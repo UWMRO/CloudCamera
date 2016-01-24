@@ -28,6 +28,7 @@ class CloudCam(object):
 		self.c = CameraExpose() # CameraExpose object, used to take images
 		self.l = Logger() #Logger class creates logfile of processes
 		self.dir = '/home/matt/College/AUEG/CloudCam/'
+		self.dir = os.getcwd()
 		self.expTime = 0 # Image exposure time in seconds, used when calling the
 		# CameraExpose object to take images.
 		self.fakeOut =  False # Boolean value that if set to True, will test code using
@@ -57,7 +58,7 @@ class CloudCam(object):
 		for i in range(1,num,1):
 			self.refName = "bias_" + time.strftime("%Y%m%dT%H%M%S") + ".fits"
 			self.expTime = 0.5
-			self.takeImage('bias', self.refName, self.expTime)
+			self.takeImage('bias', self.refName, self.expTime, self.dir)
 			print 'Bias routine complete'
 
 	def takeImage(self, imType = None, imgName = None, imExp = None, imDir = None):
@@ -81,11 +82,12 @@ class CloudCam(object):
         	Raises:
         	    Exception
         	"""
-		cam = CameraExpose()
+		#cam = CameraExpose()  you instantiate this above as self.c
 		l = Logger()
 		self.fakeOut =  False
+		im = False
 		if self.fakeOut != True:
-			im = cam.runExpose(imgName, imExp, imDir)
+			im = self.c.runExpose(imgName, imExp, imDir)
 			#l.logStr('Image\t%s %s %s' % (str(imgName), str(imExp), str(imDir)), self.logType)
 			if im == True: # check on completion and save of image exposure
 				return 0

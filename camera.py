@@ -50,6 +50,7 @@ class CameraExpose(object):
         if '.fit' not in name:
             name = name+'.fits'
         name = dir+'/'+str(name)
+	print dir, name
        
         try:
              
