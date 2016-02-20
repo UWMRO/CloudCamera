@@ -44,13 +44,13 @@ class CloudCam(object):
 		Increasing the exposure time by 1 second until exp is reached.
 		Saves each image with as timestamp_exposure.fits"""
 		stepexpose = exp / step
-	    print 'Imaging '+str(num)+' loops, with exposure times up to '+str(exp)+' seconds with '+str(step)+' step between images.'
-	    for i in range(num):
-	        for j in range(stepexpose):
+		print 'Imaging '+str(num)+' loops, with exposure times up to '+str(exp)+' seconds with '+str(step)+' step between images.'
+		for i in range(num):
+			for j in range(stepexpose):
 				name = time.strftime('%Y%m%dT%H%M%S')+'_'+str(j*step)+'.fits'
-	        	self.takeImage('image', name, (j*step), self.dir)
-	        	print 'Exposing for '+str(j*step)+' seconds, file name: '+name
-	    print 'Exposure loop complete.'
+	        		self.takeImage('image', name, (j*step), self.dir)
+	        		print 'Exposing for '+str(j*step)+' seconds, file name: '+name
+	    	print 'Exposure loop complete.'
 
 
 	def CloudBias(self, num):
@@ -105,6 +105,6 @@ if __name__ == '__main__':
 	# Calls the CloudBias function to collect bias imagery for later reduction.
 	cam.CloudBias(17)
 
-	# Calls the CloudExpose function, will produce num*exp images.
+	# Calls the CloudExpose function, will produce num*exp images with a step size for exposure.
 	cam.CloudExpose(num=10, exp=21, step=0.1)
 	print 'Camera Routine Complete'
