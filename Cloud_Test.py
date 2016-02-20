@@ -8,7 +8,7 @@ __author__ = "J. Matt Armstrong"
 __copyright__ = "NA"
 __credits__ = ["Joseph Huehnerhoff"]
 __license__ = "GPL"
-__version__ = "0.1"
+__version__ = "0.2"
 __maintainer__ = "NA"
 __email__ = "jmarmstr@uw.edu"
 __status__ = "Developement"
@@ -27,37 +27,40 @@ class CloudCam(object):
 	def __init__(self):
 		self.c = CameraExpose() # CameraExpose object, used to take images
 		self.l = Logger() #Logger class creates logfile of processes
-		self.dir = '/home/matt/College/AUEG/CloudCam/'
-		self.dir = os.getcwd()
+		#self.dir = '/home/matt/College/AUEG/CloudCam/'
+		self.dir = '/home/linaro/CloudCam/Images'
 		self.expTime = 0 # Image exposure time in seconds, used when calling the
-		# CameraExpose object to take images.
+						 # CameraExpose object to take images.
 		self.fakeOut =  False # Boolean value that if set to True, will test code using
-		# a set of test images, rather than taking new images
+							  # a set of test images, rather than taking new images
 		self.currentImage = 2 # Integer used in testing, tracks how many images have been taken
 		self.logType = 'cloud' # Parameter used in  Logger class to create logfile
 
 
-	# Runs through a loop, taking images with different exposure times
-	# Will complete num loops, each time taking exp images
-	# Increasing the exposure time by 1 second until exp is reached.
-	# Saves each image with as timestamp_exposure.fits
-	'''
-	def CloudExpose(self, num, exp):
-	    print 'Exposing '+num+' images, with exposure times up to '+exp+' seconds.'
-	    for i in range[1,num,1]:
-	        for j in range[exp]:
-	            name = time.strftime('%Y%m%dT%H%M%S')+'_'+str(j)+'.fits'
-	            c.expose(name=name, exp=j)
-	            print 'Exposing for '+str(j)+' seconds, file name: '+name
+
+	def CloudExpose(self, num, exp, step):
+		""" Runs through a loop, taking images with different exposure times
+		Will complete num loops, each time taking exp images
+		Increasing the exposure time by 1 second until exp is reached.
+		Saves each image with as timestamp_exposure.fits"""
+		stepexpose = exp / step
+	    print 'Imaging '+str(num)+' loops, with exposure times up to '+str(exp)+' seconds with '+str(step)+' step between images.'
+	    for i in range(num):
+	        for j in range(stepexpose):
+				name = time.strftime('%Y%m%dT%H%M%S')+'_'+str(j*step)+'.fits'
+	        	self.takeImage('image', name, (j*step), self.dir)
+	        	print 'Exposing for '+str(j*step)+' seconds, file name: '+name
 	    print 'Exposure loop complete.'
-'''
-	# Runs through a loop, taking bias images with 0 second exposure time
-	# Saves each image as bias_timestamp.fits
+
+
 	def CloudBias(self, num):
+		"""Runs through a loop, taking bias images with 0 second exposure time
+		Saves each image as bias_timestamp.fits"""
+
 		print 'Collecting '+str(num)+' bias images'
 		for i in range(1,num,1):
 			self.refName = "bias_" + time.strftime("%Y%m%dT%H%M%S") + ".fits"
-			self.expTime = 0.5
+			self.expTime = 0
 			self.takeImage('bias', self.refName, self.expTime, self.dir)
 			print 'Bias routine complete'
 
@@ -82,13 +85,12 @@ class CloudCam(object):
         	Raises:
         	    Exception
         	"""
-		#cam = CameraExpose()  you instantiate this above as self.c
 		l = Logger()
 		self.fakeOut =  False
 		im = False
 		if self.fakeOut != True:
 			im = self.c.runExpose(imgName, imExp, imDir)
-			#l.logStr('Image\t%s %s %s' % (str(imgName), str(imExp), str(imDir)), self.logType)
+			l.logStr('Image\t%s %s %s' % (str(imgName), str(imExp), str(imDir)), self.logType)
 			if im == True: # check on completion and save of image exposure
 				return 0
 			else:
@@ -104,5 +106,5 @@ if __name__ == '__main__':
 	cam.CloudBias(17)
 
 	# Calls the CloudExpose function, will produce num*exp images.
-	#CloudExpose(num=2, exp=5)
+	cam.CloudExpose(num=10, exp=21, step=0.1)
 	print 'Camera Routine Complete'
