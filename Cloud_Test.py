@@ -1,7 +1,7 @@
 '''
 Test code for Cloud Camera image acquisition
 Used to collect test images with a variety of exposure times
-for later analysis and proseccing
+for later analysis and processing
 '''
 
 __author__ = "J. Matt Armstrong"
