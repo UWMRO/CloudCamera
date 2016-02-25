@@ -90,7 +90,7 @@ class CloudCam(object):
 		im = False
 		if self.fakeOut != True:
 			im = self.c.runExpose(imgName, imExp, imDir)
-			l.logStr('Image\t%s %s %s' % (str(imgName), str(imExp), str(imDir)), self.logType)
+			l.logStr('image,%s,%s,%s' % (str(imgName), str(imExp), str(imDir)), self.logType)
 			if im == True: # check on completion and save of image exposure
 				return 0
 			else:
