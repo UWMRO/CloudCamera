@@ -27,8 +27,9 @@ class CameraExpose(object):
         self.l = Logger()
         self.wait = 1.0
         self.status = None
-	self.ssag = '/home/linaro/Guider/ssag'
+	self.ssag = '/home/matt/College/mro_guide/Camera/camera2'
         self.statusDict = {1:'idle', 2:'expose', 3:'reading'}
+	self.logType = 'cloud'
 
     def expose(self, name, exp, dir):
         thread.start_new_thread(self.runExpose, (name, exp, dir))
@@ -55,7 +56,7 @@ class CameraExpose(object):
         try:
              
             subprocess.Popen([self.ssag, 'image', 'binary', str(exp * 1000)])
-            self.l.logStr(str('Expose\t%s image binary %s' % (self.ssag,str(exp * 1000))), self.logType)
+            #self.l.logStr(str('Expose\t%s image binary %s' % (self.ssag,str(exp * 1000))), self.logType)
             self.status = 2
             #Pause for the camera to run
             time.sleep(self.wait+float(exp))
@@ -82,7 +83,7 @@ class CameraExpose(object):
             #im = Image.fromarray(binary)
             #im.save("tmp.jpg")
             
-            self.l.logStr('SaveIm\t%s' % name)
+            #self.l.logStr('SaveIm\t%s' % name)
             return True
 
         except Exception,e:
@@ -118,7 +119,7 @@ class CameraExpose(object):
 
     def checkConnection(self):
         try:
-            subprocess.Popen(['/home/linaro/Camera/camera', '0', '0', '0'])
+            subprocess.Popen(['/home/matt/College/mro_guide/Camera/camera2', '0', '0', '0'])
         except Exception, e:
             print e
 
@@ -129,4 +130,4 @@ class CameraExpose(object):
 
 if __name__=="__main__":
     c = CameraExpose()
-    c.runExpose('test',.1, None)
+    c.runExpose('test',15, None)
