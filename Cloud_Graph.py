@@ -43,7 +43,6 @@ class CloudGraph(object):
 		median = np.median(pixel_list)
 		#print median
 		result = pixel_list
-
 		for i in range(len(pixel_list)):
 			if pixel_list[i] > (2 * median):
 				result[i] = median
@@ -53,10 +52,14 @@ class CloudGraph(object):
 				result[i] = pixel_list[i]
 
 		return result
+
 	def masked_img(self, image, mask_val):
 		result = []
 		median = np.median(image)
-		for row in range(len(image)):
+		std = np.std(image)
+		#==> if you use median a lot consider making it a global variable
+		print median, std
+		"""for row in range(len(image)):
 			temp_row = []
 			for pixel in image[row]:
 				if pixel > (int(mask_val) * median):
@@ -65,13 +68,23 @@ class CloudGraph(object):
 					temp_row.append(median)
 				else:
 					temp_row.append(pixel)
-			result.append(temp_row)
+			result.append(temp_row)"""
+		#==>  This is your masked image but it looks black because it is saving as a 16 bit or whatever image.  The stretch needs to be changed to only show 0=>1
+		for row in range(len(image)):
+                        temp_row = []
+                        for pixel in image[row]:
+                                if pixel > (median - std):
+                                        temp_row.append(100) #==> This should be 1, so that you can use it as a multiplier later, but without the stretch changed you can't see it.  So I bumped up the limit so you can see the mask in th epng.
+                                else:
+                                        temp_row.append(0)
+                        result.append(temp_row)
 		return result
 
 	def plot_histogram(self, pixel_list):
 		plt.clf()
 		plt.hist(pixel_list, bins = (max(pixel_list) - min(pixel_list)), normed = True)
 		plt.show()
+		#==> output to a file, when running from command line plt.show() doesn't always work from platform to platform
 
 	def fits_to_list(self, file_name):
 		hdulist = fits.open(file_name)
