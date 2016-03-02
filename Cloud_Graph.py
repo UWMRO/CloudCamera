@@ -8,7 +8,7 @@ __author__ = "J. Matt Armstrong"
 __copyright__ = "NA"
 __credits__ = ["Nathen Nguyen", "Joseph Huehnerhoff"]
 __license__ = "GPL"
-__version__ = "0.2"
+__version__ = "0.3"
 __maintainer__ = "J. Matt Armstrong"
 __email__ = "jmarmstr@uw.edu"
 __status__ = "Developement"
@@ -24,10 +24,12 @@ from PIL import Image
 import itertools
 import sys
 
+
+
 class CloudGraph(object):
 	def __init__(self):
 		self.l = Logger() #Logger class creates logfile of processes
-		self.dir = '/Images'
+		self.dir = str(dir)+"/logs"
 		self.logType = 'cloud' # Parameter used in  Logger class to create logfile
 
 	def pixel_value_list(self, image):
@@ -36,12 +38,12 @@ class CloudGraph(object):
 		and the second is the number of pixels at that value
 		'''
 		#Trying to use numpy histogram to improve processing speed.
-		result = np.histogram(image, bins = np.arange(np.amax(image)+1))
+		result = np.histogram(image, bins = np.arange(np.amax(image)+1), normed = True)
 		return result
 
-		'''
-		These were functions used for testing how to mask the image, saved for
-		future use.
+	'''
+	These were functions used for testing how to mask the image, saved for
+	future use.
 
 	def mask(self, pixel_list):
 		median = np.median(pixel_list)
@@ -74,7 +76,7 @@ class CloudGraph(object):
 					temp_row.append(pixel)
 			result.append(temp_row)
 		return result
-		'''
+	'''
 
 	def masked_img2(self, image, radius):
 		'''
@@ -91,6 +93,7 @@ class CloudGraph(object):
 		result = []
 		std = 3*(np.std(image))
 		median = np.median(image)
+		mean = np.mean(image)
 		for x in range(len(image)):
 			temp_row = []
 			shift_x = x-(1024/2)
@@ -104,14 +107,28 @@ class CloudGraph(object):
 				else:
 					temp_row.append(row[y]+1)
 			result.append(temp_row)
-		return result
+		return result, median, mean, std
 
-	def plot_histogram(self, values, bins):
+
+	def plot_histogram(self, values, bins, img_out, masked, median, mean, std):
 		plt.clf()
 
+		plt.subplot(311, axisbg="black")
+		plt.imshow(masked)
+		plt.gray()
+		plt.axis('off')
+
+		plt.subplot(3,1,2)
 		plt.plot(bins, values)
 
-		plt.show()
+		plt.subplot(3,1,3)
+		plt.text(0, 0.4, 'Median = '+str(median))
+		plt.text(0, 0.2, "Mean = "+str(mean))
+		plt.text(0, 0, 'Standard Dev = '+str(std))
+		plt.axis('off')
+
+		plt.savefig(img_out)
+		#plt.show()
 
 	def fits_to_list(self, file_name):
 		'''
@@ -126,25 +143,34 @@ class CloudGraph(object):
 		This is where the code is actually run, so the total analysis
 		package can be called from outside this file.
 		'''
+		l = Logger()
 		img = self.fits_to_list(str(img_in))
+		print "Analyzing "+str(img_in)
 		# Mask the image to remove high and low pixels, and any pixels out of FoV
-		masked = self.masked_img2(img, 500)
+		masked, median, mean, std = self.masked_img2(img, 500)
+		print "Median = "+str(median)
+		print "Mean = "+str(mean)
+		print "Standard Dev = "+str(std)
 
 		# Histogram of the maksed image, with any 0 pixels removed and matched sizes
 		values, bins = self.pixel_value_list(masked)
 		bins = np.delete(bins, len(bins)-1)
 		bins = np.delete(bins, 0)
 		values = np.delete(values, 0)
-		self.plot_histogram(values, bins)
+		self.plot_histogram(values, bins, img_out, masked, median, mean, std)
 
 		# Output the masked image as a png
-		self.array_to_png(str(img_out), masked)
+		#self.array_to_png(str(img_out), masked)
+		l.logStr('Image\t%s,%s,%s,%s' % (str(img_out), str(median), str(mean), str(std)), self.logType)
 		return "analysis complete"
+
+	'''
+	Currently not used
 
 	def array_to_png(self, file_path, pixel_grid):
 		'''
-		Recycled code from CSE 160 image homework
-		to output a png image from an imput data array.
+		#Recycled code from CSE 160 image homework
+		#to output a png image from an imput data array.
 		'''
 
 		size = len(pixel_grid[0]), len(pixel_grid)
@@ -165,8 +191,24 @@ class CloudGraph(object):
 			print e
 		except:
 			print "Unexpected error writing file", file_path
+	'''
 
 if __name__=="__main__":
-	cg = CloudGraph()
+	'''
+	Run the program using a list of file names in a text file_path
+	one line for each file_path
+	Change the directory for images and create a folder inside
+	/analyzed
 
-	print cg.run_analysis("20160221T205857_30.fits", "20160221T205857_30_analyzed.png")
+	Log file will go to a /logs folder from this program's directory
+	img_name, median, mean, std
+
+	'''
+	cg = CloudGraph()
+	dir = '/home/matt/College/AUEG/CloudCamera-master/Images/'
+	img_list = np.genfromtxt(dir+'nightlist.txt', usecols = [0], unpack = True, dtype = 'str')
+	for i in img_list:
+		name = i.replace(".fits","")
+		print cg.run_analysis(dir+name+".fits", dir+"analyzed/"+name+'_analyzed.png')
+	#img = "20160221T205857_30"
+	#print cg.run_analysis(img+".fits", img+"_analyzed.png")
