@@ -97,16 +97,21 @@ class CloudGraph(object):
 	def dynamic_mask(self, image, sigrange):
 		'''
 		Creates a numpy mask on the image, filtering out any
-		pixel values that are more than range*std from the median value
+		pixel values that are more than sigrange*std from the median value
 		'''
+
+		# Make a masked array using the static mask and imput image
 		pre_masked = ma.array(image, mask=static_mask)
 
-		std = sigrange*(np.std(pre_masked))
+		# Statictics on the masked image
+		std = (np.std(pre_masked))
 		median = ma.median(pre_masked)
 		mean = ma.mean(pre_masked)
 
-		result1 = ma.masked_greater(pre_masked, (median+std))
-		result = ma.masked_less(result1, (median-std))
+		# Mask any pixels above or below the std from median
+		stdrange = sigrange*std
+		result1 = ma.masked_greater(pre_masked, (median+stdrange))
+		result = ma.masked_less(result1, (median-stdrange))
 
 		return result, median, mean, std
 
@@ -116,17 +121,22 @@ class CloudGraph(object):
 		Produce two arrays, the first is a list of the pixel values
 		and the second is the number of pixels at that value
 		'''
-		#Trying to use numpy histogram to improve processing speed.
 
+		# Compress the array into a list of pixel values
 		compressed = image.compressed()
 
+		# Find highest pixel value
 		max_val = np.amax(compressed)
 
-		result = np.histogram(compressed, bins=max_val)
+		# Make a histogram of the compressed list
+		result = np.histogram(compressed, bins=max_val, normed=True)
 		return result
 
 	def plot_histogram(self, values, bins, img_out, masked, median, mean, std):
 		plt.clf()
+
+		masked_img = ma.filled(masked, 0)
+		img = Image.fromarray(masked_img)
 
 		fig = plt.figure()
 
@@ -135,18 +145,22 @@ class CloudGraph(object):
 		plt.gray()
 		plt.axis('off')
 
-		masked_img = ma.filled(masked, 0)
-
-		img = Image.fromarray(masked_img)
 		img = img.rotate(90).resize((int(img.size[1]*.55),int(img.size[0]*.55)), Image.ANTIALIAS)
+
+		'''
+		background = Image.new("RGB", ((int(img.size[1]+250)),(int(img.size[0]+250))))
+		offset = (500, 500)
+		background.paste(img, offset)
+		'''
+
 		fig.figimage(img, 100, -50)
 
 		#plt.subplot(3,1,3)
-		#==> you could remove your histogram function and incorporate it all into plt.hist, but this is also ok
 
 
-		ax = plt.axes([.2,.05,.6,.2,]) #[xstart,ystart, xfinal,yfinal]
-		ax.bar(bins, values, alpha=.4)
+		ax = plt.axes([.2,0.06,.6,.2,]) #[xstart,ystart, xfinal,yfinal]
+		ax.bar(bins, (values*100.0), alpha=1.0)
+		#print ax.get_position()
 
 		ax.yaxis.label.set_color('white')
 		ax.xaxis.label.set_color('white')
@@ -167,7 +181,8 @@ class CloudGraph(object):
 
 	def fits_to_list(self, file_name):
 		'''
-		Open the fits file, select just the image data, and close the fits file.
+		Open the fits file, select just the image data as a numpy array
+		and close the fits file.
 		'''
 		hdulist = fits.open(file_name)
 		return np.asarray(hdulist[0].data)
@@ -180,20 +195,21 @@ class CloudGraph(object):
 		'''
 		img = self.fits_to_list(str(img_in))
 		print "Analyzing "+str(img_in)
+
 		# Mask the image to remove high and low pixels, and any pixels out of FoV
 		masked, median, mean, std = self.dynamic_mask(img, 3)
 		print "Median = "+str(median)
 		print "Mean = "+str(mean)
 		print "Standard Dev = "+str(std)
 
-		# Histogram of the maksed image, with any 0 pixels removed and matched sizes
+		# Histogram of the maksed image, with matched sizes
 		values, bins = self.pixel_value_list(masked)
 		fixed_vals = np.append(values, 0)
 		self.plot_histogram(fixed_vals, bins, img_out, masked, median, mean, std)
 
-		# Output the masked image as a png
-		#self.array_to_png(str(img_out), masked)
+		# Log the activity
 		self.l.logStr('Image\t%s,%s,%s,%s' % (str(img_out), str(median), str(mean), str(std)), self.logType)
+
 		return "Analysis complete"
 
 
@@ -208,16 +224,17 @@ if __name__=="__main__":
 
 	Log file will go to a /logs folder from this program's directory
 	img_name, median, mean, std
-
 	'''
+
 	cg = CloudGraph()
 	dir = '/home/matt/College/AUEG/CloudCamera-master/Images/'
 	list = dir+'image.txt'
 
-	# Make a new static mask file
+	# Uncomment to make a new static mask file
 	# print cg.make_static_mask(500)
 
 	static_mask = np.load("static_mask.npy")
+
 	'''
 	img_list = np.genfromtxt(list, usecols = [0], unpack = True, dtype = 'str')
 	for i in img_list:
@@ -225,5 +242,6 @@ if __name__=="__main__":
 		print cg.run_analysis(dir+name+".fits", dir+"analyzed/"+name+'_analyzed.png')
 
 	'''
+
 	img = "20160221T205857_30"
 	print cg.run_analysis(img+".fits", img+"_analyzed.png")
