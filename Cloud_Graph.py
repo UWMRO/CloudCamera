@@ -34,7 +34,11 @@ import sys
 class CloudGraph(object):
 	def __init__(self):
 		self.l = Logger() #Logger class creates logfile of processes
-		self.dir = str(dir)+"/logs"
+		#self.dir = str(dir)+"/logs"
+		#==> the dir part of this looks really weird.  Are you inheriting from if __name__??? In you init you should have some know directory or default if the inheritence is not passed. 
+		self.dir = os.path.join(os.getcwd(),'logs')
+		print self.dir
+
 		self.logType = 'cloud' # Parameter used in  Logger class to create logfile
 
 	'''
@@ -165,6 +169,8 @@ class CloudGraph(object):
 		gs.tight_layout(fig, h_pad=None)
 		fig.savefig(img_out, cmap="grey", transparent=True, facecolor="black", edgecolor='none')
 		plt.close("all")
+		return
+		#==> always (almost) return from a function
 
 	def fits_to_list(self, file_name):
 		'''
@@ -174,6 +180,7 @@ class CloudGraph(object):
 		hdulist = fits.open(file_name)
 		return np.asarray(hdulist[0].data)
 		hdulist.close()
+		return
 
 	def run_analysis(self, img_in, img_out, name):
 		'''
