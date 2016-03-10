@@ -237,11 +237,17 @@ if __name__=="__main__":
 	static_mask = np.load("static_mask.npy")
 
 	test_img = "20160221T205857_30"
+	print cg.run_analysis(test_img+".fits", test_img+'_analyzed.png', test_img)
+
+	'''
 	img_list = np.genfromtxt(list, usecols = [0], unpack = True, dtype = 'str')
 
 	for i in img_list:
 		name = i.replace(".fits","")
+		name = name.replace("bias_","")
 		if os.path.isfile(dir+name+".fits") == True:
 			print cg.run_analysis(dir+name+".fits", dir+"analyzed/"+name+'_analyzed.png', name)
 		else:
 			print "File not found"
+
+	'''
