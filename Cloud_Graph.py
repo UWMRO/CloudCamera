@@ -21,6 +21,7 @@ matplotlib.use('TkAgg')
 import matplotlib.pyplot as plt
 import matplotlib.image as mpimg
 from matplotlib.figure import Figure
+from matplotlib import gridspec
 import time
 from logger import *
 import os
@@ -132,52 +133,38 @@ class CloudGraph(object):
 		result = np.histogram(compressed, bins=max_val, normed=True)
 		return result
 
-	def plot_histogram(self, values, bins, img_out, masked, median, mean, std):
+	def plot_histogram(self, values, bins, img_out, masked, median, mean, std, name):
 		plt.clf()
-
 		masked_img = ma.filled(masked, 0)
 		img = Image.fromarray(masked_img)
 
-		fig = plt.figure()
+		fig, ax = plt.subplots(2,1)                                               # 2 rows 2 columns
+		fig.set_size_inches(8,11)                                               # width, height
+		fig.tight_layout()
+		gs = gridspec.GridSpec(2,1,height_ratios=[4,1])
 
-		#plt.subplot(2,1,1)
+		ax0 = plt.subplot(gs[0])
+		ax0.axis('off')
+		img = img.rotate(90).resize((int(img.size[1]),int(img.size[0])), Image.ANTIALIAS)
+		ax0.imshow(img, cmap="gray")
+		ax0.text(0, 0, name, size = 16, color="white")
+		ax0.text(0, 40 , 'Median = %.1f' % (median), size = 16, color="white")
+		ax0.text(0, 80, "Mean = %.2f" % (mean), size = 16, color="white")
+		ax0.text(0, 120, 'Standard Dev = %.2f' % (std), size = 16, color="white")
 
-		plt.gray()
-		plt.axis('off')
-
-		img = img.rotate(90).resize((int(img.size[1]*.55),int(img.size[0]*.55)), Image.ANTIALIAS)
-
-		'''
-		background = Image.new("RGB", ((int(img.size[1]+250)),(int(img.size[0]+250))))
-		offset = (500, 500)
-		background.paste(img, offset)
-		'''
-
-		fig.figimage(img, 100, -50)
-
-		#plt.subplot(3,1,3)
-
-
-		ax = plt.axes([.2,0.06,.6,.2,]) #[xstart,ystart, xfinal,yfinal]
-		ax.bar(bins, (values*100.0), alpha=1.0)
-		#print ax.get_position()
-
-		ax.yaxis.label.set_color('white')
-		ax.xaxis.label.set_color('white')
-
-		plt.ylabel('% pixels', size=8)
-		plt.xlabel('Pixel Value', size=8)
-		ax.tick_params(axis='x', colors='white', labelsize=8)
-		ax.tick_params(axis='y', colors='white', labelsize=8)
+		ax1 = plt.subplot(gs[1])
+		ax1.bar(bins, (values*100.0), alpha=1.0)
+		ax1.yaxis.label.set_color('white')
+		ax1.xaxis.label.set_color('white')
+		ax1.set_ylabel('% pixels', size=16)
+		ax1.set_xlabel('Pixel Value', size=16)
+		ax1.tick_params(axis='x', colors='white', labelsize=16)
+		ax1.tick_params(axis='y', colors='white', labelsize=16)
 		plt.draw()
 
-		max_val = np.max(values)
-
-		plt.text(60, max_val - .005 , 'Median = %.1f' % (median), size = 8, color="white")
-		plt.text(60, max_val - 0.009, "Mean = %.2f" % (mean), size = 8, color="white")
-		plt.text(60, max_val - 0.013, 'Standard Dev = %.2f' % (std), size = 8, color="white")
-
-		plt.savefig(img_out, transparent=True)
+		gs.tight_layout(fig, h_pad=None)
+		fig.savefig(img_out, cmap="grey", transparent=True, facecolor="black", edgecolor='none')
+		plt.close("all")
 
 	def fits_to_list(self, file_name):
 		'''
@@ -188,7 +175,7 @@ class CloudGraph(object):
 		return np.asarray(hdulist[0].data)
 		hdulist.close()
 
-	def run_analysis(self, img_in, img_out):
+	def run_analysis(self, img_in, img_out, name):
 		'''
 		This is where the code is actually run, so the total analysis
 		package can be called from outside this file.
@@ -205,7 +192,7 @@ class CloudGraph(object):
 		# Histogram of the maksed image, with matched sizes
 		values, bins = self.pixel_value_list(masked)
 		fixed_vals = np.append(values, 0)
-		self.plot_histogram(fixed_vals, bins, img_out, masked, median, mean, std)
+		self.plot_histogram(fixed_vals, bins, img_out, masked, median, mean, std, name)
 
 		# Log the activity
 		self.l.logStr('Image\t%s,%s,%s,%s' % (str(img_out), str(median), str(mean), str(std)), self.logType)
@@ -235,13 +222,13 @@ if __name__=="__main__":
 
 	static_mask = np.load("static_mask.npy")
 
-	'''
 	img_list = np.genfromtxt(list, usecols = [0], unpack = True, dtype = 'str')
 	for i in img_list:
 		name = i.replace(".fits","")
-		print cg.run_analysis(dir+name+".fits", dir+"analyzed/"+name+'_analyzed.png')
+		print cg.run_analysis(dir+name+".fits", dir+"analyzed/"+name+'_analyzed.png', i)
 
 	'''
 
 	img = "20160221T205857_30"
 	print cg.run_analysis(img+".fits", img+"_analyzed.png")
+	'''
