@@ -22,7 +22,7 @@ import matplotlib.pyplot as plt
 import matplotlib.image as mpimg
 from matplotlib.figure import Figure
 from matplotlib import gridspec
-import time
+import datetime
 from logger import *
 import os
 from PIL import Image
@@ -34,11 +34,7 @@ import sys
 class CloudGraph(object):
 	def __init__(self):
 		self.l = Logger() #Logger class creates logfile of processes
-		#self.dir = str(dir)+"/logs"
-		#==> the dir part of this looks really weird.  Are you inheriting from if __name__??? In you init you should have some know directory or default if the inheritence is not passed. 
 		self.dir = os.path.join(os.getcwd(),'logs')
-		print self.dir
-
 		self.logType = 'cloud' # Parameter used in  Logger class to create logfile
 
 	'''
@@ -145,23 +141,34 @@ class CloudGraph(object):
 		fig, ax = plt.subplots(2,1)                                               # 2 rows 2 columns
 		fig.set_size_inches(8,11)                                               # width, height
 		fig.tight_layout()
-		gs = gridspec.GridSpec(2,1,height_ratios=[4,1])
+		gs = gridspec.GridSpec(2,1,height_ratios=[4,1], wspace=0.0, hspace=0.0)
+
+		timestamp = name.split('_')
+		try:
+			timetest = timestamp[1]
+		except:
+			timetest = 'NA'
+
 
 		ax0 = plt.subplot(gs[0])
 		ax0.axis('off')
 		img = img.rotate(90).resize((int(img.size[1]),int(img.size[0])), Image.ANTIALIAS)
+
+		ax0.text(0, 0, name[0:4]+'-'+name[4:6]+'-'+name[6:8]+'   '+name[9:11]+':'+name[11:13]+':'+name[13:15], size = 16, color="white", horizontalalignment='left')
+		ax0.text(0, 40, 'Exposure = '+str(timetest)+' [s]', size = 16, color="white", horizontalalignment='left', )
+		ax0.text(1100, 0 , 'Median = %.1f' % (median), size = 16, color="white", horizontalalignment='right')
+		ax0.text(1100, 40, "Mean = %.2f" % (mean), size = 16, color="white", horizontalalignment='right')
+		ax0.text(1100, 80, 'Standard Dev = %.2f' % (std), size = 16, color="white", horizontalalignment='right')
 		ax0.imshow(img, cmap="gray")
-		ax0.text(0, 0, name, size = 16, color="white")
-		ax0.text(0, 40 , 'Median = %.1f' % (median), size = 16, color="white")
-		ax0.text(0, 80, "Mean = %.2f" % (mean), size = 16, color="white")
-		ax0.text(0, 120, 'Standard Dev = %.2f' % (std), size = 16, color="white")
 
 		ax1 = plt.subplot(gs[1])
 		ax1.bar(bins, (values*100.0), alpha=1.0)
-		ax1.yaxis.label.set_color('white')
-		ax1.xaxis.label.set_color('white')
 		ax1.set_ylabel('% pixels', size=16)
 		ax1.set_xlabel('Pixel Value', size=16)
+		ax1.yaxis.label.set_color('white')
+		ax1.xaxis.label.set_color('white')
+		ax1.yaxis.set_label_position("right")
+		ax1.yaxis.tick_right()
 		ax1.tick_params(axis='x', colors='white', labelsize=16)
 		ax1.tick_params(axis='y', colors='white', labelsize=16)
 		plt.draw()
@@ -170,17 +177,17 @@ class CloudGraph(object):
 		fig.savefig(img_out, cmap="grey", transparent=True, facecolor="black", edgecolor='none')
 		plt.close("all")
 		return
-		#==> always (almost) return from a function
 
 	def fits_to_list(self, file_name):
 		'''
-		Open the fits file, select just the image data as a numpy array
+		Try to open the fits file.
+		If the file doesn't exist, say so and return.
+		Otherwise, select just the image data as a numpy array
 		and close the fits file.
 		'''
 		hdulist = fits.open(file_name)
 		return np.asarray(hdulist[0].data)
 		hdulist.close()
-		return
 
 	def run_analysis(self, img_in, img_out, name):
 		'''
@@ -229,13 +236,12 @@ if __name__=="__main__":
 
 	static_mask = np.load("static_mask.npy")
 
+	test_img = "20160221T205857_30"
 	img_list = np.genfromtxt(list, usecols = [0], unpack = True, dtype = 'str')
+
 	for i in img_list:
 		name = i.replace(".fits","")
-		print cg.run_analysis(dir+name+".fits", dir+"analyzed/"+name+'_analyzed.png', i)
-
-	'''
-
-	img = "20160221T205857_30"
-	print cg.run_analysis(img+".fits", img+"_analyzed.png")
-	'''
+		if os.path.isfile(dir+name+".fits") == True:
+			print cg.run_analysis(dir+name+".fits", dir+"analyzed/"+name+'_analyzed.png', name)
+		else:
+			print "File not found"
