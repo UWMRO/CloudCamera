@@ -138,8 +138,8 @@ class CloudGraph(object):
 		masked_img = ma.filled(masked, 0)
 		img = Image.fromarray(masked_img)
 
-		fig, ax = plt.subplots(2,1)                                               # 2 rows 2 columns
-		fig.set_size_inches(8,11)                                               # width, height
+		fig, ax = plt.subplots(2,1)
+		fig.set_size_inches(8,11)       # width, height
 		fig.tight_layout()
 		gs = gridspec.GridSpec(2,1,height_ratios=[4,1], wspace=0.0, hspace=0.0)
 
@@ -231,10 +231,13 @@ if __name__=="__main__":
 	dir = '/home/matt/College/AUEG/CloudCamera-master/Images/'
 	list = dir+'image.txt'
 
-	# Uncomment to make a new static mask file
-	# print cg.make_static_mask(500)
-
-	static_mask = np.load("static_mask.npy")
+	if os.path.isfile("static_mask.npy") == True:
+		print 'Loading static mask file.'
+		static_mask = np.load("static_mask.npy")
+	else:
+		print "Static mask file not found, making one now."
+		print cg.make_static_mask(500)
+		static_mask = np.load("static_mask.npy")
 
 	test_img = "20160221T205857_30"
 	print cg.run_analysis(test_img+".fits", test_img+'_analyzed.png', test_img)
