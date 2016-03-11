@@ -141,7 +141,7 @@ class CloudGraph(object):
 		fig, ax = plt.subplots(2,1)
 		fig.set_size_inches(8,11)       # width, height
 		fig.tight_layout()
-		gs = gridspec.GridSpec(2,1,height_ratios=[4,1], wspace=0.0, hspace=0.0)
+		gs = gridspec.GridSpec(2,1,height_ratios=[6,1], wspace=0.0, hspace=0.0)
 
 		timestamp = name.split('_')
 		try:
@@ -170,8 +170,13 @@ class CloudGraph(object):
 		ax1.yaxis.set_label_position("right")
 		ax1.yaxis.tick_right()
 		plt.yticks(np.arange(0,(np.max(values*100))))
-		ax1.tick_params(axis='x', colors='white', labelsize=16)
-		ax1.tick_params(axis='y', colors='white', labelsize=16)
+		ax1.tick_params(axis='x', colors='white', labelsize=12)
+		ax1.tick_params(axis='y', colors='white', labelsize=12)
+		for xlabel_i in ax1.get_xticklabels():
+			xlabel_i.set_fontsize(12)
+		for ylabel_i in ax1.get_yticklabels():
+    			ylabel_i.set_fontsize(12)
+
 		plt.draw()
 
 		gs.tight_layout(fig, h_pad=None)
@@ -229,8 +234,9 @@ if __name__=="__main__":
 	'''
 
 	cg = CloudGraph()
-	dir = '/home/matt/College/AUEG/CloudCamera-master/Images/'
-	list = dir+'image.txt'
+	#dir = '/home/matt/College/AUEG/CloudCamera-master/Images/'
+	#dir = os.getcwd()
+	#list = os.path.join(dir,'image.txt')
 
 	if os.path.isfile("static_mask.npy") == True:
 		print 'Loading static mask file.'
@@ -240,11 +246,12 @@ if __name__=="__main__":
 		print cg.make_static_mask(500)
 		static_mask = np.load("static_mask.npy")
 
-	'''
+	
+
 	test_img = "20160221T205857_30"
 	print cg.run_analysis(test_img+".fits", test_img+'_analyzed.png', test_img)
 
-	'''
+	"""
 	img_list = np.genfromtxt(list, usecols = [0], unpack = True, dtype = 'str')
 
 	for i in img_list:
@@ -254,3 +261,4 @@ if __name__=="__main__":
 			print cg.run_analysis(dir+name+".fits", dir+"analyzed/"+name+'_analyzed.png', name)
 		else:
 			print "File not found"
+	"""
