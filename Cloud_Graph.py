@@ -79,6 +79,9 @@ class CloudGraph(object):
 		Used to make a static aperture mask, which can be
 		multiplied by the analysis image to remove any pixels
 		outside the radius from the center.
+
+		Input: Radius to mask from center of image
+		Output: Aperture asked numpy array the same size as the image.
 		'''
 		result = []
 
@@ -99,6 +102,9 @@ class CloudGraph(object):
 		'''
 		Creates a numpy mask on the image, filtering out any
 		pixel values that are more than sigrange*std from the median value
+
+		Input: numpy array of the image, sigrange for multiplier on standard dev range
+		Output: Masked numpy array covering any pixels above or below the standard dev range
 		'''
 
 		# Make a masked array using the static mask and imput image
@@ -119,8 +125,11 @@ class CloudGraph(object):
 
 	def pixel_value_list(self, image):
 		'''
-		Produce two arrays, the first is a list of the pixel values
+		Produce two arrays, the first is a list of the binned pixel values
 		and the second is the number of pixels at that value
+
+		Input: masked numpy array of the image
+		Output: Two lists of histogram data on the image. ([bins],[values])
 		'''
 
 		# Compress the array into a list of pixel values
@@ -134,26 +143,38 @@ class CloudGraph(object):
 		return result
 
 	def plot_histogram(self, values, bins, img_out, masked, median, mean, std, name):
+		'''
+		Statistical plotting and output function.
+
+		Input: Value list, Bin list, Name of output, Masked image, median value, mean value, standard dev, image name
+		Output: png image file with the masked image, statistical and image information, and histogram plot
+		'''
+
 		plt.clf()
+
+		#Fill in the masked image for processing
 		masked_img = ma.filled(masked, 0)
 		img = Image.fromarray(masked_img)
 
+		#Set up plotting environment
 		fig, ax = plt.subplots(2,1)
 		fig.set_size_inches(8,11)       # width, height
 		fig.tight_layout()
-		gs = gridspec.GridSpec(2,1,height_ratios=[6,1], wspace=0.0, hspace=0.0)
+		gs = gridspec.GridSpec(2,1,height_ratios=[4,1], wspace=0.0, hspace=0.0)
 
+		#Find timestamp, change this to use header info instead
 		timestamp = name.split('_')
 		try:
 			timetest = timestamp[1]
 		except:
 			timetest = 'NA'
 
-
+		#Plot the masked image, allow for arbitrary rotation
 		ax0 = plt.subplot(gs[0])
 		ax0.axis('off')
 		img = img.rotate(90).resize((int(img.size[1]),int(img.size[0])), Image.ANTIALIAS)
 
+		# Insert statistical information into the image
 		ax0.text(0, 1240, name[0:4]+'-'+name[4:6]+'-'+name[6:8]+'   '+name[9:11]+':'+name[11:13]+':'+name[13:15], size = 16, color="white", horizontalalignment='left')
 		ax0.text(0, 1280, 'Exposure = '+str(timetest)+' [s]', size = 16, color="white", horizontalalignment='left', )
 		ax0.text(1100, 1200 , 'Median = %.1f' % (median), size = 16, color="white", horizontalalignment='right')
@@ -161,6 +182,7 @@ class CloudGraph(object):
 		ax0.text(1100, 1280, 'Standard Dev = %.2f' % (std), size = 16, color="white", horizontalalignment='right')
 		ax0.imshow(img, cmap="gray")
 
+		#Plot the histogram
 		ax1 = plt.subplot(gs[1])
 		ax1.bar(bins, (values*100.0), alpha=1.0)
 		ax1.set_ylabel('% pixels', size=16)
@@ -170,15 +192,11 @@ class CloudGraph(object):
 		ax1.yaxis.set_label_position("right")
 		ax1.yaxis.tick_right()
 		plt.yticks(np.arange(0,(np.max(values*100))))
-		ax1.tick_params(axis='x', colors='white', labelsize=12)
-		ax1.tick_params(axis='y', colors='white', labelsize=12)
-		for xlabel_i in ax1.get_xticklabels():
-			xlabel_i.set_fontsize(12)
-		for ylabel_i in ax1.get_yticklabels():
-    			ylabel_i.set_fontsize(12)
-
+		ax1.tick_params(axis='x', colors='white', labelsize=16)
+		ax1.tick_params(axis='y', colors='white', labelsize=16)
 		plt.draw()
 
+		#Save the figure as a png
 		gs.tight_layout(fig, h_pad=None)
 		fig.savefig(img_out, cmap="grey", transparent=True, facecolor="black", edgecolor='none')
 		plt.close("all")
@@ -190,6 +208,9 @@ class CloudGraph(object):
 		If the file doesn't exist, say so and return.
 		Otherwise, select just the image data as a numpy array
 		and close the fits file.
+
+		Input: File name
+		Output: Numpy array of image data
 		'''
 		hdulist = fits.open(file_name)
 		return np.asarray(hdulist[0].data)
@@ -199,6 +220,8 @@ class CloudGraph(object):
 		'''
 		This is where the code is actually run, so the total analysis
 		package can be called from outside this file.
+
+		Input: name of image in, name of image out, and chopped file name
 		'''
 		img = self.fits_to_list(str(img_in))
 		print "Analyzing "+str(img_in)
@@ -222,9 +245,9 @@ class CloudGraph(object):
 
 if __name__=="__main__":
 	'''
+	Run terminal command in image directory(ls *.fits > image.txt)
+	This will produce a text list of all fits files to process
 	Run the program using a list of file names in a text file_path
-	one line for each file_path
-	change the image list file name
 
 	Change the directory for images and create a folder inside
 	/analyzed
@@ -234,9 +257,8 @@ if __name__=="__main__":
 	'''
 
 	cg = CloudGraph()
-	#dir = '/home/matt/College/AUEG/CloudCamera-master/Images/'
-	#dir = os.getcwd()
-	#list = os.path.join(dir,'image.txt')
+	dir = '/home/matt/College/AUEG/CloudCamera-master/Images/'
+	list = dir+'image.txt'
 
 	if os.path.isfile("static_mask.npy") == True:
 		print 'Loading static mask file.'
@@ -246,12 +268,11 @@ if __name__=="__main__":
 		print cg.make_static_mask(500)
 		static_mask = np.load("static_mask.npy")
 
-	
-
+	'''
 	test_img = "20160221T205857_30"
 	print cg.run_analysis(test_img+".fits", test_img+'_analyzed.png', test_img)
 
-	"""
+	'''
 	img_list = np.genfromtxt(list, usecols = [0], unpack = True, dtype = 'str')
 
 	for i in img_list:
@@ -261,4 +282,3 @@ if __name__=="__main__":
 			print cg.run_analysis(dir+name+".fits", dir+"analyzed/"+name+'_analyzed.png', name)
 		else:
 			print "File not found"
-	"""
