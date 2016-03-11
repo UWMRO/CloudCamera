@@ -154,11 +154,11 @@ class CloudGraph(object):
 		ax0.axis('off')
 		img = img.rotate(90).resize((int(img.size[1]),int(img.size[0])), Image.ANTIALIAS)
 
-		ax0.text(0, 0, name[0:4]+'-'+name[4:6]+'-'+name[6:8]+'   '+name[9:11]+':'+name[11:13]+':'+name[13:15], size = 16, color="white", horizontalalignment='left')
-		ax0.text(0, 40, 'Exposure = '+str(timetest)+' [s]', size = 16, color="white", horizontalalignment='left', )
-		ax0.text(1100, 0 , 'Median = %.1f' % (median), size = 16, color="white", horizontalalignment='right')
-		ax0.text(1100, 40, "Mean = %.2f" % (mean), size = 16, color="white", horizontalalignment='right')
-		ax0.text(1100, 80, 'Standard Dev = %.2f' % (std), size = 16, color="white", horizontalalignment='right')
+		ax0.text(0, 1240, name[0:4]+'-'+name[4:6]+'-'+name[6:8]+'   '+name[9:11]+':'+name[11:13]+':'+name[13:15], size = 16, color="white", horizontalalignment='left')
+		ax0.text(0, 1280, 'Exposure = '+str(timetest)+' [s]', size = 16, color="white", horizontalalignment='left', )
+		ax0.text(1100, 1200 , 'Median = %.1f' % (median), size = 16, color="white", horizontalalignment='right')
+		ax0.text(1100, 1240, "Mean = %.2f" % (mean), size = 16, color="white", horizontalalignment='right')
+		ax0.text(1100, 1280, 'Standard Dev = %.2f' % (std), size = 16, color="white", horizontalalignment='right')
 		ax0.imshow(img, cmap="gray")
 
 		ax1 = plt.subplot(gs[1])
@@ -169,6 +169,7 @@ class CloudGraph(object):
 		ax1.xaxis.label.set_color('white')
 		ax1.yaxis.set_label_position("right")
 		ax1.yaxis.tick_right()
+		plt.yticks(np.arange(0,(np.max(values*100))))
 		ax1.tick_params(axis='x', colors='white', labelsize=16)
 		ax1.tick_params(axis='y', colors='white', labelsize=16)
 		plt.draw()
@@ -239,6 +240,7 @@ if __name__=="__main__":
 		print cg.make_static_mask(500)
 		static_mask = np.load("static_mask.npy")
 
+	'''
 	test_img = "20160221T205857_30"
 	print cg.run_analysis(test_img+".fits", test_img+'_analyzed.png', test_img)
 
@@ -247,10 +249,8 @@ if __name__=="__main__":
 
 	for i in img_list:
 		name = i.replace(".fits","")
-		name = name.replace("bias_","")
 		if os.path.isfile(dir+name+".fits") == True:
+			name = name.replace("bias_","")
 			print cg.run_analysis(dir+name+".fits", dir+"analyzed/"+name+'_analyzed.png', name)
 		else:
 			print "File not found"
-
-	'''
