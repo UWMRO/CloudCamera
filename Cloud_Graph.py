@@ -22,6 +22,7 @@ import matplotlib.pyplot as plt
 import matplotlib.image as mpimg
 from matplotlib.figure import Figure
 from matplotlib import gridspec
+import matplotlib.ticker as mtick
 import datetime
 from logger import *
 import os
