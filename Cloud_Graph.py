@@ -117,15 +117,19 @@ class CloudGraph(object):
 		pre_masked = ma.array(image, mask=static_mask)
 
 		# Statictics on the masked image
-		std = (np.std(pre_masked))
-		median = ma.median(pre_masked)
-		mean = ma.mean(pre_masked)
+		prestd = (np.std(pre_masked))
+		premedian = ma.median(pre_masked)
+		premean = ma.mean(pre_masked)
 
 		# Mask any pixels above or below the std from median
-		stdrange = sigrange*std
-		result1 = ma.masked_greater(pre_masked, (median+stdrange))
-		result = ma.masked_less(result1, (median-stdrange))
+		stdrange = sigrange*prestd
+		#result1 = ma.masked_greater(pre_masked, (median+stdrange))
+		#result = ma.masked_less(result1, (premedian-stdrange))
+		result = ma.masked_greater(pre_masked, 254)
 
+		median = ma.median(result)
+		mean = ma.mean(result)
+		std = ma.std(result)
 		return result, median, mean, std
 
 
@@ -247,7 +251,7 @@ class CloudGraph(object):
 		# Log the activity
 		self.l.logStr('Image\t%s,%s,%s,%s' % (str(img_out), str(median), str(mean), str(std)), self.logType)
 
-		return "Analysis complete"
+		return median
 
 
 if __name__=="__main__":

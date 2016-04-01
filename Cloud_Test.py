@@ -28,7 +28,7 @@ class CloudCam(object):
 		self.c = CameraExpose() # CameraExpose object, used to take images
 		self.l = Logger() #Logger class creates logfile of processes
 		#self.dir = '/home/matt/College/AUEG/CloudCam/'
-		self.dir = '/home/matt/College/mro_guide/Camera/Images'
+		self.dir = '/home/matt/College/mro_guide/Camera/images'
 		self.expTime = 0 # Image exposure time in seconds, used when calling the
 						 # CameraExpose object to take images.
 		self.fakeOut =  False # Boolean value that if set to True, will test code using
@@ -92,7 +92,7 @@ class CloudCam(object):
 			im = self.c.runExpose(imgName, imExp, imDir)
 			l.logStr('Image\t%s %s %s' % (str(imgName), str(imExp), str(imDir)), self.logType)
 			if im == True: # check on completion and save of image exposure
-				time.sleep(1)				
+				time.sleep(1)
 				return 0
 			else:
 				raise Exception("Image exposure not completed")
@@ -104,11 +104,13 @@ if __name__ == '__main__':
 
 	cam = CloudCam()
 	# Calls the CloudBias function to collect bias imagery for later reduction.
-	#cam.CloudBias(13)
+	cam.CloudBias(1)
 
 	# Calls the CloudExpose function, will produce num*exp images with a step size for exposure.
 	"""
 	exp=60, step=5 : Run time = 7mins
 	"""
-	cam.CloudExpose(num=5, exp=60, step=5)
+	"""
+	cam.CloudExpose(num=1, exp=0.1, step=5)
 	print 'Camera Routine Complete'
+	"""

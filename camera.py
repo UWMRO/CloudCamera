@@ -27,42 +27,50 @@ class CameraExpose(object):
         self.l = Logger()
         self.wait = 1.0
         self.status = None
-	self.ssag = '/home/matt/College/mro_guide/Camera/camera2'
+        self.ssag = os.getcwd()+"/camera"
+        #self.ssag = 'camera2'
         self.statusDict = {1:'idle', 2:'expose', 3:'reading'}
-	self.logType = 'cloud'
+        self.logType = 'cloud'
+        self.gain = 1
 
-    def expose(self, name, exp, dir):
-        thread.start_new_thread(self.runExpose, (name, exp, dir))
+    def expose(self, name, exp, dir, gain):
+        thread.start_new_thread(self.runExpose, (name, exp, dir, gain))
 
-    def runExpose(self, name, exp, dir):
+    def runExpose(self, name, exp, dir, gain):
         """
         Connect to the OpenSSAG and take image
         input a given file name and exposure
         output whether the image was successful
 
-        
+
         Tells camera to take an image, it will output a binary file named "test" with 1000 ms exposure.
         Can also use './camera test 0 0' to check camera.
         """
-        
+
         if dir == None:
             dir = os.getcwd()
 
         if '.fit' not in name:
             name = name+'.fits'
         name = dir+'/'+str(name)
-	print dir, name
-       
+        print dir, name, self.ssag, exp
+        expose = float(exp)*1000
+        #print expose
+
+        if gain == None:
+            gain = self.gain
+
+
         try:
-             
-            subprocess.Popen([self.ssag, 'image', 'binary', str(exp * 1000)])
+
+            subprocess.Popen([self.ssag, 'image', 'binary', str(expose), str(gain)])
             #self.l.logStr(str('Expose\t%s image binary %s' % (self.ssag,str(exp * 1000))), self.logType)
             self.status = 2
             #Pause for the camera to run
             time.sleep(self.wait+float(exp))
             self.status = 1
-           
-	    binary=np.fromfile('binary',dtype='u1').reshape(1024,1280)
+
+            binary=np.fromfile('binary',dtype='u1').reshape(1024,1280)
 
             # --------------------------
             # Used for testing array procedure, can remove once program is tested on-sky.
@@ -71,7 +79,7 @@ class CameraExpose(object):
             # print binary
             # ---------------------------
 
-            prihdr = self.createHeader()  #create emtpy header information
+            prihdr = self.createHeader(exp, gain)  #create emtpy header information
             hdu=pyfits.PrimaryHDU(binary, header = prihdr)  #create a primary header file for the FITS image
             hdulist=pyfits.HDUList([hdu])
 
@@ -82,7 +90,7 @@ class CameraExpose(object):
             hdulist.writeto(name)
             #im = Image.fromarray(binary)
             #im.save("tmp.jpg")
-            
+
             #self.l.logStr('SaveIm\t%s' % name)
             return True
 
@@ -100,15 +108,15 @@ class CameraExpose(object):
         else:
             return fileName
 
-    def createHeader(self):
+    def createHeader(self, exp, gain):
         prihdr = pyfits.Header()
         prihdr['COMMENT'] = 'MRO Guider Camera'
         prihdr['COMMENT'] = 'Orion Star Shoot Auto Guider'
         prihdr['IMAGTYP'] = None
-        prihdr['EXPTIME'] = None
+        prihdr['EXPTIME'] = exp
         prihdr['CCDBIN1'] = 1
         prihdr['CCDBIN2'] = 1
-        prihdr['GAIN'] = None
+        prihdr['GAIN'] = gain
         prihdr['RN'] = None
         return prihdr
 
@@ -119,7 +127,7 @@ class CameraExpose(object):
 
     def checkConnection(self):
         try:
-            subprocess.Popen(['/home/matt/College/mro_guide/Camera/camera2', '0', '0', '0'])
+            subprocess.Popen([self.ssag, '0', '0', '0'])
         except Exception, e:
             print e
 
@@ -130,4 +138,4 @@ class CameraExpose(object):
 
 if __name__=="__main__":
     c = CameraExpose()
-    c.runExpose('test',15, None)
+    c.runExpose('test',0.1, None, 8)

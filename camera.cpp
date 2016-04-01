@@ -21,23 +21,23 @@ double expose=1000;
 int main(int argc, char *args[]){
 
   // now take the args and call some functions.  maybe add a start and exit, or something clever.
-   void image(char* name, double expose);
+   void image(char* name, double expose, int gain);
 
-   cout << args[1] << ' ' << args[2] << ' ' << args[3] << endl;
+   cout << args[1] << ' ' << args[2] << ' ' << args[3] << ' ' << args[4] << endl;
     if (strcmp(args[1],"test")==0){
         cout << "acknowledge test" << endl;
     } else if (strcmp(args[1],"image")==0){
     // file_name, exposure
-        image(args[2],atof(args[3]));
+        image(args[2],atof(args[3]),atof(args[4]));
     } else {
 	cout << "Did not recognize command" << endl;
 	}
 }
 
-void image(char *name, double expose){
+void image(char *name, double expose, int gain){
 
   OpenSSAG::SSAG *camera = new OpenSSAG::SSAG();
-  
+  camera->SetGain(gain);
   if (camera->Connect()) {
     struct raw_image *image = camera->Expose(expose);
     FILE *fp = fopen(name, "w");
@@ -52,7 +52,7 @@ void image(char *name, double expose){
 
 
 /*
-   try { 
+   try {
       // write the image to a fits file…
       fitsfile *fptr;
       fits_create_file (&fptr, "!" + name + ".fits", &status);
@@ -63,8 +63,7 @@ void image(char *name, double expose){
       fits_write_img(fptr, raw_image(), 1280, 1024, pixels[0],&status);
       fits_close_file(fptr,&status);
       status = 0 ;
-      } 
+      }
   catch (std::string message)
 }
 */
-

@@ -14,13 +14,14 @@ __email__ = "NA"
 __status__ = "Developement"
 
 import time
+import os
 
 class Logger(object):
     def __init__(self):
-        self.dir = None
+        self.dir = os.path.join(os.getcwd(),'logs/')
 
     def logStr(self, line, dev):
-        f_in = open(time.strftime("%Y%m%d_")+str(dev)+".log",'a')
+        f_in = open(str(self.dir)+time.strftime("%Y%m%d_")+str(dev)+".log",'a')
         t = time.strftime("%Y%m%dT%H%M%S")
         f_in.write("%s\t%s\n" % (t, str(line)))
         f_in.close()
