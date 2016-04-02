@@ -37,8 +37,8 @@ int main(int argc, char *args[]){
 void image(char *name, double expose, int gain){
 
   OpenSSAG::SSAG *camera = new OpenSSAG::SSAG();
-  camera->SetGain(gain);
   if (camera->Connect()) {
+    camera->SetGain((int)gain);
     struct raw_image *image = camera->Expose(expose);
     FILE *fp = fopen(name, "w");
     fwrite(image->data, 1, image->width * image->height, fp);
