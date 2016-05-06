@@ -38,7 +38,7 @@ class CloudGraph(object):
 		self.l = Logger() #Logger class creates logfile of processes
 		self.dir = os.path.join(os.getcwd(),'logs')
 		self.logType = 'cloud' # Parameter used in  Logger class to create logfile
-
+		self.static_mask = None
 	def start_up_checks(self):
 		"""
 		Run once at start-up
@@ -51,7 +51,7 @@ class CloudGraph(object):
 		else:
 			print "Static mask file not found, making one now."
 			print self.make_static_mask(500)
-		static_mask = np.load("static_mask.npy")
+		self.static_mask = np.load("static_mask.npy")
 
 		folder_list = ["logs", "images", "analyzed"]
 		for folder in folder_list:
@@ -77,7 +77,7 @@ class CloudGraph(object):
 
 		img_list = np.genfromtxt(imagelist, usecols = [0], unpack = True, dtype = 'str')
 
-		return img_list, static_mask
+		return img_list, self.static_mask
 
 
 	def make_static_mask(self, radius):
@@ -114,7 +114,7 @@ class CloudGraph(object):
 		"""
 
 		# Make a masked array using the static mask and imput image
-		pre_masked = ma.array(image, mask=static_mask)
+		pre_masked = ma.array(image, mask=self.static_mask)
 
 		# Statictics on the masked image
 		prestd = (np.std(pre_masked))
@@ -195,16 +195,11 @@ class CloudGraph(object):
 		#Plot the histogram
 		ax1 = plt.subplot(gs[1])
 		ax1.bar(bins, (values*100.0), alpha=1.0)
-		ax1.set_ylabel('% pixels', size=16)
 		ax1.set_xlabel('Pixel Value', size=16)
-		ax1.yaxis.label.set_color('white')
 		ax1.xaxis.label.set_color('white')
-		ax1.yaxis.set_label_position("right")
-		ax1.yaxis.tick_right()
 		plt.locator_params(axis='y',nbins=6)
 		ax1.tick_params(axis='x', colors='white', labelsize=12)
-		ax1.tick_params(axis='y', colors='white', labelsize=12)
-
+		#ax1.yaxis().set_visible(False)
 		plt.draw()
 
 		#Save the figure as a png

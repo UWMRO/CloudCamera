@@ -17,22 +17,25 @@ class CloudCam(object):
     def check_exposure(self, median):
 
         if median < self.min:
-            self.expose = self.expose*(1+self.step)
+            self.expose = self.expose*(1.0+self.step)
             print "Exposure too short, increasing by "+str(self.step*100)+"%"
         elif median > self.max:
-            self.expose = self.expose(1-self.step)
+            self.expose = self.expose*(1.0-self.step)
             print "Exposure too long, decreasing by "+str(self.step*100)+"%"
         else:
             print "Exposure within bounds"
 
-        return
+        if self.expose < 0.02:
+	    print "Exposure reached minimum of 0.02s"
+	    self.expose = 0.02
+	return
 
     def run_camera(self):
-        name = time.strftime("%Y%m%dT%H%M%S")+"_"+str(self.expose)
-        print self.expose
+        name = time.strftime("%Y%m%dT%H%M%S")+"_"+str('%.3f'%(self.expose))
+        print str('%.3f'%(self.expose))
         self.takeImage("cloud", name+".fits", self.expose, self.dir)
-        time.sleep(self.expose+2.0)
-        median = cg.run_analysis(name+".fits", name+"_analyzed.png", name)
+        time.sleep(self.expose+2)
+        median = cg.run_analysis("images/"+name+".fits", "analyzed/"+name+"_analyzed.png", name)
         self.check_exposure(median)
         return
 
@@ -61,7 +64,7 @@ class CloudCam(object):
         self.fakeOut =  False
         im = False
         if self.fakeOut != True:
-            im = self.c.runExpose(str(imgName), str(imExp), str(imDir))
+            im = self.c.runExpose(str(imgName), str(imExp), str(imDir), int(1))
             #l.logStr('Image\t%s %s %s' % (str(imgName), str(imExp), str(imDir)), self.logType)
             if im == True: # check on completion and save of image exposure
                 time.sleep(1)
@@ -78,4 +81,6 @@ if __name__ == "__main__":
     cc = CloudCam()
     img_list, static_mask = cg.start_up_checks()
 
-    cc.run_camera()
+    run = True
+    while run == True:
+        cc.run_camera()
