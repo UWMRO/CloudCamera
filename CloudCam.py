@@ -6,9 +6,9 @@ import datetime
 
 class CloudCam(object):
     def __init__(self):
-        self.min = 20.0
-        self.max = 80.0
-        self.step = 0.05
+        self.min = 25.0
+        self.max = 100.0
+        self.step = 0.20
         self.expose = 1.0
         self.dir = os.path.join(os.getcwd(),'images')
         self.cg = CloudGraph()
