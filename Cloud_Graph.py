@@ -16,6 +16,7 @@ __status__ = "Developement"
 import numpy as np
 import numpy.ma as ma
 from astropy.io import fits
+from scipy.misc import bytescale as Scale
 import matplotlib
 matplotlib.use('TkAgg')
 import matplotlib.pyplot as plt
@@ -125,11 +126,29 @@ class CloudGraph(object):
 		stdrange = sigrange*prestd
 		#result1 = ma.masked_greater(pre_masked, (median+stdrange))
 		#result = ma.masked_less(result1, (premedian-stdrange))
-		result = ma.masked_greater(pre_masked, 254)
+		masked1 = ma.masked_greater(pre_masked, 254)
+		masked1 = ma.masked_less(masked1, 0)
 
-		median = ma.median(result)
-		mean = ma.mean(result)
-		std = ma.std(result)
+		median = ma.median(masked1)
+		mean = ma.mean(masked1)
+		std = ma.std(masked1)
+
+		masked_img = ma.filled(masked1, 0)
+
+		bytehigh = int(median + std)
+		if bytehigh > 255:
+			bytescale = 255
+
+		bytelow = int(median - std)
+		if bytelow < 0:
+			bytelow = 0
+
+		print bytehigh, bytelow
+
+		result = Scale(masked_img.astype(float), high = bytehigh, low = bytelow)
+		print result
+		#result = ma.masked_greater(result, 255)
+		#result = ma.masked_less(result, 0)
 		return result, median, mean, std
 
 
@@ -143,13 +162,14 @@ class CloudGraph(object):
 		"""
 
 		# Compress the array into a list of pixel values
-		compressed = image.compressed()
+		compressed = image.flatten()
 
 		# Find highest pixel value
 		max_val = np.amax(compressed)
 
 		# Make a histogram of the compressed list
 		result = np.histogram(compressed, bins=max_val, normed=True)
+
 		return result
 
 	def plot_histogram(self, values, bins, img_out, masked, median, mean, std, name):
@@ -163,8 +183,8 @@ class CloudGraph(object):
 		plt.clf()
 
 		#Fill in the masked image for processing
-		masked_img = ma.filled(masked, 0)
-		img = Image.fromarray(masked_img)
+
+		img = Image.fromarray(masked)
 
 		#Set up plotting environment
 		fig, ax = plt.subplots(2,1)
@@ -182,6 +202,7 @@ class CloudGraph(object):
 		#Plot the masked image, allow for arbitrary rotation
 		ax0 = plt.subplot(gs[0])
 		ax0.axis('off')
+
 		img = img.rotate(90).resize((int(img.size[1]),int(img.size[0])), Image.ANTIALIAS)
 
 		# Insert statistical information into the image
