@@ -145,8 +145,8 @@ class CloudGraph(object):
 
 		print bytehigh, bytelow
 
-		result = Scale(masked_img.astype(float), high = bytehigh, low = bytelow)
-		print result
+		result = Scale(masked_img.astype(float), cmax = bytehigh, cmin = bytelow, high = bytehigh, low = bytelow)
+
 		#result = ma.masked_greater(result, 255)
 		#result = ma.masked_less(result, 0)
 		return result, median, mean, std
