@@ -117,15 +117,7 @@ class CloudGraph(object):
 		# Make a masked array using the static mask and imput image
 		pre_masked = ma.array(image, mask=self.static_mask)
 
-		# Statictics on the masked image
-		prestd = (np.std(pre_masked))
-		premedian = ma.median(pre_masked)
-		premean = ma.mean(pre_masked)
-
-		# Mask any pixels above or below the std from median
-		stdrange = sigrange*prestd
-		#result1 = ma.masked_greater(pre_masked, (median+stdrange))
-		#result = ma.masked_less(result1, (premedian-stdrange))
+		# Mask saturated or empty
 		masked1 = ma.masked_greater(pre_masked, 254)
 		masked1 = ma.masked_less(masked1, 0)
 
@@ -133,23 +125,7 @@ class CloudGraph(object):
 		mean = ma.mean(masked1)
 		std = ma.std(masked1)
 
-		masked_img = ma.filled(masked1, 0)
-
-		bytehigh = int(median + std)
-		if bytehigh > 255:
-			bytescale = 255
-
-		bytelow = int(median - std)
-		if bytelow < 0:
-			bytelow = 0
-
-		print bytehigh, bytelow
-
-		result = Scale(masked_img.astype(float), cmax = bytehigh, cmin = bytelow, high = bytehigh, low = bytelow)
-
-		#result = ma.masked_greater(result, 255)
-		#result = ma.masked_less(result, 0)
-		return result, median, mean, std
+		return masked1, median, mean, std
 
 
 	def pixel_value_list(self, image):
@@ -162,14 +138,34 @@ class CloudGraph(object):
 		"""
 
 		# Compress the array into a list of pixel values
-		compressed = image.flatten()
+		compressed = ma.compressed(image)
 
 		# Find highest pixel value
 		max_val = np.amax(compressed)
 
 		# Make a histogram of the compressed list
 		result = np.histogram(compressed, bins=max_val, normed=True)
+		#print result[0]
+		#print result[1]
+		return result
 
+	def scale_img(self, img, median, std):
+		"""
+		Scale the image based on the median and std
+		Brings out cloud detail
+		"""
+
+		masked_img = img.filled(fill_value = 0)
+
+		bytehigh = int(median + std)
+		if bytehigh > 255:
+			bytescale = 255
+
+		bytelow = int(median - std)
+		if bytelow < 0:
+			bytelow = 0
+
+		result = Scale(masked_img.astype(float), cmax = bytehigh, cmin = bytelow, high = bytehigh, low = bytelow)
 		return result
 
 	def plot_histogram(self, values, bins, img_out, masked, median, mean, std, name):
@@ -184,7 +180,10 @@ class CloudGraph(object):
 
 		#Fill in the masked image for processing
 
-		img = Image.fromarray(masked)
+		scaled_img = self.scale_img(masked, median, std)
+
+		img = Image.fromarray(scaled_img)
+
 
 		#Set up plotting environment
 		fig, ax = plt.subplots(2,1)
