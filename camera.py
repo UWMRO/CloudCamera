@@ -87,7 +87,7 @@ class CameraExpose(object):
             prihdr['IMAGTYP'] = 'guide'
             # Write the image and header to a FITS file using variable name.
             name = self.checkFile(name)
-            hdulist.writeto(name)
+            hdulist.writeto(name, clobber=True)
             #im = Image.fromarray(binary)
             #im.save("tmp.jpg")
 

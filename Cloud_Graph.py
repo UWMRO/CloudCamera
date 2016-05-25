@@ -165,7 +165,7 @@ class CloudGraph(object):
 		if bytelow < 0:
 			bytelow = 0
 
-		result = Scale(masked_img.astype(float), cmax = bytehigh, cmin = bytelow, high = bytehigh, low = bytelow)
+		result = Scale(masked_img.astype(float), cmax = bytehigh, cmin = bytelow, high = 3*bytehigh, low = 3*bytelow)
 		return result
 
 	def plot_histogram(self, values, bins, img_out, masked, median, mean, std, name):
