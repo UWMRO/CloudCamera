@@ -30,8 +30,8 @@ import os
 from PIL import Image
 import itertools
 import sys
-from subprocess import call
-
+import subprocess
+import shutil
 
 
 class CloudGraph(object):
@@ -39,6 +39,8 @@ class CloudGraph(object):
 		self.l = Logger() #Logger class creates logfile of processes
 		self.dir = os.path.join(os.getcwd(),'logs')
 		self.logType = 'cloud' # Parameter used in  Logger class to create logfile
+		self.imglist = []
+		self.count = 0
 		self.static_mask = None
 	def start_up_checks(self):
 		"""
@@ -54,7 +56,7 @@ class CloudGraph(object):
 			print self.make_static_mask(500)
 		self.static_mask = np.load("static_mask.npy")
 
-		folder_list = ["logs", "images", "analyzed"]
+		folder_list = ["gif", "logs", "images", "analyzed"]
 		for folder in folder_list:
 			if (os.path.isdir(folder)) == False:
 				print "Creating directory "+str(folder)
@@ -63,18 +65,14 @@ class CloudGraph(object):
 		listdirect = os.path.join(os.getcwd(),'images/')
 		imagelist = listdirect+'image.txt'
 
-		if os.path.isfile(str(imagelist)) == True:
-			print "Found and loading image list"
-		else:
-			print "Could not find image list (images/image.txt)"
-			print "Creating a list of fits files in images/"
-			fitslist = []
-			for fits in os.listdir(listdirect):
-				if fits.endswith(".fits"):
-					fitslist.append(fits)
-			f = open(imagelist, "w")
-			f.write("\n".join(map(lambda x: str(x), fitslist)))
-			f.close()
+		print "Creating a list of fits files in images/"
+		fitslist = []
+		for fits in os.listdir(listdirect):
+			if fits.endswith(".fits"):
+				fitslist.append(fits)
+		f = open(imagelist, "w")
+		f.write("\n".join(map(lambda x: str(x), fitslist)))
+		f.close()
 
 		img_list = np.genfromtxt(imagelist, usecols = [0], unpack = True, dtype = 'str')
 
@@ -157,15 +155,15 @@ class CloudGraph(object):
 
 		masked_img = img.filled(fill_value = 0)
 
-		bytehigh = int(median + std)
+		bytehigh = int((median + std))
 		if bytehigh > 255:
 			bytescale = 255
 
-		bytelow = int(median - std)
+		bytelow = int((median - std))
 		if bytelow < 0:
 			bytelow = 0
-
-		result = Scale(masked_img.astype(float), cmax = bytehigh, cmin = bytelow, high = 3*bytehigh, low = 3*bytelow)
+		
+		result = Scale(masked_img.astype(float), cmax = bytehigh, cmin = bytelow, high = bytehigh, low = bytelow)
 		return result
 
 	def plot_histogram(self, values, bins, img_out, masked, median, mean, std, name):
@@ -215,6 +213,7 @@ class CloudGraph(object):
 		#Plot the histogram
 		ax1 = plt.subplot(gs[1])
 		ax1.bar(bins, (values*100.0), alpha=1.0)
+		ax1.set_xlim([int(median-3*std),int(median+3*std)])
 		ax1.set_xlabel('Pixel Value', size=16)
 		ax1.xaxis.label.set_color('white')
 		plt.locator_params(axis='y',nbins=6)
@@ -225,6 +224,21 @@ class CloudGraph(object):
 		#Save the figure as a png
 		gs.tight_layout(fig, h_pad=None)
 		fig.savefig(img_out, cmap="grey", transparent=True, facecolor="black", edgecolor='none')
+		
+                fig.savefig(os.getcwd()+"/gif/gif"+str(self.count)+".png", cmap="grey", transparent=True, facecolor="black", edgecolor='none', clobber=True)
+	
+		fig.savefig("/var/www/html/latest.png", cmap="grey", transparent=True, facecolor="black", edgecolor='none', clobber=True)
+	
+		self.count += 1
+		if self.count == 10:
+			print "Producing gif image"
+			command = "sudo convert -delay 40 -loop 0 "+os.getcwd()+"/gif/*.png /var/www/html/latest.gif"
+			out = subprocess.Popen(command, stdout = subprocess.PIPE, shell=True)
+			self.count = 0
+			self.imglist = []
+			time.sleep(15)
+			shutil.rmtree(os.getcwd()+"/gif")
+			os.makedirs(os.getcwd()+"/gif")
 		plt.close("all")
 		return
 
