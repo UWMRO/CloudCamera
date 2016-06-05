@@ -102,3 +102,11 @@ class ClouduinoInterface():
 	l = line.split()
 	print l
 	return l
+
+if __name__ == "__main__":
+	c = ClouduinoInterface()
+	c.openPort()
+	time.sleep(1)
+	c.getDomeStatus()
+	time.sleep(1)
+	c.closePort()
