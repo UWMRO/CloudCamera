@@ -1,5 +1,4 @@
-
-
+#include <Wire.h>
 #include <OneWire.h>
 #include <DallasTemperature.h>
 #include <Servo.h>
@@ -11,11 +10,16 @@
 DHT dht(DHTPIN, DHTTYPE);
 
 int servoPin = 9;       // light servo connected to pin 9
-int heatPin = 13;       // Heater connected to digital pin 13
+int heatPin = 13;      // Heater connected to digital pin 13
+int dsPin = 10;
+int pos = 0;
 
-#define ONE_WIRE_BUS 10
+#define ONE_WIRE_BUS dsPin
 OneWire oneWire(ONE_WIRE_BUS);
 DallasTemperature sensors(&oneWire);
+OneWire  ds(dsPin);
+
+Servo myservo;
 
 DeviceAddress therm1 = { 0x28, 0xCC, 0x44, 0x5D, 0x06, 0x00, 0x00, 0x9E };
 
@@ -42,12 +46,23 @@ void loop() {
       case 't':
         getTemp(therm1);
         break;
+      case 'l':
+        getLux();
+        break;
+      case 'i':
+        setFilterIn();
+        break;
+      case 'o':
+        setFilterOut();
+        break;
+      case 'd':
+        getDomeMet();
+        break;
       default:
         break;
         }
     }
   }
-}  // put your main code here, to run repeatedly:
 
 
 void findTempAddr(){
@@ -91,15 +106,15 @@ void getTemp(DeviceAddress deviceAddress){
 }
 
 void setHeaterOn(){
-  break;  
+  return;  
 }
 
 void setHeaterOff(){
-  
+  return;
 }
 
-void getHeaterState({
-  
+void getHeaterState(){
+  return;
 }
 
 void getLux(){
@@ -127,8 +142,6 @@ void setFilterOut(){
      pos = 45;
    }
  }
-  
-}
 
 void getDomeMet(){
      float h = dht.readHumidity();
