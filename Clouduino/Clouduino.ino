@@ -36,35 +36,6 @@ void setup() {
 
 }
 
-void loop() {
-  if (Serial.available() > 0) {
-    int inByte = Serial.read();
-    switch (inByte) {
-      case 'f':
-        findTempAddr();
-        break;
-      case 't':
-        getTemp(therm1);
-        break;
-      case 'l':
-        getLux();
-        break;
-      case 'i':
-        setFilterIn();
-        break;
-      case 'o':
-        setFilterOut();
-        break;
-      case 'd':
-        getDomeMet();
-        break;
-      default:
-        break;
-        }
-    }
-  }
-
-
 void findTempAddr(){
   byte i;
   byte present = 0;
@@ -154,14 +125,35 @@ void getDomeMet(){
     } 
     else 
     {
-        Serial.print("Humidity: "); 
         Serial.print(h);
-        Serial.print(" %\t");
-        Serial.print("Temperature: "); 
-        Serial.print(t);
-        Serial.println(" *C");
+        Serial.print(","); 
+        Serial.println(t);
     }
   
 }
 
-  
+void loop() {
+  if (Serial.available() > 0) {
+    int inByte = Serial.read();
+    switch (inByte) {
+      case 'f':
+        findTempAddr();
+        break;
+      case 't':
+        getTemp(therm1);
+        break;
+      case 'l':
+        getLux();
+        break;
+      case 'i':
+        setFilterIn();
+        break;
+      case 'o':
+        setFilterOut();
+        break;
+      case 'd':
+        getDomeMet();
+        break;
+        }
+    }
+}
