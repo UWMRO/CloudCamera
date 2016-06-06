@@ -23,17 +23,13 @@ Servo myservo;
 
 DeviceAddress therm1 = { 0x28, 0xCC, 0x44, 0x5D, 0x06, 0x00, 0x00, 0x9E };
 
-void setup() {
-
+void setup(void) {
   Serial.begin(9600);
-  
   myservo.attach(servoPin);  // attaches the servo on pin 9 to the servo object
   TSL2561.init();            // light Sensor
   sensors.begin();              // start one wire devices 
   dht.begin();
-
   pinMode(heatPin, OUTPUT);      // sets the digital pin as output
-
 }
 
 void findTempAddr(){
@@ -129,10 +125,9 @@ void getDomeMet(){
         Serial.print(","); 
         Serial.println(t);
     }
-  
 }
 
-void loop() {
+void loop(void) {
   if (Serial.available() > 0) {
     int inByte = Serial.read();
     switch (inByte) {
