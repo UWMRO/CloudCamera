@@ -26,11 +26,12 @@ __email__ = ""
 __status__ = "Developement"
 
 import serial
+import time
 
 class ClouduinoInterface():
     def __init__(self):
 	self.ser = None
-	self.serPort = 'dev/tty.usbserial'
+	self.serPort = '/dev/tty.usbmodem1421'
 
     def log(self):
     	"""
@@ -53,7 +54,7 @@ class ClouduinoInterface():
         self.ser.close()
         return
 
-   def readSer(self):
+    def readSer(self):
 	""" Read in the arduino output, parse, and return something useful
 	Arguments:
 		None
@@ -63,7 +64,7 @@ class ClouduinoInterface():
         s = self.ser.readline()
         return s
 
-   def getLux(self):
+    def getLux(self):
 	""" calls the arduino getLux() function
 	Arguments:
 		None
@@ -75,7 +76,7 @@ class ClouduinoInterface():
 	print flux
 	return flux
 
-   def setFilterPos(self, pos):
+    def setFilterPos(self, pos):
 	""" pos accepts True or False.  If true then it moves into position
 	Arguments:
 		pos (bool): True if filter should be in path, False if not
@@ -88,7 +89,7 @@ class ClouduinoInterface():
 		self.ser.write('o')
 	return
 	
-   def getDomeStatus(self):
+    def getDomeStatus(self):
 	"""returns the dome metrology in format humidity,temp,pos
 	Arguments:
 		None
@@ -106,7 +107,7 @@ class ClouduinoInterface():
 if __name__ == "__main__":
 	c = ClouduinoInterface()
 	c.openPort()
-	time.sleep(1)
-	c.getDomeStatus()
-	time.sleep(1)
+	time.sleep(2)
+	c.setFilterPos(False)
+	time.sleep(5)
 	c.closePort()

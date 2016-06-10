@@ -5,14 +5,18 @@
 #include <Digital_Light_TSL2561.h>
 #include "DHT.h"
 
-#define DHTTYPE DHT22 
+
 #define DHTPIN A0
+#define DHTTYPE DHT22 
 DHT dht(DHTPIN, DHTTYPE);
 
 int servoPin = 9;       // light servo connected to pin 9
 int heatPin = 13;      // Heater connected to digital pin 13
 int dsPin = 10;
 int pos = 0;
+int inPos = 90;
+int outPos = 45;
+int servoDelay = 2;
 
 #define ONE_WIRE_BUS dsPin
 OneWire oneWire(ONE_WIRE_BUS);
@@ -26,10 +30,13 @@ DeviceAddress therm1 = { 0x28, 0xCC, 0x44, 0x5D, 0x06, 0x00, 0x00, 0x9E };
 void setup(void) {
   Serial.begin(9600);
   myservo.attach(servoPin);  // attaches the servo on pin 9 to the servo object
+  Wire.begin();
   TSL2561.init();            // light Sensor
+  Serial.println("past here");
   sensors.begin();              // start one wire devices 
   dht.begin();
   pinMode(heatPin, OUTPUT);      // sets the digital pin as output
+
 }
 
 void findTempAddr(){
@@ -90,41 +97,38 @@ void getLux(){
 }
 
 void setFilterIn(){
-      if (pos != 115){
-      for (pos = 45; pos <= 115; pos += 1) { // goes from 0 degrees to 180 degrees
-        // in steps of 1 degree
+      if (pos != inPos){
+      for (pos = outPos; pos <= inPos; pos += 1) { // goes from 0 degrees to 180 degrees
         myservo.write(pos);              // tell servo to go to position in variable 'pos'
-        delay(300);                       // waits 15ms for the servo to reach the position
+        delay(servoDelay);                       // waits 15ms for the servo to reach the position
       }
-      pos = 115;
+      pos = inPos;
     }
+    return;
 }
 
 void setFilterOut(){
-   if (pos != 45){
-      for (pos = 115; pos >= 45; pos -= 1) { // goes from 180 degrees to 0 degrees
+   if (pos != outPos){
+      for (pos = inPos; pos >= outPos; pos -= 1) { // goes from 180 degrees to 0 degrees
       myservo.write(pos);              // tell servo to go to position in variable 'pos'
-      delay(300);                       // waits 15ms for the servo to reach the position
+      delay(servoDelay);                       // waits 15ms for the servo to reach the position
       }
-     pos = 45;
+     pos = outPos;
    }
+   return;
  }
 
 void getDomeMet(){
-     float h = dht.readHumidity();
+    float h = dht.readHumidity();
     float t = dht.readTemperature();
 
-    // check if returns are valid, if they are NaN (not a number) then something went wrong!
-    if (isnan(t) || isnan(h)) 
-    {
-        Serial.println("Failed to read from DHT");
-    } 
-    else 
-    {
-        Serial.print(h);
-        Serial.print(","); 
-        Serial.println(t);
-    }
+    Serial.print(h);
+    Serial.print(","); 
+    Serial.println(t);
+}
+
+void test(void){
+  Serial.println("test routine");
 }
 
 void loop(void) {
@@ -149,6 +153,9 @@ void loop(void) {
       case 'd':
         getDomeMet();
         break;
+      case 'y':
+         test();
+         break;
         }
     }
 }
