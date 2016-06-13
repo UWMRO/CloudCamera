@@ -3,21 +3,26 @@ from Cloud_Graph import *
 from camera import *
 from logger import *
 import datetime
+from Clouduino_interface import ClouduinoInterface
 
 class CloudCam(object):
     def __init__(self):
-        self.min = 25.0
+        self.min = 40.0
         self.max = 100.0
-        self.step = 0.20
-        self.expose = 1.0
+        self.step = 0.40
+        self.expose = 10.0
         self.dir = os.path.join(os.getcwd(),'images')
         self.cg = CloudGraph()
-        self.c = CameraExpose()
+	self.c = CameraExpose()
+	self.ci = ClouduinoInterface()
+	self.gain = 2 
+	self.filterpos = 0
+
 
     def check_exposure(self, median):
 
         if median < self.min:
-            self.expose = self.expose*(1.0+self.step)
+	    self.expose = self.expose*(1.0+self.step)
             print "Exposure too short, increasing by "+str(self.step*100)+"%"
         elif median > self.max:
             self.expose = self.expose*(1.0-self.step)
@@ -26,8 +31,30 @@ class CloudCam(object):
             print "Exposure within bounds"
 
         if self.expose < 0.02:
-	    print "Exposure reached minimum of 0.02s"
-	    self.expose = 0.02
+	    if self.filterpos = 0:
+		print "Moving filter into FoV"
+		c.openPort()
+		time.sleep(2)
+		c.setFilterPos(False)
+		time.sleep(5)
+		c.closePort()
+		self.filterpos = 1
+	    else:
+	    	print "Exposure reached minimum of 0.02s"
+	    	self.expose = 0.02
+	
+	if self.expose > 60.0:
+	    if self.filterpos = 1:
+		print "Moving filter out of FoV"
+		c.openPort()
+		time.sleep(2)
+		c.setFilterPos(False)
+		time.sleep(5)
+		c.closePort()
+		self.filterpos = 0
+	    else:
+		print "Exposure reached maximum of 60s"
+	    	self.expose = 60.0
 	return
 
     def run_camera(self):
@@ -64,7 +91,7 @@ class CloudCam(object):
         self.fakeOut =  False
         im = False
         if self.fakeOut != True:
-            im = self.c.runExpose(str(imgName), str(imExp), str(imDir), int(1))
+            im = self.c.runExpose(str(imgName), str(imExp), str(imDir), self.gain)
             #l.logStr('Image\t%s %s %s' % (str(imgName), str(imExp), str(imDir)), self.logType)
             if im == True: # check on completion and save of image exposure
                 time.sleep(1)

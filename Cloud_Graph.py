@@ -159,11 +159,11 @@ class CloudGraph(object):
 		if bytehigh > 255:
 			bytescale = 255
 
-		bytelow = int((median - std))
-		if bytelow < 0:
-			bytelow = 0
+		#bytelow = int((median - std))
+		#if bytelow < 0:
+		bytelow = 0
 		
-		result = Scale(masked_img.astype(float), cmax = bytehigh, cmin = bytelow, high = bytehigh, low = bytelow)
+		result = Scale(masked_img.astype(float), cmax = bytehigh, cmin = bytelow) #, high = bytehigh, low = bytelow)
 		return result
 
 	def plot_histogram(self, values, bins, img_out, masked, median, mean, std, name):
@@ -179,8 +179,8 @@ class CloudGraph(object):
 		#Fill in the masked image for processing
 
 		scaled_img = self.scale_img(masked, median, std)
-
-		img = Image.fromarray(scaled_img)
+		img_masked, junk1, junk2, junk3 = self.dynamic_mask(scaled_img, 3)
+		img = Image.fromarray(img_masked)
 
 
 		#Set up plotting environment
@@ -200,7 +200,7 @@ class CloudGraph(object):
 		ax0 = plt.subplot(gs[0])
 		ax0.axis('off')
 
-		img = img.rotate(90).resize((int(img.size[1]),int(img.size[0])), Image.ANTIALIAS)
+		img = img.rotate(90).resize((int(img.size[0]),int(img.size[1])), Image.ANTIALIAS)
 
 		# Insert statistical information into the image
 		ax0.text(0, 1240, name[0:4]+'-'+name[4:6]+'-'+name[6:8]+'   '+name[9:11]+':'+name[11:13]+':'+name[13:15], size = 16, color="white", horizontalalignment='left')
