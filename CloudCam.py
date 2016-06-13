@@ -31,7 +31,7 @@ class CloudCam(object):
             print "Exposure within bounds"
 
         if self.expose < 0.02:
-	    if self.filterpos = 0:
+	    if self.filterpos == 0:
 		print "Moving filter into FoV"
 		c.openPort()
 		time.sleep(2)
@@ -44,7 +44,7 @@ class CloudCam(object):
 	    	self.expose = 0.02
 	
 	if self.expose > 60.0:
-	    if self.filterpos = 1:
+	    if self.filterpos == 1:
 		print "Moving filter out of FoV"
 		c.openPort()
 		time.sleep(2)
