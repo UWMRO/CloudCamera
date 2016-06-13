@@ -3,7 +3,7 @@ from Cloud_Graph import *
 from camera import *
 from logger import *
 import datetime
-from Clouduino_interface import ClouduinoInterface
+from clouduino_interface import ClouduinoInterface
 
 class CloudCam(object):
     def __init__(self):
