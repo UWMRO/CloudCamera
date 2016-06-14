@@ -1,14 +1,31 @@
+#! /usr/bin/python
+
 """
-Test code for Cloud Camera histogram plotting
-Used to determine the mean value of each row in an image
-to be used for later analysis
+Cloud_Graph.py
+Analyze and process images from the CloudCam. Applies masks, calculates
+statistics, and outputs a .png image to analyzed/
+
+TODO:
+	Produce directional statistics
+	Zip fits images after they are used
+
+Dependencies:
+	Run ./make to install all dependencies
+
+Usage:
+	Analyze all .fits images in images/:	python Cloud_Graph.py
+	Typically called from CloudCam.py
+
+Output:
+	Analyzed image, with histogram plot and statistics is
+	output to analyzed as (Input_Name)_analyzed.png
 """
 
-__author__ = ["J. Matt Armstrong","Nathen Nguyen"]
+__author__ = ["J. Matt Armstrong"]
 __copyright__ = "NA"
 __credits__ = ["Joseph Huehnerhoff"]
 __license__ = "GPL"
-__version__ = "0.6"
+__version__ = "1.5"
 __maintainer__ = "J. Matt Armstrong"
 __email__ = "jmarmstr@uw.edu"
 __status__ = "Developement"
@@ -47,8 +64,13 @@ class CloudGraph(object):
 		Run once at start-up
 		Checks for necessary folders and files
 		Creates them if necessary
+
+		Returns:
+			img_list			(list of .fits in images/)
+			self.static_mask	(circular aperture mask loaded into memory)
 		"""
 
+		# Load mask into memory
 		if os.path.isfile("static_mask.npy") == True:
 			print 'Loading static mask file.'
 		else:
@@ -56,15 +78,16 @@ class CloudGraph(object):
 			print self.make_static_mask(500)
 		self.static_mask = np.load("static_mask.npy")
 
+		# Produce any missing folders
 		folder_list = ["gif", "logs", "images", "analyzed"]
 		for folder in folder_list:
 			if (os.path.isdir(folder)) == False:
 				print "Creating directory "+str(folder)
 				os.makedirs(folder)
 
+		# Produce a txt file with a list of .fits images in images/
 		listdirect = os.path.join(os.getcwd(),'images/')
 		imagelist = listdirect+'image.txt'
-
 		print "Creating a list of fits files in images/"
 		fitslist = []
 		for fits in os.listdir(listdirect):
@@ -73,7 +96,6 @@ class CloudGraph(object):
 		f = open(imagelist, "w")
 		f.write("\n".join(map(lambda x: str(x), fitslist)))
 		f.close()
-
 		img_list = np.genfromtxt(imagelist, usecols = [0], unpack = True, dtype = 'str')
 
 		return img_list, self.static_mask
@@ -162,7 +184,7 @@ class CloudGraph(object):
 		#bytelow = int((median - std))
 		#if bytelow < 0:
 		bytelow = 0
-		
+
 		result = Scale(masked_img.astype(float), cmax = bytehigh, cmin = bytelow) #, high = bytehigh, low = bytelow)
 		return result
 
@@ -224,11 +246,11 @@ class CloudGraph(object):
 		#Save the figure as a png
 		gs.tight_layout(fig, h_pad=None)
 		fig.savefig(img_out, cmap="grey", transparent=True, facecolor="black", edgecolor='none')
-		
+
                 fig.savefig(os.getcwd()+"/gif/gif"+str(self.count)+".png", cmap="grey", transparent=True, facecolor="black", edgecolor='none', clobber=True)
-	
+
 		fig.savefig("/var/www/html/latest.png", cmap="grey", transparent=True, facecolor="black", edgecolor='none', clobber=True)
-	
+
 		self.count += 1
 		if self.count == 10:
 			print "Producing gif image"
