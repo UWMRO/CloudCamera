@@ -29,7 +29,7 @@ DeviceAddress therm1 = { 0x28, 0xCC, 0x44, 0x5D, 0x06, 0x00, 0x00, 0x9E };
 
 void setup(void) {
   Serial.begin(9600);
-  myservo.attach(servoPin);  // attaches the servo on pin 9 to the servo object
+  // myservo.attach(servoPin);  // attaches the servo on pin 9 to the servo object
   Wire.begin();
   TSL2561.init();            // light Sensor
   Serial.println("past here");
@@ -98,22 +98,28 @@ void getLux(){
 
 void setFilterIn(){
       if (pos != inPos){
-      for (pos = outPos; pos <= inPos; pos += 1) { // goes from 0 degrees to 180 degrees
+        myservo.attach(servoPin);     // attach to the servo
+        delay(servoDelay);      // wait for the servo to attach
+        for (pos = outPos; pos <= inPos; pos += 1) { // goes from 0 degrees to 180 degrees
         myservo.write(pos);              // tell servo to go to position in variable 'pos'
         delay(servoDelay);                       // waits 15ms for the servo to reach the position
+        myservo.detach();     // detach from the servo
       }
-      pos = inPos;
+    pos = inPos;
     }
     return;
 }
 
 void setFilterOut(){
    if (pos != outPos){
+      myservo.attach(servoPin);     // attach to the servo
+      delay(servoDelay);      // wait for the servo to attach
       for (pos = inPos; pos >= outPos; pos -= 1) { // goes from 180 degrees to 0 degrees
       myservo.write(pos);              // tell servo to go to position in variable 'pos'
       delay(servoDelay);                       // waits 15ms for the servo to reach the position
+      myservo.detach();       // detach from the servo
       }
-     pos = outPos;
+   pos = outPos;
    }
    return;
  }
