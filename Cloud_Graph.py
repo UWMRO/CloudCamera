@@ -8,12 +8,14 @@ statistics, and outputs a .png image to analyzed/
 TODO:
 	Produce directional statistics
 	Zip fits images after they are used
+	Fix png naming to use a timestamp, not a chopped name
 
 Dependencies:
 	Run ./make to install all dependencies
 
 Usage:
-	Analyze all .fits images in images/:	python Cloud_Graph.py
+	Analyze all .fits images in images/:
+		python Cloud_Graph.py
 	Typically called from CloudCam.py
 
 Output:
@@ -108,7 +110,7 @@ class CloudGraph(object):
 		outside the radius from the center.
 
 		Input: Radius to mask from center of image
-		Output: Aperture asked numpy array the same size as the image.
+		Output: Aperture masked numpy array the same size as the image.
 		"""
 		result = []
 
@@ -125,13 +127,17 @@ class CloudGraph(object):
 		np.save("static_mask", np.asarray(result))
 		return "Static mask saved"
 
-	def dynamic_mask(self, image, sigrange):
+	def dynamic_mask(self, image):
 		"""
 		Creates a numpy mask on the image, filtering out any
-		pixel values that are more than sigrange*std from the median value
+		pixel values that are negative or saturated
 
-		Input: numpy array of the image, sigrange for multiplier on standard dev range
+		Input:
+			image			(Aperture masked numpy image)
 		Output: Masked numpy array covering any pixels above or below the standard dev range
+			masked1			(masked numpy array)
+			median	*Float*	(median value of masked array)
+			mean	*Float*	(mean value of masked array)
 		"""
 
 		# Make a masked array using the static mask and imput image
@@ -165,14 +171,21 @@ class CloudGraph(object):
 
 		# Make a histogram of the compressed list
 		result = np.histogram(compressed, bins=max_val, normed=True)
-		#print result[0]
-		#print result[1]
+
 		return result
 
 	def scale_img(self, img, median, std):
 		"""
 		Scale the image based on the median and std
 		Brings out cloud detail
+
+		input:
+			img			(masked numpy image to scale)\
+			median		(median value of image)
+			std			(std value of image)
+
+		output:
+			result		(scaled image)
 		"""
 
 		masked_img = img.filled(fill_value = 0)
@@ -193,7 +206,22 @@ class CloudGraph(object):
 		Statistical plotting and output function.
 
 		Input: Value list, Bin list, Name of output, Masked image, median value, mean value, standard dev, image name
+			values 		(List of histogram counts)
+			bins		(List of histogram bins)
+			img_out		(Name of output image)
+			masked 		(Masked numpy image)
+			median		(Histogram median)
+			mean		(Histogram mean)
+			std			(Histogram standard dev)
+			name		(Name of image)				[Replace with timestp]
+
 		Output: png image file with the masked image, statistical and image information, and histogram plot
+			Saves three copies of the image
+				analyzed/img_out.png			(Archive storage location)
+				gif/img_out.png					(Temp directory used to produce a gif)
+				/var/www/html/latest.png		(Live view webpage displays this image)
+			Every 10 images, produces a gif of the images in gif/
+				/var/www/html/latest.png		(Live view webpage displays this gif)
 		"""
 
 		plt.clf()
@@ -240,7 +268,6 @@ class CloudGraph(object):
 		ax1.xaxis.label.set_color('white')
 		plt.locator_params(axis='y',nbins=6)
 		ax1.tick_params(axis='x', colors='white', labelsize=12)
-		#ax1.yaxis().set_visible(False)
 		plt.draw()
 
 		#Save the figure as a png
@@ -251,6 +278,7 @@ class CloudGraph(object):
 
 		fig.savefig("/var/www/html/latest.png", cmap="grey", transparent=True, facecolor="black", edgecolor='none', clobber=True)
 
+		# produce a gif of the last 10 images when self.count == 10
 		self.count += 1
 		if self.count == 10:
 			print "Producing gif image"
@@ -284,6 +312,10 @@ class CloudGraph(object):
 		package can be called from outside this file.
 
 		Input: name of image in, name of image out, and chopped file name
+		input:
+			img_in			(name of input .fits image)
+			img_out			(name of output png image)
+			name 			(name file for timestamp)
 		"""
 		img = self.fits_to_list(str(img_in))
 		print "Analyzing "+str(img_in)
@@ -310,10 +342,7 @@ if __name__=="__main__":
 	Run terminal command in image directory(ls *.fits > image.txt)
 	This will produce a text list of all fits files to process
 	Run the program using a list of file names in a text file_path
-
-	Change the directory for images and create a folder inside
-	/analyzed
-
+	
 	Log file will contain time stamp, img_name, median, mean, std
 	"""
 
