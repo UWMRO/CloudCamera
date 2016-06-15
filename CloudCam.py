@@ -1,3 +1,21 @@
+#! /usr/bin/python
+
+"""
+CloudCam.py
+Operates the CloudCam hardware and analysis software
+
+TODO:
+
+
+Usage:
+    Automatic camera operation and data analysis from command line:
+        python CloudCam.py
+
+    Live data is displayed by opening a web browser and looking at
+    the IP of the CloudCam
+"""
+
+
 import numpy as np
 from Cloud_Graph import *
 from camera import *
@@ -7,20 +25,40 @@ from clouduino_interface import ClouduinoInterface
 
 class CloudCam(object):
     def __init__(self):
+        """
+        Options:
+            self.min        (minimum median value for exposure control)
+            self.max        (maximum median value for exposure control)
+            self.step       (What percent the exp value changes under exposure control)
+            self.expose     (starting exposure length [s])
+            self.dir        (where are the .fits images saved)
+            self.gain       (camera gain setting)
+            self.filterpos  (where is the filter arm? 0 = out, 1 = in)
+        """
+
         self.min = 40.0
         self.max = 100.0
         self.step = 0.40
         self.expose = 10.0
         self.dir = os.path.join(os.getcwd(),'images')
+        self.gain = 2
+	    self.filterpos = 0
+
         self.cg = CloudGraph()
-	self.c = CameraExpose()
-	self.ci = ClouduinoInterface()
-	self.gain = 2 
-	self.filterpos = 0
+	    self.c = CameraExpose()
+	    self.ci = ClouduinoInterface()
 
 
     def check_exposure(self, median):
+        """
+        Adjusts the exposure timing and filter arm position
+        to try and keep the median between self.min and self.max
 
+        input:
+            median      (median value from analysis)
+        """
+
+        # Check and adjust exposure timing if necessary
         if median < self.min:
 	    self.expose = self.expose*(1.0+self.step)
             print "Exposure too short, increasing by "+str(self.step*100)+"%"
@@ -30,34 +68,40 @@ class CloudCam(object):
         else:
             print "Exposure within bounds"
 
+        # If exposure reaches minimum, move the filter over the lens
         if self.expose < 0.02:
-	    if self.filterpos == 0:
-		print "Moving filter into FoV"
-		c.openPort()
-		time.sleep(2)
-		c.setFilterPos(False)
-		time.sleep(5)
-		c.closePort()
-		self.filterpos = 1
-	    else:
-	    	print "Exposure reached minimum of 0.02s"
-	    	self.expose = 0.02
-	
-	if self.expose > 60.0:
-	    if self.filterpos == 1:
-		print "Moving filter out of FoV"
-		c.openPort()
-		time.sleep(2)
-		c.setFilterPos(False)
-		time.sleep(5)
-		c.closePort()
-		self.filterpos = 0
-	    else:
-		print "Exposure reached maximum of 60s"
-	    	self.expose = 60.0
-	return
+    	    if self.filterpos == 0:
+        		print "Moving filter into FoV"
+        		c.openPort()
+        		time.sleep(2)
+        		c.setFilterPos(False)
+        		time.sleep(5)
+        		c.closePort()
+        		self.filterpos = 1
+        	else:
+        		print "Exposure reached minimum of 0.02s"
+        		self.expose = 0.02
+
+        # if exposure reaches maximum, move the filter out of the way
+    	if self.expose > 60.0:
+    	    if self.filterpos == 1:
+        		print "Moving filter out of FoV"
+        		c.openPort()
+        		time.sleep(2)
+        		c.setFilterPos(False)
+        		time.sleep(5)
+        		c.closePort()
+        		self.filterpos = 0
+        	else:
+        		print "Exposure reached maximum of 60s"
+        	    self.expose = 60.0
+	    return
 
     def run_camera(self):
+        """
+        Take and analyze image, check exposure after analysis
+        """
+
         name = time.strftime("%Y%m%dT%H%M%S")+"_"+str('%.3f'%(self.expose))
         print str('%.3f'%(self.expose))
         self.takeImage("cloud", name+".fits", self.expose, self.dir)
