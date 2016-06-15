@@ -99,13 +99,14 @@ void getLux(){
 void setFilterIn(){
       if (pos != inPos){
         myservo.attach(servoPin);     // attach to the servo
-        delay(servoDelay);      // wait for the servo to attach
+        delay(1000);      // wait for the servo to attach
         for (pos = outPos; pos <= inPos; pos += 1) { // goes from 0 degrees to 180 degrees
         myservo.write(pos);              // tell servo to go to position in variable 'pos'
         delay(servoDelay);                       // waits 15ms for the servo to reach the position
+        }  
+        delay(1500);
         myservo.detach();     // detach from the servo
-      }
-    pos = inPos;
+        pos = inPos;
     }
     return;
 }
@@ -113,13 +114,14 @@ void setFilterIn(){
 void setFilterOut(){
    if (pos != outPos){
       myservo.attach(servoPin);     // attach to the servo
-      delay(servoDelay);      // wait for the servo to attach
+      delay(1000);      // wait for the servo to attach
       for (pos = inPos; pos >= outPos; pos -= 1) { // goes from 180 degrees to 0 degrees
       myservo.write(pos);              // tell servo to go to position in variable 'pos'
       delay(servoDelay);                       // waits 15ms for the servo to reach the position
-      myservo.detach();       // detach from the servo
       }
-   pos = outPos;
+      delay(1500);
+      myservo.detach();       // detach from the servo
+      pos = outPos;
    }
    return;
  }
