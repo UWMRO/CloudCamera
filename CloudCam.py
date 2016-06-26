@@ -39,14 +39,14 @@ class CloudCam(object):
         self.min = 40.0
         self.max = 100.0
         self.step = 0.40
-        self.expose = 10.0
+        self.expose = 1.0
         self.dir = os.path.join(os.getcwd(),'images')
-        self.gain = 2
-	    self.filterpos = 0
+        self.gain = 1
+	self.filterpos = 0
 
         self.cg = CloudGraph()
-	    self.c = CameraExpose()
-	    self.ci = ClouduinoInterface()
+	self.c = CameraExpose()
+	self.ci = ClouduinoInterface()
 
 
     def check_exposure(self, median):
@@ -150,7 +150,7 @@ class CloudCam(object):
 if __name__ == "__main__":
     cg = CloudGraph()
     cc = CloudCam()
-    img_list, static_mask = cg.start_up_checks()
+    cg.start_up_checks()
 
     run = True
     while run == True:
