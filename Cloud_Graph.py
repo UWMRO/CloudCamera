@@ -141,6 +141,9 @@ class CloudGraph(object):
 
 		mean = float('%.2f' % (mean))
 		std = float('%.2f' % (std))
+		
+		print mean
+		print std
 
 		return masked1, median, mean, std
 
