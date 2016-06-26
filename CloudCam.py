@@ -94,7 +94,7 @@ class CloudCam(object):
         		self.filterpos = 0
             else:
         		print "Exposure reached maximum of 60s"
-        	    self.expose = 60.0
+        	        self.expose = 60.0
 	    return
 
     def run_camera(self):
