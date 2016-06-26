@@ -84,10 +84,6 @@ class CloudGraph(object):
 		Run once at start-up
 		Checks for necessary folders and files
 		Creates them if necessary
-
-		Returns:
-			img_list			(list of .fits in images/)
-			self.static_mask	(circular aperture mask loaded into memory)
 		"""
 
 		# Produce any missing folders
@@ -117,22 +113,7 @@ class CloudGraph(object):
 		self.ne_mask = np.load("masks/7_wedge_mask.npy")
 		self.n_mask = np.load("masks/8_wedge_mask.npy")
 
-		# Produce a txt file with a list of .fits images in images/
-		listdirect = os.path.join(os.getcwd(),'images/')
-		imagelist = listdirect+'image.txt'
-		print "Creating a list of fits files in images/"
-		fitslist = []
-		for fits in os.listdir(listdirect):
-			if fits.endswith(".fits"):
-				fitslist.append(fits)
-		if len(fitslist) == 0:
-			fitslist = [0, 1]
-		f = open(imagelist, "w")
-		f.write("\n".join(map(lambda x: str(x), fitslist)))
-		f.close()
-		img_list = np.genfromtxt(imagelist, usecols = [0], unpack = True, dtype = 'str')
-
-		return img_list
+		return
 
 	def dynamic_mask(self, image, maskname):
 		"""
@@ -414,7 +395,24 @@ if __name__=="__main__":
 
 
 	cg = CloudGraph()
-	img_list = cg.start_up_checks()
+	cg.start_up_checks()
+	
+	# Produce a txt file with a list of .fits images in images/
+	listdirect = os.path.join(os.getcwd(),'images/')
+	imagelist = listdirect+'image.txt'
+	print "Creating a list of fits files in images/"
+	fitslist = []
+	for fits in os.listdir(listdirect):
+		if fits.endswith(".fits"):
+			fitslist.append(fits)
+	if len(fitslist) == 0:
+		print "No FITS images found in images/"
+		print "Ending Cloud_Graph.py"
+		sys.exit()
+	f = open(imagelist, "w")
+	f.write("\n".join(map(lambda x: str(x), fitslist)))
+	f.close()
+	img_list = np.genfromtxt(imagelist, usecols = [0], unpack = True, dtype = 'str')
 
 	for i in img_list:
 		name = i.replace(".fits","")
