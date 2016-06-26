@@ -78,7 +78,7 @@ class CloudCam(object):
         		time.sleep(5)
         		c.closePort()
         		self.filterpos = 1
-        	else:
+            else:
         		print "Exposure reached minimum of 0.02s"
         		self.expose = 0.02
 
@@ -92,7 +92,7 @@ class CloudCam(object):
         		time.sleep(5)
         		c.closePort()
         		self.filterpos = 0
-        	else:
+            else:
         		print "Exposure reached maximum of 60s"
         	    self.expose = 60.0
 	    return
