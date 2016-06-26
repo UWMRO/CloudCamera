@@ -52,7 +52,6 @@ import itertools
 import sys
 import subprocess
 import shutil
-import warnings
 from Cloud_Mask import CloudMask
 
 
@@ -126,6 +125,8 @@ class CloudGraph(object):
 		for fits in os.listdir(listdirect):
 			if fits.endswith(".fits"):
 				fitslist.append(fits)
+		if len(fitslist) == 0:
+			fitslist = [0, 1]
 		f = open(imagelist, "w")
 		f.write("\n".join(map(lambda x: str(x), fitslist)))
 		f.close()
