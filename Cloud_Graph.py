@@ -135,7 +135,7 @@ class CloudGraph(object):
 		masked1 = ma.masked_greater(pre_masked, 254)
 		masked1 = ma.masked_less(masked1, 0)
 
-		median = ma.median(masked1)
+		median = int(ma.median(masked1))
 		mean = ma.mean(masked1)
 		std = ma.std(masked1)
 
