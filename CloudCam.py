@@ -106,7 +106,7 @@ class CloudCam(object):
         print str('%.3f'%(self.expose))
         self.takeImage("cloud", name+".fits", self.expose, self.dir)
         time.sleep(self.expose+2)
-        median = cg.run_analysis("images/"+name+".fits", "analyzed/"+name+"_analyzed.png", name)
+        median = cg.run_analysis("images/"+name+".fits", "analyzed/"+name+"_analyzed.png", name, self.expose)
         self.check_exposure(median)
         return
 
