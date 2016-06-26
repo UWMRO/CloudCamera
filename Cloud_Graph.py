@@ -142,9 +142,6 @@ class CloudGraph(object):
 		mean = float('%.2f' % (mean))
 		std = float('%.2f' % (std))
 		
-		print mean
-		print std
-
 		return masked1, median, mean, std
 
 	def directional_statistics(self, image):
@@ -257,7 +254,7 @@ class CloudGraph(object):
 		ax0 = plt.subplot(gs[0])
 		ax0.axis('off')
 
-		img = img.rotate(90).resize((int(img.size[1]),int(img.size[0])), Image.ANTIALIAS)
+		img = img.rotate(90).resize((int(img.size[0]),int(img.size[1])), Image.ANTIALIAS)
 
 		# Insert statistical information into the image
 		ax0.text(0, 1240, name[0:4]+'-'+name[4:6]+'-'+name[6:8]+'   '+name[9:11]+':'+name[11:13]+':'+name[13:15], size = 16, color="white", horizontalalignment='left')
