@@ -257,17 +257,17 @@ class CloudGraph(object):
 		img = img.rotate(90).resize((int(img.size[0]),int(img.size[1])), Image.ANTIALIAS)
 
 		# Insert statistical information into the image
-		ax0.text(0, 1240, name[0:4]+'-'+name[4:6]+'-'+name[6:8]+'   '+name[9:11]+':'+name[11:13]+':'+name[13:15], size = 16, color="white", horizontalalignment='left')
-		ax0.text(0, 1280, 'Exposure = '+str(timetest)+' [s]', size = 16, color="white", horizontalalignment='left', )
-		ax0.text(1100, 1200 , 'Median = %.1f' % (median), size = 16, color="white", horizontalalignment='right')
-		ax0.text(1100, 1240, "Mean = %.2f" % (mean), size = 16, color="white", horizontalalignment='right')
-		ax0.text(1100, 1280, 'Standard Dev = %.2f' % (std), size = 16, color="white", horizontalalignment='right')
+		ax0.text(0, 1140, name[0:4]+'-'+name[4:6]+'-'+name[6:8]+'   '+name[9:11]+':'+name[11:13]+':'+name[13:15], size = 16, color="white", horizontalalignment='left')
+		ax0.text(0, 1180, 'Exposure = '+str(timetest)+' [s]', size = 16, color="white", horizontalalignment='left', )
+		ax0.text(1100, 1100 , 'Median = %.1f' % (median), size = 16, color="white", horizontalalignment='right')
+		ax0.text(1100, 1140, "Mean = %.2f" % (mean), size = 16, color="white", horizontalalignment='right')
+		ax0.text(1100, 1180, 'Standard Dev = %.2f' % (std), size = 16, color="white", horizontalalignment='right')
 		ax0.imshow(img, cmap="gray")
 
 		#Plot the histogram
 		ax1 = plt.subplot(gs[1])
 		ax1.bar(bins, (values*100.0), alpha=1.0)
-		ax1.set_xlim([int(median-3*std),int(median+3*std)])
+		ax1.set_xlim(0,255)
 		ax1.set_xlabel('Pixel Value', size=16)
 		ax1.xaxis.label.set_color('white')
 		plt.locator_params(axis='y',nbins=6)
