@@ -65,6 +65,7 @@ class CloudGraph(object):
 		self.cm = CloudMask()
 		self.hdudata = None
 		self.header = None
+		self.scale_img = True
 
 		# Memory locations for masks
 		self.large_mask = None
@@ -233,9 +234,11 @@ class CloudGraph(object):
 
 		#Fill in the masked image for processing
 
-		scaled_img = self.scale_img(masked, median, std)
-		#img_masked, junk1, junk2, junk3 = self.dynamic_mask(masked, self.large_mask)
-		img = Image.fromarray(scaled_img)
+		if self.scale_img = True:
+			scaled_img = self.scale_img(masked, median, std)
+			img = Image.fromarray(scaled_img)
+		else:
+			img = Image.fromarray(masked)
 
 		#Set up plotting environment
 		fig, ax = plt.subplots(2,1)
@@ -257,11 +260,11 @@ class CloudGraph(object):
 		img = img.rotate(90).resize((int(img.size[0]),int(img.size[1])), Image.ANTIALIAS)
 
 		# Insert statistical information into the image
-		ax0.text(0, 1140, name[0:4]+'-'+name[4:6]+'-'+name[6:8]+'   '+name[9:11]+':'+name[11:13]+':'+name[13:15], size = 16, color="white", horizontalalignment='left')
-		ax0.text(0, 1180, 'Exposure = '+str(timetest)+' [s]', size = 16, color="white", horizontalalignment='left', )
-		ax0.text(1100, 1100 , 'Median = %.1f' % (median), size = 16, color="white", horizontalalignment='right')
-		ax0.text(1100, 1140, "Mean = %.2f" % (mean), size = 16, color="white", horizontalalignment='right')
-		ax0.text(1100, 1180, 'Standard Dev = %.2f' % (std), size = 16, color="white", horizontalalignment='right')
+		ax0.text(0, 1040, name[0:4]+'-'+name[4:6]+'-'+name[6:8]+'   '+name[9:11]+':'+name[11:13]+':'+name[13:15], size = 16, color="white", horizontalalignment='left')
+		ax0.text(0, 1080, 'Exposure = '+str(timetest)+' [s]', size = 16, color="white", horizontalalignment='left', )
+		ax0.text(1200, 1000 , 'Median = %.1f' % (median), size = 16, color="white", horizontalalignment='right')
+		ax0.text(1200, 1040, "Mean = %.2f" % (mean), size = 16, color="white", horizontalalignment='right')
+		ax0.text(1200, 1080, 'Standard Dev = %.2f' % (std), size = 16, color="white", horizontalalignment='right')
 		ax0.imshow(img, cmap="gray")
 
 		#Plot the histogram
