@@ -280,9 +280,8 @@ class CloudGraph(object):
 
 		fig.savefig(os.getcwd()+"/gif/gif"+str(self.count)+".png", cmap="grey", transparent=True, facecolor="black", edgecolor='none', clobber=True)
 
-		"""
-		#fig.savefig("/var/www/html/latest.png", cmap="grey", transparent=True, facecolor="black", edgecolor='none', clobber=True)
-		"""
+		fig.savefig("/var/www/html/latest.png", cmap="grey", transparent=True, facecolor="black", edgecolor='none', clobber=True)
+		
 		#produce a gif of the last 10 images when self.count == 10
 		self.count += 1
 		if self.count == 10:
