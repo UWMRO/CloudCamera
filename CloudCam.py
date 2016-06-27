@@ -70,7 +70,7 @@ class CloudCam(object):
 
         # If exposure reaches minimum, move the filter over the lens
         if self.expose < 0.02:
-        """
+            """
     	    if self.filterpos == 0:
         		print "Moving filter into FoV"
         		self.ci.openPort()
@@ -86,7 +86,7 @@ class CloudCam(object):
 
         # if exposure reaches maximum, move the filter out of the way
     	if self.expose > 60.0:
-    	"""
+    	    """
     	    if self.filterpos == 1:
         		print "Moving filter out of FoV"
         		self.ci.openPort()
@@ -96,7 +96,7 @@ class CloudCam(object):
         		self.ci.closePort()
         		self.filterpos = 0
             else:
-        """
+            """
             print "Exposure reached maximum of 60s"
             self.expose = 60.0
 	    return
