@@ -23,8 +23,7 @@ import os
 
 class transfer(object):
 	def __init__(self):
-		self.server = 'ovid.u.washington.edu'
-		self.user = 'jwhueh'
+		self.parm = self.retrieveParm()
 		self.ssh = None
 		self.ftp = None
 
@@ -32,12 +31,12 @@ class transfer(object):
 		self.ssh = paramiko.SSHClient()
 		self.ssh.set_missing_host_key_policy(
     		paramiko.AutoAddPolicy())
-		self.ssh.connect(self.server, username=self.user)
+		self.ssh.connect(self.parm['server'], username=self.parm['user'])
 		self.ftp = self.ssh.open_sftp()
 
 	def uploadFile(self, f_in):
 		#add changdir to public_html
-		self.ftp.put(os.path.join(os.getcwd(), f_in), os.path.join('public_html/', f_in))
+		self.ftp.put(os.path.join(os.getcwd(), f_in), os.path.join(self.parm['server_dir'], f_in))
 		return
 
 	def closeConnection(self):
@@ -45,9 +44,17 @@ class transfer(object):
 		self.ssh.close()
 		return
 
+	def retrieveParm(self, f_loc = None):
+		dict = {}
+		f_in = open(os.path.join(os.getcwd(), 'transfer.init'),'r')
+		for line in f_in:
+			l = line.split()
+			dict[l[0]] = l[1]
+		f_in.close()
+		return dict
+
 if __name__ == "__main__":
 	t = transfer()
 	t.openConnection()
 	t.uploadFile('make')
-	time.sleep(1)
 	t.closeConnection()
