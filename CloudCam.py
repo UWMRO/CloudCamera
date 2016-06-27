@@ -39,14 +39,14 @@ class CloudCam(object):
         self.min = 40.0
         self.max = 100.0
         self.step = 0.40
-        self.expose = 10.0
+        self.expose = 1.0
         self.dir = os.path.join(os.getcwd(),'images')
-        self.gain = 2
-	    self.filterpos = 0
+        self.gain = 1
+	self.filterpos = 0
 
         self.cg = CloudGraph()
-	    self.c = CameraExpose()
-	    self.ci = ClouduinoInterface()
+	self.c = CameraExpose()
+	self.ci = ClouduinoInterface()
 
 
     def check_exposure(self, median):
@@ -70,31 +70,35 @@ class CloudCam(object):
 
         # If exposure reaches minimum, move the filter over the lens
         if self.expose < 0.02:
+            """
     	    if self.filterpos == 0:
         		print "Moving filter into FoV"
-        		c.openPort()
+        		self.ci.openPort()
         		time.sleep(2)
-        		c.setFilterPos(False)
+        		self.ci.setFilterPos(False)
         		time.sleep(5)
-        		c.closePort()
+        		self.ci.closePort()
         		self.filterpos = 1
-        	else:
-        		print "Exposure reached minimum of 0.02s"
-        		self.expose = 0.02
+            else:
+            """
+            print "Exposure reached minimum of 0.02s"
+            self.expose = 0.02
 
         # if exposure reaches maximum, move the filter out of the way
     	if self.expose > 60.0:
+    	    """
     	    if self.filterpos == 1:
         		print "Moving filter out of FoV"
-        		c.openPort()
+        		self.ci.openPort()
         		time.sleep(2)
-        		c.setFilterPos(False)
+        		self.ci.setFilterPos(False)
         		time.sleep(5)
-        		c.closePort()
+        		self.ci.closePort()
         		self.filterpos = 0
-        	else:
-        		print "Exposure reached maximum of 60s"
-        	    self.expose = 60.0
+            else:
+            """
+            print "Exposure reached maximum of 60s"
+            self.expose = 60.0
 	    return
 
     def run_camera(self):
@@ -106,7 +110,7 @@ class CloudCam(object):
         print str('%.3f'%(self.expose))
         self.takeImage("cloud", name+".fits", self.expose, self.dir)
         time.sleep(self.expose+2)
-        median = cg.run_analysis("images/"+name+".fits", "analyzed/"+name+"_analyzed.png", name)
+        median = cg.run_analysis("images/"+name+".fits", "analyzed/"+name+"_analyzed.png", name, self.expose)
         self.check_exposure(median)
         return
 
@@ -150,7 +154,7 @@ class CloudCam(object):
 if __name__ == "__main__":
     cg = CloudGraph()
     cc = CloudCam()
-    img_list, static_mask = cg.start_up_checks()
+    cg.start_up_checks()
 
     run = True
     while run == True:

@@ -52,7 +52,6 @@ import itertools
 import sys
 import subprocess
 import shutil
-import warnings
 from Cloud_Mask import CloudMask
 
 
@@ -66,6 +65,7 @@ class CloudGraph(object):
 		self.cm = CloudMask()
 		self.hdudata = None
 		self.header = None
+		self.scale_img = True
 
 		# Memory locations for masks
 		self.large_mask = None
@@ -85,10 +85,6 @@ class CloudGraph(object):
 		Run once at start-up
 		Checks for necessary folders and files
 		Creates them if necessary
-
-		Returns:
-			img_list			(list of .fits in images/)
-			self.static_mask	(circular aperture mask loaded into memory)
 		"""
 
 		# Produce any missing folders
@@ -118,20 +114,7 @@ class CloudGraph(object):
 		self.ne_mask = np.load("masks/7_wedge_mask.npy")
 		self.n_mask = np.load("masks/8_wedge_mask.npy")
 
-		# Produce a txt file with a list of .fits images in images/
-		listdirect = os.path.join(os.getcwd(),'images/')
-		imagelist = listdirect+'image.txt'
-		print "Creating a list of fits files in images/"
-		fitslist = []
-		for fits in os.listdir(listdirect):
-			if fits.endswith(".fits"):
-				fitslist.append(fits)
-		f = open(imagelist, "w")
-		f.write("\n".join(map(lambda x: str(x), fitslist)))
-		f.close()
-		img_list = np.genfromtxt(imagelist, usecols = [0], unpack = True, dtype = 'str')
-
-		return img_list
+		return
 
 	def dynamic_mask(self, image, maskname):
 		"""
@@ -153,13 +136,13 @@ class CloudGraph(object):
 		masked1 = ma.masked_greater(pre_masked, 254)
 		masked1 = ma.masked_less(masked1, 0)
 
-		median = ma.median(masked1)
+		median = int(ma.median(masked1))
 		mean = ma.mean(masked1)
 		std = ma.std(masked1)
 
 		mean = float('%.2f' % (mean))
 		std = float('%.2f' % (std))
-
+		
 		return masked1, median, mean, std
 
 	def directional_statistics(self, image):
@@ -251,9 +234,11 @@ class CloudGraph(object):
 
 		#Fill in the masked image for processing
 
-		scaled_img = self.scale_img(masked, median, std)
-		#img_masked, junk1, junk2, junk3 = self.dynamic_mask(masked, self.large_mask)
-		img = Image.fromarray(scaled_img)
+		if self.scale_img = True:
+			scaled_img = self.scale_img(masked, median, std)
+			img = Image.fromarray(scaled_img)
+		else:
+			img = Image.fromarray(masked)
 
 		#Set up plotting environment
 		fig, ax = plt.subplots(2,1)
@@ -272,20 +257,20 @@ class CloudGraph(object):
 		ax0 = plt.subplot(gs[0])
 		ax0.axis('off')
 
-		img = img.rotate(90).resize((int(img.size[1]),int(img.size[0])), Image.ANTIALIAS)
+		img = img.rotate(90).resize((int(img.size[0]),int(img.size[1])), Image.ANTIALIAS)
 
 		# Insert statistical information into the image
-		ax0.text(0, 1240, name[0:4]+'-'+name[4:6]+'-'+name[6:8]+'   '+name[9:11]+':'+name[11:13]+':'+name[13:15], size = 16, color="white", horizontalalignment='left')
-		ax0.text(0, 1280, 'Exposure = '+str(timetest)+' [s]', size = 16, color="white", horizontalalignment='left', )
-		ax0.text(1100, 1200 , 'Median = %.1f' % (median), size = 16, color="white", horizontalalignment='right')
-		ax0.text(1100, 1240, "Mean = %.2f" % (mean), size = 16, color="white", horizontalalignment='right')
-		ax0.text(1100, 1280, 'Standard Dev = %.2f' % (std), size = 16, color="white", horizontalalignment='right')
+		ax0.text(0, 1040, name[0:4]+'-'+name[4:6]+'-'+name[6:8]+'   '+name[9:11]+':'+name[11:13]+':'+name[13:15], size = 16, color="white", horizontalalignment='left')
+		ax0.text(0, 1080, 'Exposure = '+str(timetest)+' [s]', size = 16, color="white", horizontalalignment='left', )
+		ax0.text(1200, 1000 , 'Median = %.1f' % (median), size = 16, color="white", horizontalalignment='right')
+		ax0.text(1200, 1040, "Mean = %.2f" % (mean), size = 16, color="white", horizontalalignment='right')
+		ax0.text(1200, 1080, 'Standard Dev = %.2f' % (std), size = 16, color="white", horizontalalignment='right')
 		ax0.imshow(img, cmap="gray")
 
 		#Plot the histogram
 		ax1 = plt.subplot(gs[1])
 		ax1.bar(bins, (values*100.0), alpha=1.0)
-		ax1.set_xlim([int(median-3*std),int(median+3*std)])
+		ax1.set_xlim(0,255)
 		ax1.set_xlabel('Pixel Value', size=16)
 		ax1.xaxis.label.set_color('white')
 		plt.locator_params(axis='y',nbins=6)
@@ -298,9 +283,8 @@ class CloudGraph(object):
 
 		fig.savefig(os.getcwd()+"/gif/gif"+str(self.count)+".png", cmap="grey", transparent=True, facecolor="black", edgecolor='none', clobber=True)
 
-		"""
-		#fig.savefig("/var/www/html/latest.png", cmap="grey", transparent=True, facecolor="black", edgecolor='none', clobber=True)
-		"""
+		fig.savefig("/var/www/html/latest.png", cmap="grey", transparent=True, facecolor="black", edgecolor='none', clobber=True)
+		
 		#produce a gif of the last 10 images when self.count == 10
 		self.count += 1
 		if self.count == 10:
@@ -413,7 +397,24 @@ if __name__=="__main__":
 
 
 	cg = CloudGraph()
-	img_list = cg.start_up_checks()
+	cg.start_up_checks()
+	
+	# Produce a txt file with a list of .fits images in images/
+	listdirect = os.path.join(os.getcwd(),'images/')
+	imagelist = listdirect+'image.txt'
+	print "Creating a list of fits files in images/"
+	fitslist = []
+	for fits in os.listdir(listdirect):
+		if fits.endswith(".fits"):
+			fitslist.append(fits)
+	if len(fitslist) == 0:
+		print "No FITS images found in images/"
+		print "Ending Cloud_Graph.py"
+		sys.exit()
+	f = open(imagelist, "w")
+	f.write("\n".join(map(lambda x: str(x), fitslist)))
+	f.close()
+	img_list = np.genfromtxt(imagelist, usecols = [0], unpack = True, dtype = 'str')
 
 	for i in img_list:
 		name = i.replace(".fits","")
