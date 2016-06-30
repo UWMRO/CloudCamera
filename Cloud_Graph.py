@@ -35,7 +35,7 @@ __status__ = "Developement"
 
 import numpy as np
 import numpy.ma as ma
-from astropy.io import fits
+from astropy.io import fits as Fits
 from scipy.misc import bytescale as Scale
 import matplotlib
 matplotlib.use('TkAgg')
@@ -61,11 +61,12 @@ class CloudGraph(object):
 		self.dir = os.path.join(os.getcwd(),'logs')
 		self.logType = 'cloud' # Parameter used in  Logger class to create logfile
 		self.imglist = []
+		self.dir_stats = {}
 		self.count = 0
 		self.cm = CloudMask()
 		self.hdudata = None
 		self.header = None
-		self.scale_img = True
+		self.scaleimg = True
 
 		# Memory locations for masks
 		self.large_mask = None
@@ -116,6 +117,61 @@ class CloudGraph(object):
 
 		return
 
+	def run_analysis(self, img_in, img_out, name, expose):
+		"""
+		This is where the code is actually run, so the total analysis
+		package can be called from outside this file.
+
+		Input: name of image in, name of image out, and chopped file name
+		input:
+			img_in			(name of input .fits image)
+			img_out			(name of output png image)
+			name 			(name file for timestamp)
+		"""
+		img = self.fits_to_list(img_in)
+		print "Analyzing "+str(img_in)
+
+		# Use small mask to calculate image statistics
+		masked, median, mean, std = self.dynamic_mask(img, self.small_mask)
+		print "Median = "+str(median)
+		print "Mean = "+str(mean)
+		print "Standard Dev = "+str(std)
+
+		# Calculate directional statistics
+		self.directional_statistics(masked)
+
+		# Calculate histogram for small maksed image
+		values, bins = self.pixel_value_list(masked)
+		fixed_vals = np.append(values, 0)
+
+		# Use large mask to produce image
+		masked_img, junk1, junk2, junk3 = self.dynamic_mask(img, self.large_mask)
+
+		# Produce output png with histogram info
+		self.plot_histogram(fixed_vals, bins, img_out, masked_img, median, mean, std, name)
+
+		# Add image data to the FITS header, compress the image
+		self.add_headers(expose, median, std, name, img_in)
+
+		# Log the activity
+		self.l.logStr('Image\t%s,%s,%s,%s' % (str(img_out), str(median), str(mean), str(std)), self.logType)
+
+		return median
+
+	def fits_to_list(self, file_name):
+		"""
+		Try to open the fits file.
+		If the file doesn't exist, say so and return.
+		Otherwise, select just the image data as a numpy array
+		and close the fits file.
+
+		Input: File name
+		Output: Numpy array of image data
+		"""
+		#fits.open(file_name, mode='w')
+		self.hdudata, self.header = Fits.getdata(file_name, header=True)
+		return np.asarray(self.hdudata)
+
 	def dynamic_mask(self, image, maskname):
 		"""
 		Creates a numpy mask on the image, filtering out any
@@ -142,7 +198,7 @@ class CloudGraph(object):
 
 		mean = float('%.2f' % (mean))
 		std = float('%.2f' % (std))
-		
+
 		return masked1, median, mean, std
 
 	def directional_statistics(self, image):
@@ -158,6 +214,7 @@ class CloudGraph(object):
 			print "STD = "+str(tmp_std)
 			self.header[str(d)+"_MED"] = tmp_median
 			self.header[str(d)+"_STD"] = tmp_std
+			self.dir_stats[d] = {'Median':tmp_median, 'Mean':tmp_mean, 'STD':tmp_std}
 		return
 
 	def pixel_value_list(self, image):
@@ -194,17 +251,15 @@ class CloudGraph(object):
 			result		(scaled image)
 		"""
 
-		masked_img = img.filled(fill_value = 0)
-
-		bytehigh = int((median + std))
+		bytehigh = int(median + (2*std))
 		if bytehigh > 255:
 			bytescale = 255
 
-		#bytelow = int((median - std))
-		#if bytelow < 0:
-		bytelow = 0
+		bytelow = int(median - (2*std))
+		if bytelow < 0:
+			bytelow = 0
 
-		result = Scale(masked_img.astype(float), cmax = bytehigh, cmin = bytelow) #, high = bytehigh, low = bytelow)
+		result = Scale(img.astype(float), cmax = bytehigh, cmin = bytelow) #, high = bytehigh, low = bytelow)
 		return result
 
 	def plot_histogram(self, values, bins, img_out, masked, median, mean, std, name):
@@ -232,59 +287,91 @@ class CloudGraph(object):
 
 		plt.clf()
 
+		masked_img = masked.filled(fill_value = 0)
 		#Fill in the masked image for processing
-
-		if self.scale_img = True:
-			scaled_img = self.scale_img(masked, median, std)
+		if self.scaleimg == True:
+			scaled_img = self.scale_img(masked_img, median, std)
 			img = Image.fromarray(scaled_img)
 		else:
-			img = Image.fromarray(masked)
+			img = Image.fromarray(masked_img)
 
 		#Set up plotting environment
-		fig, ax = plt.subplots(2,1)
-		fig.set_size_inches(8,11)       # width, height
+		fig, ax = plt.subplots(2,2)
+		fig.set_size_inches(8,8)       # width, height
 		fig.tight_layout()
-		gs = gridspec.GridSpec(2,1,height_ratios=[4,1], wspace=0.0, hspace=0.0)
+		gs = gridspec.GridSpec(8,8)		# height, width
 
 		#Find timestamp, change this to use header info instead
 		timestamp = name.split('_')
 		try:
-			timetest = timestamp[1]
+			exp = timestamp[1]
 		except:
-			timetest = 'NA'
+			exp = 'NA'
 
 		#Plot the masked image, allow for arbitrary rotation
-		ax0 = plt.subplot(gs[0])
-		ax0.axis('off')
+		ax[0,0] = plt.subplot(gs[:7,:4])
+		ax[0,0].axis('off')
 
-		img = img.rotate(90).resize((int(img.size[0]),int(img.size[1])), Image.ANTIALIAS)
+		img = img.rotate(90).resize((int(img.size[1]),int(img.size[0])), Image.ANTIALIAS)
 
 		# Insert statistical information into the image
-		ax0.text(0, 1040, name[0:4]+'-'+name[4:6]+'-'+name[6:8]+'   '+name[9:11]+':'+name[11:13]+':'+name[13:15], size = 16, color="white", horizontalalignment='left')
-		ax0.text(0, 1080, 'Exposure = '+str(timetest)+' [s]', size = 16, color="white", horizontalalignment='left', )
-		ax0.text(1200, 1000 , 'Median = %.1f' % (median), size = 16, color="white", horizontalalignment='right')
-		ax0.text(1200, 1040, "Mean = %.2f" % (mean), size = 16, color="white", horizontalalignment='right')
-		ax0.text(1200, 1080, 'Standard Dev = %.2f' % (std), size = 16, color="white", horizontalalignment='right')
-		ax0.imshow(img, cmap="gray")
+		ax[0,0].text(0, 1240, name[0:4]+'-'+name[4:6]+'-'+name[6:8]+'   '+name[9:11]+':'+name[11:13]+':'+name[13:15], size = 12, color="white", horizontalalignment='left')
+		ax[0,0].text(0, 1280, 'Exposure = '+str(exp)+' [s]', size = 12, color="white", horizontalalignment='left', )
+		ax[0,0].text(1200, 1200 , 'Median = %.1f' % (median), size = 12, color="white", horizontalalignment='right')
+		ax[0,0].text(1200, 1240, "Mean = %.2f" % (mean), size = 12, color="white", horizontalalignment='right')
+		ax[0,0].text(1200, 1280, 'Standard Dev = %.2f' % (std), size = 12, color="white", horizontalalignment='right')
+		ax[0,0].imshow(img, cmap="gray")
 
 		#Plot the histogram
-		ax1 = plt.subplot(gs[1])
-		ax1.bar(bins, (values*100.0), alpha=1.0)
-		ax1.set_xlim(0,255)
-		ax1.set_xlabel('Pixel Value', size=16)
-		ax1.xaxis.label.set_color('white')
+		ax[1,0] = plt.subplot(gs[7:,:5])
+		ax[1,0].bar(bins, (values*100.0), alpha=1.0)
+		ax[1,0].set_xlim(0,255)
+		ax[1,0].set_xlabel('Pixel Value', size=16)
+		ax[1,0].xaxis.label.set_color('white')
 		plt.locator_params(axis='y',nbins=6)
-		ax1.tick_params(axis='x', colors='white', labelsize=12)
+		ax[1,0].tick_params(axis='x', colors='white', labelsize=12)
+
+		#Plot directional Median values
+		ax[0,1] = plt.subplot(gs[1:4,5:])
+		sizes = [1,1,1,1,1,1,1,1]
+		med_data = []
+		for key in self.dir_stats:
+			tmp_med = self.dir_stats[key]['Median']
+			#normalize to max pixel value
+			norm_tmp_med = tmp_med / 255.0
+			med_data.append(norm_tmp_med)
+		cmap = plt.cm.gray
+		colors = cmap(med_data)
+		ax[0,1].pie(sizes, colors=colors)
+		ax[0,1].suptitle('Median')
+
+		#Plot directional Median values
+		ax[1,1] = plt.subplot(gs[5:,5:])
+		sizes = [1,1,1,1,1,1,1,1]
+		std_data = []
+		for key in self.dir_stats:
+			tmp_std = self.dir_stats[key]['STD']
+			#normalize to 100 std
+			if tmp_std <= 50:
+				tmp_std = tmp_std / 50
+			else:
+				tmp_std = 1.0
+			std_data.append(tmp_std)
+		cmap = plt.cm.gray
+		colors = cmap(std_data)
+		ax[1,1].pie(sizes, colors=colors)
+		ax[1,1].suptitle('STD')
+
 		plt.draw()
 
 		#Save the figure as a png
-		gs.tight_layout(fig, h_pad=None)
+		#gs0.tight_layout(fig, h_pad=None)
 		fig.savefig(img_out, cmap="grey", transparent=True, facecolor="black", edgecolor='none')
 
 		fig.savefig(os.getcwd()+"/gif/gif"+str(self.count)+".png", cmap="grey", transparent=True, facecolor="black", edgecolor='none', clobber=True)
 
 		fig.savefig("/var/www/html/latest.png", cmap="grey", transparent=True, facecolor="black", edgecolor='none', clobber=True)
-		
+
 		#produce a gif of the last 10 images when self.count == 10
 		self.count += 1
 		if self.count == 10:
@@ -298,19 +385,6 @@ class CloudGraph(object):
 			os.makedirs(os.getcwd()+"/gif")
 		plt.close("all")
 		return
-
-	def fits_to_list(self, file_name):
-		"""
-		Try to open the fits file.
-		If the file doesn't exist, say so and return.
-		Otherwise, select just the image data as a numpy array
-		and close the fits file.
-
-		Input: File name
-		Output: Numpy array of image data
-		"""
-		self.hdudata, self.header = fits.getdata(file_name, header=True)
-		return np.asarray(self.hdudata)
 
 	def add_headers(self, expose, median, std, name, img_in):
 		"""
@@ -336,51 +410,10 @@ class CloudGraph(object):
 
 
 		# Close and compress the FITS file, saving the header
-		compressed = fits.CompImageHDU(self.hdudata, self.header, name=name)
+		compressed = Fits.CompImageHDU(self.hdudata, self.header, name=name)
 		compressed.writeto(img_in, clobber=True)
 
 		return
-
-	def run_analysis(self, img_in, img_out, name, expose):
-		"""
-		This is where the code is actually run, so the total analysis
-		package can be called from outside this file.
-
-		Input: name of image in, name of image out, and chopped file name
-		input:
-			img_in			(name of input .fits image)
-			img_out			(name of output png image)
-			name 			(name file for timestamp)
-		"""
-		img = self.fits_to_list(str(img_in))
-		print "Analyzing "+str(img_in)
-
-		# Use small mask to calculate image statistics
-		masked, median, mean, std = self.dynamic_mask(img, self.small_mask)
-		print "Median = "+str(median)
-		print "Mean = "+str(mean)
-		print "Standard Dev = "+str(std)
-
-		# Calculate directional statistics
-		self.directional_statistics(masked)
-
-		# Calculate histogram for small maksed image
-		values, bins = self.pixel_value_list(masked)
-		fixed_vals = np.append(values, 0)
-
-		# Use large mask to produce image
-		masked_img, junk1, junk2, junk3 = self.dynamic_mask(img, self.large_mask)
-
-		# Produce output png with histogram info
-		self.plot_histogram(fixed_vals, bins, img_out, masked_img, median, mean, std, name)
-
-		# Add image data to the FITS header, compress the image
-		self.add_headers(expose, median, std, name, img_in)
-
-		# Log the activity
-		self.l.logStr('Image\t%s,%s,%s,%s' % (str(img_out), str(median), str(mean), str(std)), self.logType)
-
-		return median
 
 
 if __name__=="__main__":
@@ -398,7 +431,7 @@ if __name__=="__main__":
 
 	cg = CloudGraph()
 	cg.start_up_checks()
-	
+
 	# Produce a txt file with a list of .fits images in images/
 	listdirect = os.path.join(os.getcwd(),'images/')
 	imagelist = listdirect+'image.txt'
