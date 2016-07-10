@@ -66,7 +66,7 @@ class CloudGraph(object):
 		self.cm = CloudMask()
 		self.hdudata = None
 		self.header = None
-		self.scaleimg = True
+		self.scaleimg = True 
 
 		# Memory locations for masks
 		self.large_mask = None
@@ -312,7 +312,7 @@ class CloudGraph(object):
 		ax[0,0] = plt.subplot(gs[:7,:4])
 		ax[0,0].axis('off')
 
-		img = img.rotate(90).resize((int(img.size[1]),int(img.size[0])), Image.ANTIALIAS)
+		img = img.rotate(90).resize((1280,1024), Image.ANTIALIAS)
 
 		# Insert statistical information into the image
 		ax[0,0].text(0, 1240, name[0:4]+'-'+name[4:6]+'-'+name[6:8]+'   '+name[9:11]+':'+name[11:13]+':'+name[13:15], size = 12, color="white", horizontalalignment='left')
@@ -343,7 +343,7 @@ class CloudGraph(object):
 		cmap = plt.cm.gray
 		colors = cmap(med_data)
 		ax[0,1].pie(sizes, colors=colors)
-		ax[0,1].suptitle('Median')
+		#ax[0,1].suptitle('Median')
 
 		#Plot directional Median values
 		ax[1,1] = plt.subplot(gs[5:,5:])
@@ -360,7 +360,7 @@ class CloudGraph(object):
 		cmap = plt.cm.gray
 		colors = cmap(std_data)
 		ax[1,1].pie(sizes, colors=colors)
-		ax[1,1].suptitle('STD')
+		#ax[1,1].suptitle('STD')
 
 		plt.draw()
 
