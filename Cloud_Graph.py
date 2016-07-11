@@ -36,7 +36,7 @@ __status__ = "Developement"
 import numpy as np
 import numpy.ma as ma
 from astropy.io import fits as Fits
-import scipy
+import scipy.ndimage
 from scipy.misc import bytescale as Scale
 import matplotlib
 matplotlib.use('TkAgg')
@@ -345,7 +345,7 @@ class CloudGraph(object):
 		cmap = plt.cm.gray
 		colors = cmap(med_data)
 		ax[0,1].pie(sizes, colors=colors)
-		ax[0,1].suptitle('Median', color="white")
+		ax[0,1].subtitle('Median', color="white")
 
 		#Plot directional Median values
 		ax[1,1] = plt.subplot(gs[5:,5:])
@@ -362,7 +362,7 @@ class CloudGraph(object):
 		cmap = plt.cm.gray
 		colors = cmap(std_data)
 		ax[1,1].pie(sizes, colors=colors)
-		ax[1,1].suptitle('STD', color="white")
+		ax[1,1].subtitle('STD', color="white")
 
 		plt.draw()
 
