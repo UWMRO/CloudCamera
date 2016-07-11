@@ -288,14 +288,17 @@ class CloudGraph(object):
 
 		plt.clf()
 
-		masked_img = masked.filled(fill_value = 0)
-		#fixed_img = scipy.ndimage.morphology.binary_erosion(masked_img)
 		#Fill in the masked image for processing
+		masked_img = masked.filled(fill_value = 0)
+
+		#Use binary erosion to smooth the image
+		fixed_img = scipy.ndimage.morphology.binary_erosion(masked_img)
+
 		if self.scaleimg == True:
-			scaled_img = self.scale_img(masked_img, median, std)
+			scaled_img = self.scale_img(fixed_img, median, std)
 			img = Image.fromarray(scaled_img)
 		else:
-			img = Image.fromarray(masked_img)
+			img = Image.fromarray(fixed_img)
 
 		#Set up plotting environment
 		fig, ax = plt.subplots(2,2)
