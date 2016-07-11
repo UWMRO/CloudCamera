@@ -36,6 +36,7 @@ __status__ = "Developement"
 import numpy as np
 import numpy.ma as ma
 from astropy.io import fits as Fits
+import scipy
 from scipy.misc import bytescale as Scale
 import matplotlib
 matplotlib.use('TkAgg')
