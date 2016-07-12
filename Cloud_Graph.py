@@ -303,9 +303,9 @@ class CloudGraph(object):
 
 		#Set up plotting environment
 		fig, ax = plt.subplots(2,2)
-		fig.set_size_inches(8,8)       # width, height
+		fig.set_size_inches(10,10)       # width, height
 		fig.tight_layout()
-		gs = gridspec.GridSpec(8,8)		# height, width
+		gs = gridspec.GridSpec(10,10)		# height, width
 
 		#Find timestamp, change this to use header info instead
 		timestamp = name.split('_')
@@ -315,7 +315,7 @@ class CloudGraph(object):
 			exp = 'NA'
 
 		#Plot the masked image, allow for arbitrary rotation
-		ax[0,0] = plt.subplot(gs[:7,:4])
+		ax[0,0] = plt.subplot(gs[:7,:7])
 		ax[0,0].axis('off')
 
 		img = img.rotate(90).resize((1280,1024), Image.ANTIALIAS)
@@ -336,7 +336,7 @@ class CloudGraph(object):
 		ax[0,0].imshow(img, cmap="gray")
 
 		#Plot the histogram
-		ax[1,0] = plt.subplot(gs[7:,:5])
+		ax[1,0] = plt.subplot(gs[8:9,:10])
 		ax[1,0].bar(bins, (values*100.0), alpha=1.0)
 		ax[1,0].set_xlim(0,255)
 		ax[1,0].set_xlabel('Pixel Value', size=16)
@@ -345,7 +345,7 @@ class CloudGraph(object):
 		ax[1,0].tick_params(axis='x', colors='white', labelsize=12)
 
 		#Plot directional Median values
-		ax[0,1] = plt.subplot(gs[1:4,5:])
+		ax[0,1] = plt.subplot(gs[1:4,7:])
 		sizes = [1,1,1,1,1,1,1,1]
 		med_data = []
 		for key in self.dir_stats:
@@ -359,7 +359,7 @@ class CloudGraph(object):
 		#ax[0,1].subtitle('Median', color="white")
 
 		#Plot directional Median values
-		ax[1,1] = plt.subplot(gs[5:,5:])
+		ax[1,1] = plt.subplot(gs[4:7,7:])
 		sizes = [1,1,1,1,1,1,1,1]
 		std_data = []
 		for key in self.dir_stats:
@@ -373,12 +373,12 @@ class CloudGraph(object):
 		cmap = plt.cm.gray
 		colors = cmap(std_data)
 		ax[1,1].pie(sizes, colors=colors)
-		#ax[1,1].subtitle('STD', color="white")
-
+		ax[1,1].text(100, 100, 'STD', size=12, color="white")
+		
 		plt.draw()
 
 		#Save the figure as a png
-		#gs0.tight_layout(fig, h_pad=None)
+		
 		fig.savefig(img_out, cmap="grey", transparent=True, facecolor="black", edgecolor='none')
 
 		fig.savefig(os.getcwd()+"/gif/gif"+str(self.count)+".png", cmap="grey", transparent=True, facecolor="black", edgecolor='none', clobber=True)

@@ -20,23 +20,26 @@ __status__ = "Developement"
 import paramiko
 import time
 import os
+import keyring
 
 class transfer(object):
 	def __init__(self):
 		self.parm = self.retrieveParm()
-		self.ssh = galileo.apo.nmsu.edu
+		self.ssh = "galileo.apo.nmsu.edu"
 		self.ftp = None
 
 	def openConnection(self, server = None, user = None):
 		self.ssh = paramiko.SSHClient()
-		self.ssh.set_missing_host_key_policy(
-    		paramiko.AutoAddPolicy())
-		self.ssh.connect(self.parm['server'], username=self.parm['user'])
+		keyfile = os.path.expanduser('~/.ssh/id_rsa')
+		password = keyring.get_password('SSH', keyfile)
+		key = paramiko.RSAKey.from_private_key_file(keyfile, password='mro2015')
+		self.ssh.set_missing_host_key_policy(paramiko.AutoAddPolicy())
+		self.ssh.connect(self.parm['server'], username=self.parm['user'], pkey = key)
 		self.ftp = self.ssh.open_sftp()
 
 	def uploadFile(self, f_in):
 		#add changdir to public_html
-		self.ftp.put(os.path.join(os.getcwd(), f_in), os.path.join(self.parm['server_dir'], f_in))
+		self.ftp.put(f_in,os.path.join(self.parm['server_dir'], f_in))
 		return
 
 	def closeConnection(self):
@@ -56,5 +59,5 @@ class transfer(object):
 if __name__ == "__main__":
 	t = transfer()
 	t.openConnection()
-	t.uploadFile('make')
+	t.uploadFile('/var/www/html/latest.png')
 	t.closeConnection()

@@ -15,8 +15,8 @@ import numpy as np
 class CloudMask(object):
     def __init__(self):
         self.radius = 500
-        self.xcenter = 562
-        self.ycenter = 590
+        self.xcenter = 512
+        self.ycenter = 640
 
 
     def make_aperture_mask(self, radius):
