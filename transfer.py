@@ -24,7 +24,7 @@ import os
 class transfer(object):
 	def __init__(self):
 		self.parm = self.retrieveParm()
-		self.ssh = None
+		self.ssh = galileo.apo.nmsu.edu
 		self.ftp = None
 
 	def openConnection(self, server = None, user = None):
