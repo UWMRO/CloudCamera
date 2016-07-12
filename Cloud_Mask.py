@@ -15,6 +15,8 @@ import numpy as np
 class CloudMask(object):
     def __init__(self):
         self.radius = 500
+        self.xcenter = 562
+        self.ycenter = 590
 
 
     def make_aperture_mask(self, radius):
@@ -32,10 +34,10 @@ class CloudMask(object):
 
         print "Producing aperture mask with radius = "+str(radius)
         for x in range(1024):
-            shift_x = x-(1024/2)
+            shift_x = x-(self.xcenter)
             temp_row = []
             for y in range(1280):
-                shift_y = y-(1280/2)
+                shift_y = y-(self.ycenter)
                 if np.sqrt((shift_x)**2 + (shift_y)**2) > radius:
                     temp_row.append(1)
                 else:
@@ -71,10 +73,10 @@ class CloudMask(object):
             result = []
             # Move coordinate system to center of image
             for x in range(1024):
-                shift_x = x-(1024/2)
+                shift_x = x-(self.xcenter)
                 temp_row = []
                 for y in range(1280):
-                    shift_y = y-(1280/2)
+                    shift_y = y-(self.ycenter)
 
                     theta = np.arctan2(shift_y,shift_x)
                     rad = np.sqrt((shift_x)**2 + (shift_y)**2)
