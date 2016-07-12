@@ -104,8 +104,8 @@ class CloudMask(object):
                             temp_row.append(1)
                 result.append(temp_row)
 
-            for i in result[502:522]:
-                print i[630:650]
+            for i in result[self.xcenter-10:self.xcenter+10]:
+                print i[self.ycenter-10:self.ycenter+10]
 
             print "Saving "+str(int(angle * 4) + 4)+" mask"
             np.save("masks/"+str(int(angle * 4) + 4)+"_wedge_mask", np.asarray(result))
