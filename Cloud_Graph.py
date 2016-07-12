@@ -39,7 +39,7 @@ from astropy.io import fits as Fits
 import scipy.ndimage
 from scipy.misc import bytescale as Scale
 import matplotlib
-matplotlib.use('TkAgg')
+matplotlib.use('Agg')
 import matplotlib.pyplot as plt
 import matplotlib.image as mpimg
 from matplotlib.figure import Figure
@@ -91,6 +91,7 @@ class CloudGraph(object):
 		Checks for necessary folders and files
 		Creates them if necessary
 		"""
+
 
 		# Produce any missing folders
 		folder_list = ["gif", "logs", "images", "analyzed", "masks"]
