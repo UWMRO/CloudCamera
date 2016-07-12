@@ -323,7 +323,7 @@ class CloudGraph(object):
 		if self.bin_eros == True:
 			img = scipy.ndimage.morphology.binary_erosion(img)
 
-		scipy.misc.imsave('latestimg.png', img)
+		scipy.misc.imsave('/var/www/html/latestimg.png', img)
 
 		# Insert statistical information into the image
 		ax[0,0].text(0, 1240, name[0:4]+'-'+name[4:6]+'-'+name[6:8]+'   '+name[9:11]+':'+name[11:13]+':'+name[13:15], size = 12, color="white", horizontalalignment='left')
