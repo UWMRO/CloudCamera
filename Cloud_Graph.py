@@ -383,10 +383,12 @@ class CloudGraph(object):
 
 		fig.savefig("/var/www/html/latest.png", cmap="grey", transparent=True, facecolor="black", edgecolor='none', clobber=True)
 
+		"""
 		#send the latest image to galileo
 		self.trans.openConnection()
 		self.trans.uploadFile("/var/www/html/latest.png")
 		self.trans.closeConnection()
+		"""
 
 		#produce a gif of the last 10 images when self.count == 10
 		self.count += 1
@@ -400,9 +402,11 @@ class CloudGraph(object):
 			shutil.rmtree(os.getcwd()+"/gif")
 			os.makedirs(os.getcwd()+"/gif")
 			time.sleep(8)
+			"""
 			self.trans.openConnection()
 			self.trans.uploadFile("/var/www/html/latest.gif")
 			self.trans.closeConnection()
+			"""
 		plt.close("all")
 		return
 
