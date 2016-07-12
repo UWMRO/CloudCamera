@@ -386,12 +386,15 @@ class CloudGraph(object):
 
 		
 		#send the latest image to galileo
+		#try:
 		self.trans.openConnection()
-		f_out = ["/var/www/html/latest.png", "/var/www/html/latestimg.png", "/var/www/html/latest.gif"]
+		f_out = ["/var/www/html/latest.png", "/var/www/html/latestimg.png"]
 		for f in f_out:
 			if os.path.isfile(f):
 				self.trans.uploadFile(f)
 		self.trans.closeConnection()
+		#except:
+		#	print "could not connected to remote server"
 		
 
 		#produce a gif of the last 10 images when self.count == 10
@@ -406,11 +409,10 @@ class CloudGraph(object):
 			shutil.rmtree(os.getcwd()+"/gif")
 			os.makedirs(os.getcwd()+"/gif")
 			time.sleep(8)
-			"""
+			# Send the gif to Galileo
 			self.trans.openConnection()
 			self.trans.uploadFile("/var/www/html/latest.gif")
 			self.trans.closeConnection()
-			"""
 		plt.close("all")
 		return
 
