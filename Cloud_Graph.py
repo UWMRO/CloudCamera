@@ -55,7 +55,7 @@ import subprocess
 import shutil
 from Cloud_Mask import CloudMask
 from transfer import transfer
-
+from shutil import copyfile
 
 class CloudGraph(object):
 	def __init__(self):
@@ -324,7 +324,8 @@ class CloudGraph(object):
 		if self.bin_eros == True:
 			img = scipy.ndimage.morphology.binary_erosion(img)
 
-		scipy.misc.imsave('/var/www/html/latestimg.png', img)
+		scipy.misc.imsave('latestimg.png', img)
+		shutil.copyfile("latestimg.png", "/var/www/html/latestimg.png")
 
 		# Insert statistical information into the image
 		ax[0,0].text(0, 1240, name[0:4]+'-'+name[4:6]+'-'+name[6:8]+'   '+name[9:11]+':'+name[11:13]+':'+name[13:15], size = 12, color="white", horizontalalignment='left')
@@ -382,15 +383,16 @@ class CloudGraph(object):
 
 		fig.savefig(os.getcwd()+"/gif/gif"+str(self.count)+".png", cmap="grey", transparent=True, facecolor="black", edgecolor='none', clobber=True)
 
-		fig.savefig("/var/www/html/latest.png", cmap="grey", transparent=True, facecolor="black", edgecolor='none', clobber=True)
-
+		fig.savefig("latest.png", cmap="grey", transparent=True, facecolor="black", edgecolor='none', clobber=True)
+		shutil.copyfile("latest.png", "/var/www/html/latest.png")
 		
 		#send the latest image to galileo
 		#try:
 		self.trans.openConnection()
-		f_out = ["/var/www/html/latest.png", "/var/www/html/latestimg.png"]
+		f_out = ["latest.png", "latestimg.png"]
 		for f in f_out:
 			if os.path.isfile(f):
+				print 'uploading',str(f)
 				self.trans.uploadFile(f)
 		self.trans.closeConnection()
 		#except:
@@ -401,7 +403,7 @@ class CloudGraph(object):
 		self.count += 1
 		if self.count == 10:
 			print "Producing gif image"
-			command = "sudo convert -delay 40 -loop 0 "+os.getcwd()+"/gif/*.png /var/www/html/latest.gif"
+			command = "convert -delay 40 -loop 0 "+os.getcwd()+"/gif/*.png latest.gif"
 			out = subprocess.Popen(command, stdout = subprocess.PIPE, shell=True)
 			self.count = 0
 			self.imglist = []
@@ -410,8 +412,9 @@ class CloudGraph(object):
 			os.makedirs(os.getcwd()+"/gif")
 			time.sleep(8)
 			# Send the gif to Galileo
+			shutil.copyfile("latest.gif", "/var/www/html/latest.gif")
 			self.trans.openConnection()
-			self.trans.uploadFile("/var/www/html/latest.gif")
+			self.trans.uploadFile("latest.gif")
 			self.trans.closeConnection()
 		plt.close("all")
 		return
