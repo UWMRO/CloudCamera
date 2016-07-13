@@ -49,6 +49,7 @@ import datetime
 from logger import *
 import os
 from PIL import Image
+from PIL import ImageOps
 import itertools
 import sys
 import subprocess
@@ -71,6 +72,7 @@ class CloudGraph(object):
 		self.scaleimg = True
 		self.bin_eros = False
 		self.trans = transfer()
+		self.rotate = 112
 
 		# Memory locations for masks
 		self.large_mask = None
@@ -318,7 +320,9 @@ class CloudGraph(object):
 		ax[0,0] = plt.subplot(gs[:7,:7])
 		ax[0,0].axis('off')
 
-		img = img.rotate(90).resize((1280,1024), Image.ANTIALIAS)
+		img = img.rotate(self.rotate).resize((1280,1024), Image.ANTIALIAS)
+		img = ImageOps.mirror(img)		
+		img = scipy.ndimage.median_filter(img, 3)
 
 		#Use binary erosion to smooth the image
 		if self.bin_eros == True:
@@ -328,11 +332,11 @@ class CloudGraph(object):
 		shutil.copyfile("latestimg.png", "/var/www/html/latestimg.png")
 
 		# Insert statistical information into the image
-		ax[0,0].text(0, 1240, name[0:4]+'-'+name[4:6]+'-'+name[6:8]+'   '+name[9:11]+':'+name[11:13]+':'+name[13:15], size = 12, color="white", horizontalalignment='left')
-		ax[0,0].text(0, 1280, 'Exposure = '+str(exp)+' [s]', size = 12, color="white", horizontalalignment='left', )
-		ax[0,0].text(1200, 1200 , 'Median = %.1f' % (median), size = 12, color="white", horizontalalignment='right')
-		ax[0,0].text(1200, 1240, "Mean = %.2f" % (mean), size = 12, color="white", horizontalalignment='right')
-		ax[0,0].text(1200, 1280, 'Standard Dev = %.2f' % (std), size = 12, color="white", horizontalalignment='right')
+		ax[0,0].text(0, 1240, name[0:4]+'-'+name[4:6]+'-'+name[6:8]+'   '+name[9:11]+':'+name[11:13]+':'+name[13:15], size = 16, color="white", horizontalalignment='left')
+		ax[0,0].text(0, 1300, 'Exposure = '+str(exp)+' [s]', size = 16, color="white", horizontalalignment='left', )
+		ax[0,0].text(1200, 1200 , 'Median = %.1f' % (median), size = 16, color="white", horizontalalignment='right')
+		ax[0,0].text(1200, 1260, "Mean = %.2f" % (mean), size = 16, color="white", horizontalalignment='right')
+		ax[0,0].text(1200, 1320, 'Standard Dev = %.2f' % (std), size = 16, color="white", horizontalalignment='right')
 		ax[0,0].imshow(img, cmap="gray")
 
 		#Plot the histogram
