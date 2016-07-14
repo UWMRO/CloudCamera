@@ -124,7 +124,7 @@ class CloudGraph(object):
 
 		return
 
-	def run_analysis(self, img_in, img_out, name, expose):
+	def run_analysis(self, img_in, img_out, name, expose, gain):
 		"""
 		This is where the code is actually run, so the total analysis
 		package can be called from outside this file.
@@ -155,7 +155,7 @@ class CloudGraph(object):
 		masked_img, junk1, junk2, junk3 = self.dynamic_mask(img, self.large_mask)
 
 		# Produce output png with histogram info
-		self.plot_histogram(fixed_vals, bins, img_out, masked_img, median, mean, std, name)
+		self.plot_histogram(fixed_vals, bins, img_out, masked_img, median, mean, std, name, gain)
 
 		# Add image data to the FITS header, compress the image
 		self.add_headers(expose, median, std, name, img_in)
@@ -269,7 +269,7 @@ class CloudGraph(object):
 		result = Scale(img.astype(float), cmax = bytehigh, cmin = bytelow) #, high = bytehigh, low = bytelow)
 		return result
 
-	def plot_histogram(self, values, bins, img_out, masked, median, mean, std, name):
+	def plot_histogram(self, values, bins, img_out, masked, median, mean, std, name, gain):
 		"""
 		Statistical plotting and output function.
 
@@ -331,9 +331,23 @@ class CloudGraph(object):
 		scipy.misc.imsave('latestimg.png', img)
 		shutil.copyfile("latestimg.png", "/var/www/html/latestimg.png")
 
+  #try:
+                self.trans.openConnection()
+                f_out = ["latestimg.png"]
+                for f in f_out:
+                        if os.path.isfile(f):
+                                print 'uploading',str(f)
+                                self.trans.uploadFile(f)
+                self.trans.closeConnection()
+                #except:
+                #       print "could not connected to remote server"
+                
+
+
 		# Insert statistical information into the image
-		ax[0,0].text(0, 1240, name[0:4]+'-'+name[4:6]+'-'+name[6:8]+'   '+name[9:11]+':'+name[11:13]+':'+name[13:15], size = 16, color="white", horizontalalignment='left')
-		ax[0,0].text(0, 1300, 'Exposure = '+str(exp)+' [s]', size = 16, color="white", horizontalalignment='left', )
+		ax[0,0].text(0, 1200, name[0:4]+'-'+name[4:6]+'-'+name[6:8]+'   '+name[9:11]+':'+name[11:13]+':'+name[13:15], size = 16, color="white", horizontalalignment='left')
+		ax[0,0].text(0, 1260, 'Exposure = '+str(exp)+' [s]', size = 16, color="white", horizontalalignment='left', )
+		ax[0,0].text(0, 1320, 'Gain = '+str(gain), size = 16, color = "white", horizontalalignment = "left")
 		ax[0,0].text(1200, 1200 , 'Median = %.1f' % (median), size = 16, color="white", horizontalalignment='right')
 		ax[0,0].text(1200, 1260, "Mean = %.2f" % (mean), size = 16, color="white", horizontalalignment='right')
 		ax[0,0].text(1200, 1320, 'Standard Dev = %.2f' % (std), size = 16, color="white", horizontalalignment='right')
@@ -393,7 +407,7 @@ class CloudGraph(object):
 		#send the latest image to galileo
 		#try:
 		self.trans.openConnection()
-		f_out = ["latest.png", "latestimg.png"]
+		f_out = ["latest.png"]
 		for f in f_out:
 			if os.path.isfile(f):
 				print 'uploading',str(f)
@@ -418,6 +432,7 @@ class CloudGraph(object):
 			# Send the gif to Galileo
 			shutil.copyfile("latest.gif", "/var/www/html/latest.gif")
 			self.trans.openConnection()
+			print("uploading latest.gif")
 			self.trans.uploadFile("latest.gif")
 			self.trans.closeConnection()
 		plt.close("all")
