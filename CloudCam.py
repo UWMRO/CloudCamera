@@ -23,6 +23,7 @@ from logger import *
 import datetime
 from clouduino_interface import ClouduinoInterface
 import os
+from CloudParams import *
 
 class CloudCam(object):
     def __init__(self):
@@ -37,12 +38,12 @@ class CloudCam(object):
             self.filterpos  (where is the filter arm? 0 = out, 1 = in)
         """
 
-        self.min = 40.0
-        self.max = 100.0
-        self.step = 0.40
-        self.expose = 4.0
+        self.min = min_median
+        self.max = max_median
+        self.step = step_size
+        self.expose = expose
         self.dir = os.path.join(os.getcwd(),'images')
-        self.gain = 1
+        self.gain = gain
 	self.filterpos = 0
 
         self.cg = CloudGraph()

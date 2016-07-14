@@ -57,6 +57,7 @@ import shutil
 from Cloud_Mask import CloudMask
 from transfer import transfer
 from shutil import copyfile
+from CloudParams import *
 
 class CloudGraph(object):
 	def __init__(self):
@@ -69,10 +70,10 @@ class CloudGraph(object):
 		self.cm = CloudMask()
 		self.hdudata = None
 		self.header = None
-		self.scaleimg = True
-		self.bin_eros = False
+		self.scaleimg = scale_img
+		self.bin_eros = binary_erosion
 		self.trans = transfer()
-		self.rotate = 112
+		self.rotate = rotate
 
 		# Memory locations for masks
 		self.large_mask = None
@@ -323,6 +324,7 @@ class CloudGraph(object):
 		img = img.rotate(self.rotate).resize((1280,1024), Image.ANTIALIAS)
 		img = ImageOps.mirror(img)		
 		img = scipy.ndimage.median_filter(img, 3)
+		#img = scipy.ndimage.gaussian_filter(img, sigma=3)
 
 		#Use binary erosion to smooth the image
 		if self.bin_eros == True:

@@ -10,13 +10,13 @@ masks.
 """
 
 import numpy as np
-
+from CloudParams import *
 
 class CloudMask(object):
     def __init__(self):
-        self.radius = 500
-        self.xcenter = 512
-        self.ycenter = 640
+        self.radius = radius
+        self.xcenter = x_center
+        self.ycenter = y_center
 
 
     def make_aperture_mask(self, radius):
