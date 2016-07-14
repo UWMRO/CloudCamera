@@ -58,6 +58,8 @@ from Cloud_Mask import CloudMask
 from transfer import transfer
 from shutil import copyfile
 from CloudParams import *
+from matplotlib.transforms import Affine2D
+import thread
 
 class CloudGraph(object):
 	def __init__(self):
@@ -98,6 +100,7 @@ class CloudGraph(object):
 
 		# Produce any missing folders
 		folder_list = ["gif", "logs", "images", "analyzed", "masks"]
+		shutil.rmtree('gif')
 		for folder in folder_list:
 			if (os.path.isdir(folder)) == False:
 				print "Creating directory "+str(folder)
@@ -347,6 +350,11 @@ class CloudGraph(object):
 
 
 		# Insert statistical information into the image
+
+		ax[0,0].text(600, 0, "N", size=20, color="white")
+		ax[0,0].text(600, 1100, "S", size=20, color="white")
+		ax[0,0].text(0, 550, "W", size=20, color="white")
+		ax[0,0].text(1200, 550, "E", size=20, color="white")
 		ax[0,0].text(0, 1200, name[0:4]+'-'+name[4:6]+'-'+name[6:8]+'   '+name[9:11]+':'+name[11:13]+':'+name[13:15], size = 16, color="white", horizontalalignment='left')
 		ax[0,0].text(0, 1260, 'Exposure = '+str(exp)+' [s]', size = 16, color="white", horizontalalignment='left', )
 		ax[0,0].text(0, 1320, 'Gain = '+str(gain), size = 16, color = "white", horizontalalignment = "left")
@@ -376,6 +384,7 @@ class CloudGraph(object):
 		cmap = plt.cm.gray
 		colors = cmap(med_data)
 		ax[0,1].pie(sizes, colors=colors)
+		ax[0,1].text(400, 0, "Median", size=20, color="white")
 		#ax[0,1].subtitle('Median', color="white")
 
 		#Plot directional Median values
@@ -401,11 +410,14 @@ class CloudGraph(object):
 		
 		fig.savefig(img_out, cmap="grey", transparent=True, facecolor="black", edgecolor='none')
 
-		fig.savefig(os.getcwd()+"/gif/gif"+str(self.count)+".png", cmap="grey", transparent=True, facecolor="black", edgecolor='none', clobber=True)
-
+		fig.savefig(os.getcwd()+"/gif/"+name+".png", cmap="grey", transparent=True, facecolor="black", edgecolor='none', clobber=True)
+		self.imglist.append("gif/"+name+".png")
+		print self.imglist
+		print self.count
 		fig.savefig("latest.png", cmap="grey", transparent=True, facecolor="black", edgecolor='none', clobber=True)
 		shutil.copyfile("latest.png", "/var/www/html/latest.png")
 		
+		plt.close("all")
 		#send the latest image to galileo
 		#try:
 		self.trans.openConnection()
@@ -417,26 +429,30 @@ class CloudGraph(object):
 		self.trans.closeConnection()
 		#except:
 		#	print "could not connected to remote server"
-		
-
-		#produce a gif of the last 10 images when self.count == 10
 		self.count += 1
-		if self.count == 10:
-			print "Producing gif image"
-			command = "convert -delay 40 -loop 0 "+os.getcwd()+"/gif/*.png latest.gif"
-			out = subprocess.Popen(command, stdout = subprocess.PIPE, shell=True)
-			self.count = 0
-			self.imglist = []
-			time.sleep(15)
-			shutil.rmtree(os.getcwd()+"/gif")
-			os.makedirs(os.getcwd()+"/gif")
-			time.sleep(8)
-			# Send the gif to Galileo
-			shutil.copyfile("latest.gif", "/var/www/html/latest.gif")
+		if self.count == 30:
+			thread.start_new_thread(self.make_gif, ())
+		
+	def make_gif(self):
+		#produce a gif of the last 10 images when self.count == 10
+		print "Producing gif image"
+		command = "convert -delay 25 -loop 0 "+os.getcwd()+"/gif/*.png latest.gif"
+		out = subprocess.Popen(command, stdout = subprocess.PIPE, shell=True)
+		time.sleep(75)
+		self.count -= 10
+		for i in range(0, 9):
+			os.remove(str(self.imglist[0]))
+			del self.imglist[0]
+		time.sleep(2)
+		# Send the gif to Galileo
+		shutil.copyfile("latest.gif", "/var/www/html/latest.gif")
+		try:
 			self.trans.openConnection()
 			print("uploading latest.gif")
 			self.trans.uploadFile("latest.gif")
 			self.trans.closeConnection()
+		except:
+			print "Could not upload latest.gif"
 		plt.close("all")
 		return
 
