@@ -22,6 +22,7 @@ from camera import *
 from logger import *
 import datetime
 from clouduino_interface import ClouduinoInterface
+import os
 
 class CloudCam(object):
     def __init__(self):
@@ -39,7 +40,7 @@ class CloudCam(object):
         self.min = 40.0
         self.max = 100.0
         self.step = 0.40
-        self.expose = 1.0
+        self.expose = 4.0
         self.dir = os.path.join(os.getcwd(),'images')
         self.gain = 1
 	self.filterpos = 0
@@ -83,6 +84,8 @@ class CloudCam(object):
             """
             print "Exposure reached minimum of 0.02s"
             self.expose = 0.02
+	    if self.gain > 1:
+	    	self.gain -= 1
 
         # if exposure reaches maximum, move the filter out of the way
     	if self.expose > 60.0:
@@ -99,6 +102,8 @@ class CloudCam(object):
             """
             print "Exposure reached maximum of 60s"
             self.expose = 60.0
+	    if self.gain < 6:
+	    	self.gain += 1
 	    return
 
     def run_camera(self):
@@ -108,9 +113,14 @@ class CloudCam(object):
 
         name = time.strftime("%Y%m%dT%H%M%S")+"_"+str('%.3f'%(self.expose))
         print str('%.3f'%(self.expose))
-        self.takeImage("cloud", name+".fits", self.expose, self.dir)
+	try:
+        	self.takeImage("cloud", name+".fits", self.expose, self.dir)
+	except:
+		os.remove('binary')
+		time.sleep(2)
+		self.takeImage("cloud", name+".fits", self.expose, self.dir)
         time.sleep(self.expose+2)
-        median = cg.run_analysis("images/"+name+".fits", "analyzed/"+name+"_analyzed.png", name, self.expose)
+        median = cg.run_analysis("images/"+name+".fits", "analyzed/"+name+"_analyzed.png", name, self.expose, self.gain)
         self.check_exposure(median)
         return
 
