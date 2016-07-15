@@ -1,27 +1,51 @@
-<!DOCTYPE html PUBLIC "-//W3C//DTD HTML 4.01//EN">
 <html>
-  <head>
-    <meta http-equiv="refresh" content="20">
-    <title>
-      Apache Point Observatory CloudCam<br>
-    </title>
-  </head>
-  <body bgcolor="black">
+<script language="javascript">
+
+<!--
+function updateImage() {
+   obj1 = document.latestimg;
+   obj1.src = obj1.src + "?" + Math.random();
+   obj2 = document.latestgif;
+   obj2.src = obj2.src + "?" + Math.random();
+   obj3 = document.latest;
+   obj3.src = obj3.src + "?" + Math.random();	
+   //Following statement sets the delay before the function will
+   //call itself again (in milliseconds)
+   setTimeout("updateImage()",5000);
+}
+
+//-->
+</script>
+<head>
+<title>APO Optical Cloud Camera</title>
+</head>
+
+<body onload="updateImage()"  bgcolor="black">
     <h2>
-        <center><font color="blue">APO CloudCam</font></center>
+        <center><font color="blue">Apache Point Observatory Optical  Cloud Camera</font></center>
     </h2>
     <font color="white">
     <table border="0">
     <tr>
-    <td><a href="latest.png"><img src="latest.png" width="400"></a></td>
-    <td><a href="latestimg.png"><img src="latestimg.png" width="400"></a></td>
-    <td><a href="latest.gif"><img src="latest.gif" width="400"></a></td>
+    <td><a href="latest.png"><img src="latest.png" width="400"  name="latest"></a></td>
+    <td><a href="latestimg.png"><img src="latestimg.png" width="400" name="latestimg"></a></td>
+    <td><a href="latest.gif"><img src="latest.gif" width="400"  name="latestgif"></a></td>
     </tr>
     </table>
 <br><Br>
 <center>
-Image will auto-refresh.<br><br>
+Image will auto-refresh<br><br>
+</center>
+<hr>
+
+<b>GIF Movies</b><Br><Br>
+<a href="0712.gif">2016-07-12</a><br>
+<a href="0713.gif">2016-07-13</a><br>
 
   </font>
-  </body>
+
+
+
+
+</body>
 </html>
