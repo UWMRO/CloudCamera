@@ -114,15 +114,19 @@ class CloudCam(object):
 
         name = time.strftime("%Y%m%dT%H%M%S")+"_"+str('%.3f'%(self.expose))
         print str('%.3f'%(self.expose))
+	if os.path.isfile('binary'):
+		os.remove('binary')
 	try:
         	self.takeImage("cloud", name+".fits", self.expose, self.dir)
 	except:
-		os.remove('binary')
-		time.sleep(2)
-		self.takeImage("cloud", name+".fits", self.expose, self.dir)
+		raise ExposeError
         time.sleep(self.expose+2)
         median = cg.run_analysis("images/"+name+".fits", "analyzed/"+name+"_analyzed.png", name, self.expose, self.gain)
+	if self.expose < 60:
+		print "going to sleep for:", 60-self.expose, "seconds"
+		time.sleep(60-self.expose)
         self.check_exposure(median)
+
         return
 
     def takeImage(self, imType = None, imgName = None, imExp = None, imDir = None):

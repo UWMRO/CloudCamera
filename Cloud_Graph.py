@@ -58,8 +58,8 @@ from Cloud_Mask import CloudMask
 from transfer import transfer
 from shutil import copyfile
 from CloudParams import *
-from matplotlib.transforms import Affine2D
 import thread
+from images2gif import writeGif
 
 class CloudGraph(object):
 	def __init__(self):
@@ -76,6 +76,7 @@ class CloudGraph(object):
 		self.bin_eros = binary_erosion
 		self.trans = transfer()
 		self.rotate = rotate
+		self.gif_upload = True
 
 		# Memory locations for masks
 		self.large_mask = None
@@ -166,6 +167,7 @@ class CloudGraph(object):
 
 		# Log the activity
 		self.l.logStr('Image\t%s,%s,%s,%s' % (str(img_out), str(median), str(mean), str(std)), self.logType)
+
 
 		return median
 
@@ -417,7 +419,8 @@ class CloudGraph(object):
 		fig.savefig("latest.png", cmap="grey", transparent=True, facecolor="black", edgecolor='none', clobber=True)
 		shutil.copyfile("latest.png", "/var/www/html/latest.png")
 		
-		plt.close("all")
+		plt.close(fig)
+		plt.close()
 		#send the latest image to galileo
 		#try:
 		self.trans.openConnection()
@@ -432,13 +435,26 @@ class CloudGraph(object):
 		self.count += 1
 		if self.count == 30:
 			thread.start_new_thread(self.make_gif, ())
-		
+			pass
+
+		if self.gif_upload == False:
+			try:
+				self.trans.openConnection()
+				print "Attempting to upload latest.gif"
+				self.trans.uploadFile("latest.gif")
+				self.trans.closeConnection()
+				print "latest.gif uploaded successfully"
+				self.gif_upload = True
+			except:
+				print "Could not upload latest.gif, will try again"
+
 	def make_gif(self):
 		#produce a gif of the last 10 images when self.count == 10
 		print "Producing gif image"
 		command = "convert -delay 25 -loop 0 "+os.getcwd()+"/gif/*.png latest.gif"
 		out = subprocess.Popen(command, stdout = subprocess.PIPE, shell=True)
-		time.sleep(75)
+		time.sleep(180)
+		#writeGif("latest.gif", self.imglist, duration=0.3, repeat=True)
 		self.count -= 10
 		for i in range(0, 9):
 			os.remove(str(self.imglist[0]))
@@ -446,13 +462,8 @@ class CloudGraph(object):
 		time.sleep(2)
 		# Send the gif to Galileo
 		shutil.copyfile("latest.gif", "/var/www/html/latest.gif")
-		try:
-			self.trans.openConnection()
-			print("uploading latest.gif")
-			self.trans.uploadFile("latest.gif")
-			self.trans.closeConnection()
-		except:
-			print "Could not upload latest.gif"
+		self.gif_upload = False
+		print "gif image produced"
 		plt.close("all")
 		return
 
@@ -529,4 +540,4 @@ if __name__=="__main__":
 		if os.path.isfile(imagedir+name+".fits") == True:
 			cg.run_analysis(imagedir+name+".fits", location+"/analyzed/"+name+'_analyzed.png', name, expose)
 		else:
-			print "File not found"
+			pass
