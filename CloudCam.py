@@ -24,6 +24,7 @@ import datetime
 from clouduino_interface import ClouduinoInterface
 import os
 from CloudParams import *
+import traceback
 
 class CloudCam(object):
     def __init__(self):
@@ -49,6 +50,7 @@ class CloudCam(object):
         self.cg = CloudGraph()
 	self.c = CameraExpose()
 	self.ci = ClouduinoInterface()
+	os.system('rm gif/*')
 
 
     def check_exposure(self, median):
@@ -119,12 +121,16 @@ class CloudCam(object):
 	try:
         	self.takeImage("cloud", name+".fits", self.expose, self.dir)
 	except:
-		raise ExposeError
+		#raise ExposeError
+		traceback.print_exc()
         time.sleep(self.expose+2)
-        median = cg.run_analysis("images/"+name+".fits", "analyzed/"+name+"_analyzed.png", name, self.expose, self.gain)
-	if self.expose < 60:
-		print "going to sleep for:", 60-self.expose, "seconds"
-		time.sleep(60-self.expose)
+	try:
+       		median = cg.run_analysis("images/"+name+".fits", "analyzed/"+name+"_analyzed.png", name, self.expose, self.gain)
+	except:
+		traceback.print_exc()
+	#if self.expose < 60:
+	#	print "going to sleep for:", 60-self.expose, "seconds"
+	#	time.sleep(60-self.expose)
         self.check_exposure(median)
 
         return

@@ -60,6 +60,7 @@ from shutil import copyfile
 from CloudParams import *
 import thread
 from images2gif import writeGif
+import traceback
 
 class CloudGraph(object):
 	def __init__(self):
@@ -151,7 +152,6 @@ class CloudGraph(object):
 
 		# Calculate directional statistics
 		self.directional_statistics(masked)
-
 		# Calculate histogram for small maksed image
 		values, bins = self.pixel_value_list(masked)
 		fixed_vals = np.append(values, 0)
@@ -219,12 +219,12 @@ class CloudGraph(object):
 		directions = ['NE', 'N', 'NW', 'W', 'SW', 'S', 'SE', 'E']
 		dirdict = {'NE': self.ne_mask, 'N': self.n_mask, 'NW': self.nw_mask, 'W': self.w_mask, 'SW': self.sw_mask, 'S': self.s_mask, 'SE': self.se_mask, 'E': self.e_mask}
 		for d in directions:
-			print "Statistics for "+str(d)+" directional mask:"
+			#print "Statistics for "+str(d)+" directional mask:"
 			mask = dirdict[d]
 			tmp_img, tmp_median, tmp_mean, tmp_std = self.dynamic_mask(image, mask)
-			print "Median = "+str(tmp_median)
-			print "Mean = "+str(tmp_mean)
-			print "STD = "+str(tmp_std)
+			#print "Median = "+str(tmp_median)
+			#print "Mean = "+str(tmp_mean)
+			#print "STD = "+str(tmp_std)
 			self.header[str(d)+"_MED"] = tmp_median
 			self.header[str(d)+"_STD"] = tmp_std
 			self.dir_stats[d] = {'Median':tmp_median, 'Mean':tmp_mean, 'STD':tmp_std}
@@ -297,7 +297,6 @@ class CloudGraph(object):
 			Every 10 images, produces a gif of the images in gif/
 				/var/www/html/latest.png		(Live view webpage displays this gif)
 		"""
-
 		plt.clf()
 
 		#Fill in the masked image for processing
@@ -338,18 +337,7 @@ class CloudGraph(object):
 		scipy.misc.imsave('latestimg.png', img)
 		shutil.copyfile("latestimg.png", "/var/www/html/latestimg.png")
 
-  #try:
-                self.trans.openConnection()
-                f_out = ["latestimg.png"]
-                for f in f_out:
-                        if os.path.isfile(f):
-                                print 'uploading',str(f)
-                                self.trans.uploadFile(f)
-                self.trans.closeConnection()
-                #except:
-                #       print "could not connected to remote server"
-                
-
+		self.uploadImg('latestimg.png')
 
 		# Insert statistical information into the image
 
@@ -414,57 +402,55 @@ class CloudGraph(object):
 
 		fig.savefig(os.getcwd()+"/gif/"+name+".png", cmap="grey", transparent=True, facecolor="black", edgecolor='none', clobber=True)
 		self.imglist.append("gif/"+name+".png")
-		print self.imglist
+		#print self.imglist
 		print self.count
 		fig.savefig("latest.png", cmap="grey", transparent=True, facecolor="black", edgecolor='none', clobber=True)
 		shutil.copyfile("latest.png", "/var/www/html/latest.png")
 		
 		plt.close(fig)
 		plt.close()
+		fig.clf()
 		#send the latest image to galileo
-		#try:
-		self.trans.openConnection()
-		f_out = ["latest.png"]
-		for f in f_out:
-			if os.path.isfile(f):
-				print 'uploading',str(f)
-				self.trans.uploadFile(f)
-		self.trans.closeConnection()
-		#except:
-		#	print "could not connected to remote server"
+		self.uploadImg('latest.png')
+	
+		while len(self.imglist) > 60:
+                        os.remove(os.path.join('gif',self.imglist.pop()))
+			
 		self.count += 1
-		if self.count == 30:
-			thread.start_new_thread(self.make_gif, ())
-			pass
+		if self.count == 5:
+			print "imglist:",len(self.imglist)
+			thread.start_new_thread(self.make_gif, (self.imglist,))
+			self.count = 0
+			#self.make_gif()
+		return
 
-		if self.gif_upload == False:
-			try:
-				self.trans.openConnection()
-				print "Attempting to upload latest.gif"
-				self.trans.uploadFile("latest.gif")
-				self.trans.closeConnection()
-				print "latest.gif uploaded successfully"
-				self.gif_upload = True
-			except:
-				print "Could not upload latest.gif, will try again"
+	def uploadImg(self, img):
+		try:
+                	self.trans.openConnection()
+                        if os.path.isfile(img):
+                                print 'uploading',str(img)
+                                self.trans.uploadFile(img)
+                	self.trans.closeConnection()
+                except:
+                	print "could not connected to remote server"
+			traceback.print_exc()
 
-	def make_gif(self):
+
+	def make_gif(self, imArr):
 		#produce a gif of the last 10 images when self.count == 10
 		print "Producing gif image"
-		command = "convert -delay 25 -loop 0 "+os.getcwd()+"/gif/*.png latest.gif"
+		os.remove("latest.gif")
+		command = "convert -delay 40 -loop 0 "+os.getcwd()+"/gif/*.png latest.gif"
 		out = subprocess.Popen(command, stdout = subprocess.PIPE, shell=True)
-		time.sleep(180)
+		print out.communicate()
+		print "sleeping while gif is produced"
+		time.sleep(60)
 		#writeGif("latest.gif", self.imglist, duration=0.3, repeat=True)
-		self.count -= 10
-		for i in range(0, 9):
-			os.remove(str(self.imglist[0]))
-			del self.imglist[0]
-		time.sleep(2)
-		# Send the gif to Galileo
 		shutil.copyfile("latest.gif", "/var/www/html/latest.gif")
-		self.gif_upload = False
+		self.uploadImg('latest.gif')
 		print "gif image produced"
 		plt.close("all")
+		plt.close()
 		return
 
 	def add_headers(self, expose, median, std, name, img_in):
