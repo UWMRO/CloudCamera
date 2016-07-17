@@ -34,7 +34,7 @@ class transfer(object):
 		password = keyring.get_password('SSH', keyfile)
 		key = paramiko.RSAKey.from_private_key_file(keyfile, password='mro2015')
 		self.ssh.set_missing_host_key_policy(paramiko.AutoAddPolicy())
-		self.ssh.connect(self.parm['server'], username=self.parm['user'], pkey = key)
+		self.ssh.connect(self.parm['server'], username=self.parm['user'], pkey = key, timeout = 30)
 		self.ftp = self.ssh.open_sftp()
 
 	def uploadFile(self, f_in):

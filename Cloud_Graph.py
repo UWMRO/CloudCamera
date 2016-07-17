@@ -414,7 +414,8 @@ class CloudGraph(object):
 		self.uploadImg('latest.png')
 	
 		while len(self.imglist) > 60:
-                        os.remove(os.path.join('gif',self.imglist.pop()))
+			if os.path.isfile(self.imglist.pop()):
+                        	os.remove(self.imglist.pop())	
 			
 		self.count += 1
 		if self.count == 5:
@@ -439,14 +440,16 @@ class CloudGraph(object):
 	def make_gif(self, imArr):
 		#produce a gif of the last 10 images when self.count == 10
 		print "Producing gif image"
-		os.remove("latest.gif")
+		if os.path.isfile('latest.gif'):
+			os.remove("latest.gif")
 		command = "convert -delay 40 -loop 0 "+os.getcwd()+"/gif/*.png latest.gif"
 		out = subprocess.Popen(command, stdout = subprocess.PIPE, shell=True)
 		print out.communicate()
 		print "sleeping while gif is produced"
-		time.sleep(60)
+		time.sleep(120)
 		#writeGif("latest.gif", self.imglist, duration=0.3, repeat=True)
-		shutil.copyfile("latest.gif", "/var/www/html/latest.gif")
+		if os.path.isfile('latest.gif'):
+			shutil.copyfile("latest.gif", "/var/www/html/latest.gif")
 		self.uploadImg('latest.gif')
 		print "gif image produced"
 		plt.close("all")

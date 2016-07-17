@@ -126,12 +126,13 @@ class CloudCam(object):
         time.sleep(self.expose+2)
 	try:
        		median = cg.run_analysis("images/"+name+".fits", "analyzed/"+name+"_analyzed.png", name, self.expose, self.gain)
+		self.check_exposure(median)
 	except:
 		traceback.print_exc()
 	#if self.expose < 60:
 	#	print "going to sleep for:", 60-self.expose, "seconds"
 	#	time.sleep(60-self.expose)
-        self.check_exposure(median)
+        #self.check_exposure(median)
 
         return
 
