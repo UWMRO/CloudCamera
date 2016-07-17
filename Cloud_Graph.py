@@ -55,12 +55,13 @@ import sys
 import subprocess
 import shutil
 from Cloud_Mask import CloudMask
+from Cloug_gif import CloudGif
 from transfer import transfer
 from shutil import copyfile
 from CloudParams import *
 import thread
-from images2gif import writeGif
 import traceback
+
 
 class CloudGraph(object):
 	def __init__(self):
@@ -71,6 +72,7 @@ class CloudGraph(object):
 		self.dir_stats = {}
 		self.count = 0
 		self.cm = CloudMask()
+		self.Cg = CloudGif()
 		self.hdudata = None
 		self.header = None
 		self.scaleimg = scale_img
@@ -326,7 +328,7 @@ class CloudGraph(object):
 		ax[0,0].axis('off')
 
 		img = img.rotate(self.rotate).resize((1280,1024), Image.ANTIALIAS)
-		img = ImageOps.mirror(img)		
+		img = ImageOps.mirror(img)
 		img = scipy.ndimage.median_filter(img, 3)
 		#img = scipy.ndimage.gaussian_filter(img, sigma=3)
 
@@ -393,11 +395,11 @@ class CloudGraph(object):
 		colors = cmap(std_data)
 		ax[1,1].pie(sizes, colors=colors)
 		ax[1,1].text(100, 100, 'STD', size=12, color="white")
-		
+
 		plt.draw()
 
 		#Save the figure as a png
-		
+
 		fig.savefig(img_out, cmap="grey", transparent=True, facecolor="black", edgecolor='none')
 
 		fig.savefig(os.getcwd()+"/gif/"+name+".png", cmap="grey", transparent=True, facecolor="black", edgecolor='none', clobber=True)
@@ -406,21 +408,21 @@ class CloudGraph(object):
 		print self.count
 		fig.savefig("latest.png", cmap="grey", transparent=True, facecolor="black", edgecolor='none', clobber=True)
 		shutil.copyfile("latest.png", "/var/www/html/latest.png")
-		
+
 		plt.close(fig)
 		plt.close()
 		fig.clf()
 		#send the latest image to galileo
 		self.uploadImg('latest.png')
-	
+
 		while len(self.imglist) > 60:
-			if os.path.isfile(self.imglist.pop()):
-                        	os.remove(self.imglist.pop())	
-			
+			if os.path.isfile(self.imglist[0]):
+                        	os.remove(self.imglist[0])
+
 		self.count += 1
 		if self.count == 5:
 			print "imglist:",len(self.imglist)
-			thread.start_new_thread(self.make_gif, (self.imglist,))
+			thread.start_new_thread(self.Cg.make_gif(), (self.imglist,))
 			self.count = 0
 			#self.make_gif()
 		return
@@ -436,7 +438,7 @@ class CloudGraph(object):
                 	print "could not connected to remote server"
 			traceback.print_exc()
 
-
+'''
 	def make_gif(self, imArr):
 		#produce a gif of the last 10 images when self.count == 10
 		print "Producing gif image"
@@ -455,7 +457,7 @@ class CloudGraph(object):
 		plt.close("all")
 		plt.close()
 		return
-
+'''
 	def add_headers(self, expose, median, std, name, img_in):
 		"""
 		Add statistical and image information
