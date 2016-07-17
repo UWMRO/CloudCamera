@@ -421,10 +421,13 @@ class CloudGraph(object):
 
 		self.count += 1
 		if self.count == 5:
+			tic = time.clock()
 			print "imglist:",len(self.imglist)
 			#thread.start_new_thread(self.Cg.make_gif(60), ())
-			makegif = threading.Thread(self.Cg.make_gif(60))
+			makegif = threading.Thread(self.Cg.make_gif(180))
 			makegif.start()
+			toc = time.clock()
+			print "Time to process gif: "+str((toc-tic)*60)+" sec"
 			self.count = 0
 			#self.make_gif()
 		return

@@ -26,7 +26,8 @@ class CloudGif(object):
 				stdoutp = "ran out of time"
 			else:
 				print "gif not ready"
-				killcount = 60
+				print str(killcount)
+				killcount += 1
 				time.sleep(1)
 		#print "sleeping while gif is produced"
 		#time.sleep(120)
