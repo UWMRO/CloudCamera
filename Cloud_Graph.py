@@ -55,13 +55,13 @@ import sys
 import subprocess
 import shutil
 from Cloud_Mask import CloudMask
-from Cloug_gif import CloudGif
+from Cloud_gif import CloudGif
 from transfer import transfer
 from shutil import copyfile
 from CloudParams import *
 import thread
 import traceback
-
+import threading
 
 class CloudGraph(object):
 	def __init__(self):
@@ -415,14 +415,16 @@ class CloudGraph(object):
 		#send the latest image to galileo
 		self.uploadImg('latest.png')
 
-		while len(self.imglist) > 60:
+		while len(self.imglist) > 30:
 			if os.path.isfile(self.imglist[0]):
                         	os.remove(self.imglist[0])
 
 		self.count += 1
 		if self.count == 5:
 			print "imglist:",len(self.imglist)
-			thread.start_new_thread(self.Cg.make_gif(), (self.imglist,))
+			#thread.start_new_thread(self.Cg.make_gif(60), ())
+			makegif = threading.Thread(self.Cg.make_gif(60))
+			makegif.start()
 			self.count = 0
 			#self.make_gif()
 		return
@@ -438,7 +440,7 @@ class CloudGraph(object):
                 	print "could not connected to remote server"
 			traceback.print_exc()
 
-'''
+	'''
 	def make_gif(self, imArr):
 		#produce a gif of the last 10 images when self.count == 10
 		print "Producing gif image"
@@ -457,7 +459,7 @@ class CloudGraph(object):
 		plt.close("all")
 		plt.close()
 		return
-'''
+	'''
 	def add_headers(self, expose, median, std, name, img_in):
 		"""
 		Add statistical and image information
