@@ -1,4 +1,5 @@
 *.pyc
+*.fits
 analyzed/
 gif
 giftest
