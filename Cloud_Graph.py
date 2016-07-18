@@ -328,7 +328,7 @@ class CloudGraph(object):
 		ax[0,0].axis('off')
 
 		img = img.rotate(self.rotate).resize((1280,1024), Image.ANTIALIAS)
-		img = ImageOps.mirror(img)
+		#img = ImageOps.mirror(img)
 		img = scipy.ndimage.median_filter(img, 3)
 		#img = scipy.ndimage.gaussian_filter(img, sigma=3)
 
@@ -339,14 +339,16 @@ class CloudGraph(object):
 		scipy.misc.imsave('latestimg.png', img)
 		shutil.copyfile("latestimg.png", "/var/www/html/latestimg.png")
 
+		#uploadlatestimgpng = threading.Thread(self.uploadImg('latestimg.png'))
+                #uploadlatestimgpng.start()
 		self.uploadImg('latestimg.png')
 
 		# Insert statistical information into the image
 
 		ax[0,0].text(600, 0, "N", size=20, color="white")
 		ax[0,0].text(600, 1100, "S", size=20, color="white")
-		ax[0,0].text(0, 550, "W", size=20, color="white")
-		ax[0,0].text(1200, 550, "E", size=20, color="white")
+		ax[0,0].text(0, 550, "E", size=20, color="white")
+		ax[0,0].text(1200, 550, "W", size=20, color="white")
 		ax[0,0].text(0, 1200, name[0:4]+'-'+name[4:6]+'-'+name[6:8]+'   '+name[9:11]+':'+name[11:13]+':'+name[13:15], size = 16, color="white", horizontalalignment='left')
 		ax[0,0].text(0, 1260, 'Exposure = '+str(exp)+' [s]', size = 16, color="white", horizontalalignment='left', )
 		ax[0,0].text(0, 1320, 'Gain = '+str(gain), size = 16, color = "white", horizontalalignment = "left")
@@ -408,29 +410,36 @@ class CloudGraph(object):
 		print self.count
 		fig.savefig("latest.png", cmap="grey", transparent=True, facecolor="black", edgecolor='none', clobber=True)
 		shutil.copyfile("latest.png", "/var/www/html/latest.png")
-
 		plt.close(fig)
 		plt.close()
 		fig.clf()
 		#send the latest image to galileo
+		#uploadlatestpng = threading.Thread(self.uploadImg('latest.png'))
+		#uploadlatestpng.start()
 		self.uploadImg('latest.png')
-
-		while len(self.imglist) > 30:
-			if os.path.isfile(self.imglist[0]):
-                        	os.remove(self.imglist[0])
-
+		print traceback.print_exc()
+		#try:	
+			#while len(self.imglist) > 30:
+			#	print self.imglist[0]
+				#if os.path.isfile(self.imglist[0]):
+                        	#	os.remove(self.imglist[0])
+		#except:
+		#	print traceback.print_exc()
+		"""
 		self.count += 1
 		if self.count == 5:
 			tic = time.clock()
 			print "imglist:",len(self.imglist)
 			#thread.start_new_thread(self.Cg.make_gif(60), ())
-			makegif = threading.Thread(self.Cg.make_gif(180))
-			makegif.start()
+			#makegif = threading.Thread(self.Cg.make_gif(180))
+			#makegif.start()
+			#thread.start_new_thread(self.Cg.make_gif, (60,))
 			toc = time.clock()
 			print "Time to process gif: "+str((toc-tic)*60)+" sec"
 			self.count = 0
 			#self.make_gif()
 		return
+		"""
 
 	def uploadImg(self, img):
 		try:
@@ -440,11 +449,10 @@ class CloudGraph(object):
                                 self.trans.uploadFile(img)
                 	self.trans.closeConnection()
                 except:
-                	print "could not connected to remote server"
 			traceback.print_exc()
+		return
 
-	'''
-	def make_gif(self, imArr):
+	def makeGifOld(self, imArr):
 		#produce a gif of the last 10 images when self.count == 10
 		print "Producing gif image"
 		if os.path.isfile('latest.gif'):
@@ -462,7 +470,7 @@ class CloudGraph(object):
 		plt.close("all")
 		plt.close()
 		return
-	'''
+
 	def add_headers(self, expose, median, std, name, img_in):
 		"""
 		Add statistical and image information

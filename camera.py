@@ -97,6 +97,7 @@ class CameraExpose(object):
         except Exception,e:
             print "failed"
             print str(e)
+	    #self.l.logStr('Exception: '+str(e))
             return False
 
     def checkFile(self, fileName):

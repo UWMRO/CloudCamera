@@ -8,7 +8,7 @@ Parameter file for CloudCam options.
 min_median = 40			#Lower limit for median value
 max_median = 100		#Upper limit for median value
 step_size = 0.40		#Exposure scaling step size, %
-expose = 10			#Set starting exposure
+expose = 1			#Set starting exposure
 gain = 1			#Set starting gain
 
 #Cloud_Graph.py

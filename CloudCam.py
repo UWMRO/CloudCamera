@@ -129,10 +129,10 @@ class CloudCam(object):
 		self.check_exposure(median)
 	except:
 		traceback.print_exc()
-	#if self.expose < 60:
-	#	print "going to sleep for:", 60-self.expose, "seconds"
-	#	time.sleep(60-self.expose)
-        #self.check_exposure(median)
+	if self.expose < 60:
+		print "going to sleep for:", 60-self.expose, "seconds"
+		time.sleep(60-self.expose)
+        self.check_exposure(median)
 
         return
 
