@@ -1,0 +1,8 @@
+*.pyc
+analyzed/
+gif
+giftest
+images
+logs
+masks
+
