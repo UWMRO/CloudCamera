@@ -104,7 +104,7 @@ class CloudGraph(object):
 
 		# Produce any missing folders
 		folder_list = ["gif", "logs", "images", "analyzed", "masks"]
-		shutil.rmtree('gif')
+		#shutil.rmtree('gif')
 		for folder in folder_list:
 			if (os.path.isdir(folder)) == False:
 				print "Creating directory "+str(folder)
@@ -148,9 +148,7 @@ class CloudGraph(object):
 
 		# Use small mask to calculate image statistics
 		masked, median, mean, std = self.dynamic_mask(img, self.small_mask)
-		print "Median = "+str(median)
-		print "Mean = "+str(mean)
-		print "Standard Dev = "+str(std)
+		print "Median = "+str(median)+", Mean = "+str(mean)+", Standard Dev = "+str(std)
 
 		# Calculate directional statistics
 		self.directional_statistics(masked)
@@ -205,7 +203,7 @@ class CloudGraph(object):
 
 		# Mask saturated or empty
 		masked1 = ma.masked_greater(pre_masked, 254)
-		masked1 = ma.masked_less(masked1, 0)
+		#masked1 = ma.masked_less(masked1, 0)
 
 		median = int(ma.median(masked1))
 		mean = ma.mean(masked1)
@@ -265,12 +263,12 @@ class CloudGraph(object):
 		output:
 			result		(scaled image)
 		"""
-
-		bytehigh = int(median + (2*std))
+		
+		bytehigh = int(median + (2.0*std))
 		if bytehigh > 255:
 			bytescale = 255
 
-		bytelow = int(median - (2*std))
+		bytelow = int(median - (1.5*std))
 		if bytelow < 0:
 			bytelow = 0
 
@@ -302,13 +300,21 @@ class CloudGraph(object):
 		plt.clf()
 
 		#Fill in the masked image for processing
-		masked_img = masked.filled(fill_value = 0)
+                masked_img = masked.filled(fill_value = 0)
 
 		if self.scaleimg == True:
 			scaled_img = self.scale_img(masked_img, median, std)
 			img = Image.fromarray(scaled_img)
 		else:
 			img = Image.fromarray(masked_img)
+		img = img.rotate(self.rotate).resize((1280,1024), Image.ANTIALIAS)
+		img = scipy.ndimage.median_filter(img, 3)
+
+		self.mapImg(img, 'latest_map.png', 'inferno')
+		self.mapImg(img, 'latestimg.png', 'gray')
+
+		#Fill in the masked image for processing
+                masked_img = masked.filled(fill_value = 0)
 
 		#Set up plotting environment
 		fig, ax = plt.subplots(2,2)
@@ -326,22 +332,6 @@ class CloudGraph(object):
 		#Plot the masked image, allow for arbitrary rotation
 		ax[0,0] = plt.subplot(gs[:7,:7])
 		ax[0,0].axis('off')
-
-		img = img.rotate(self.rotate).resize((1280,1024), Image.ANTIALIAS)
-		#img = ImageOps.mirror(img)
-		img = scipy.ndimage.median_filter(img, 3)
-		#img = scipy.ndimage.gaussian_filter(img, sigma=3)
-
-		#Use binary erosion to smooth the image
-		if self.bin_eros == True:
-			img = scipy.ndimage.morphology.binary_erosion(img)
-
-		scipy.misc.imsave('latestimg.png', img)
-		shutil.copyfile("latestimg.png", "/var/www/html/latestimg.png")
-
-		#uploadlatestimgpng = threading.Thread(self.uploadImg('latestimg.png'))
-                #uploadlatestimgpng.start()
-		self.uploadImg('latestimg.png')
 
 		# Insert statistical information into the image
 
@@ -400,46 +390,33 @@ class CloudGraph(object):
 
 		plt.draw()
 
-		#Save the figure as a png
-
-		fig.savefig(img_out, cmap="grey", transparent=True, facecolor="black", edgecolor='none')
-
-		fig.savefig(os.getcwd()+"/gif/"+name+".png", cmap="grey", transparent=True, facecolor="black", edgecolor='none', clobber=True)
-		self.imglist.append("gif/"+name+".png")
-		#print self.imglist
-		print self.count
+		
 		fig.savefig("latest.png", cmap="grey", transparent=True, facecolor="black", edgecolor='none', clobber=True)
 		shutil.copyfile("latest.png", "/var/www/html/latest.png")
-		plt.close(fig)
+		shutil.copyfile("latest.png", os.path.join("images", name+".png"))
+		shutil.copyfile("latest.png", os.path.join("gif", name+".png"))
 		plt.close()
 		fig.clf()
-		#send the latest image to galileo
-		#uploadlatestpng = threading.Thread(self.uploadImg('latest.png'))
-		#uploadlatestpng.start()
-		self.uploadImg('latest.png')
-		print traceback.print_exc()
-		#try:	
-			#while len(self.imglist) > 30:
-			#	print self.imglist[0]
-				#if os.path.isfile(self.imglist[0]):
-                        	#	os.remove(self.imglist[0])
-		#except:
-		#	print traceback.print_exc()
-		"""
-		self.count += 1
-		if self.count == 5:
-			tic = time.clock()
-			print "imglist:",len(self.imglist)
-			#thread.start_new_thread(self.Cg.make_gif(60), ())
-			#makegif = threading.Thread(self.Cg.make_gif(180))
-			#makegif.start()
-			#thread.start_new_thread(self.Cg.make_gif, (60,))
-			toc = time.clock()
-			print "Time to process gif: "+str((toc-tic)*60)+" sec"
-			self.count = 0
-			#self.make_gif()
+		
+		#self.uploadImg('latest.png')
 		return
-		"""
+
+	def mapImg(self, imArr = None, name = None, map = None):
+		
+		fig1 = plt.figure(figsize=(10,9.5))
+		#fig1.figsize(1024/DPI, 1280/DPI)
+		plt.imshow(imArr, cmap=map)
+		
+		#color_bar = plt.colorbar()
+		#color_bar.outline.set_color('white')                   #set colorbar box color
+		#color_bar.ax.yaxis.set_tick_params(color='white') 
+		plt.draw()
+		plt.savefig(name, transparent=True, facecolor="black", edgecolor='none', bbox_inches='tight')
+		shutil.copyfile(name, os.path.join("/var/www/html/",name))
+		#self.uploadImg(name)
+		plt.close()
+		fig1.clf()
+		return
 
 	def uploadImg(self, img):
 		try:
