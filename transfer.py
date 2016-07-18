@@ -37,9 +37,14 @@ class transfer(object):
 		self.ssh.connect(self.parm['server'], username=self.parm['user'], pkey = key, timeout = 30)
 		self.ftp = self.ssh.open_sftp()
 
+	def transProgress(self, trans, toBeTrans):
+		print ("transferred: {0:.0f} %".format((trans / toBeTrans) * 100))
+		time.sleep(5)
+
+
 	def uploadFile(self, f_in):
 		#add changdir to public_html
-		self.ftp.put(f_in,os.path.join(self.parm['server_dir'], f_in))
+		self.ftp.put(f_in,os.path.join(self.parm['server_dir'], f_in), callback=self.transProgress)
 		return
 
 	def closeConnection(self):

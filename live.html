@@ -9,6 +9,8 @@ function updateImage() {
    obj2.src = obj2.src + "?" + Math.random();
    obj3 = document.latest;
    obj3.src = obj3.src + "?" + Math.random();	
+   obj3 = document.latestmap;
+   obj3.src = obj3.src + "?" + Math.random();   
    //Following statement sets the delay before the function will
    //call itself again (in milliseconds)
    setTimeout("updateImage()",5000);
@@ -28,9 +30,10 @@ function updateImage() {
     <table border="0">
     <tr>
     <td><a href="latest.png"><img src="latest.png" width="400"  name="latest"></a></td>
-    <td><a href="latestimg.png"><img src="latestimg.png" width="400" name="latestimg"></a></td>
     <td><a href="latest.gif"><img src="latest.gif" width="400"  name="latestgif"></a></td>
     </tr>
+    <td><a href="latestimg.png"><img src="latestimg.png" width="400" name="latestimg"></a></td>
+    <td><a href="latest_map.png"><img src="latest_map.png" width="400" name="latestmap"></a></td>
     </table>
 <br><Br>
 <center>
