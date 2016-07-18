@@ -15,6 +15,28 @@ class CloudGif(object):
 	def __init__(self):
 		self.trans = transfer()
 
+	def findImg(self, dir = None):
+	       	listdirect = os.path.join(os.getcwd(),'gif/')
+	        imagelist = listdirect+'giflist.txt'
+
+        	print "Creating a list of png files in gif/"
+        	imglist = []
+        	for img in os.listdir(listdirect):
+                	if img.endswith(".png"):
+                        	img = "gif/"+img
+                        	imglist.append(img)
+        	if len(imglist) == 0:
+                	print "No images found in gif/"
+                	print "Ending Cloud_gif.py"
+			return
+        	f = open(imagelist, "w")
+        	f.write("\n".join(map(lambda x: str(x), imglist)))
+        	f.close()
+
+        	img_list = np.genfromtxt(imagelist, usecols = [0], unpack = True, dtype = 'str')
+        	print "gif list has "+str(len(img_list))+" entries"
+		return
+
 	def make_gif(self, killmax, imglist):
 		#produce a gif of the last 10 images when self.count == 10
 		print "Producing gif image"
@@ -67,25 +89,9 @@ class CloudGif(object):
 
 if __name__ ==  "__main__":
 	cg = CloudGif()
-
-	listdirect = os.path.join(os.getcwd(),'gif/')
-        imagelist = listdirect+'giflist.txt'
 	
-	print "Creating a list of png files in gif/"
-	imglist = []
-	for img in os.listdir(listdirect):
-		if img.endswith(".png"):
-			img = "gif/"+img
-			imglist.append(img)
-	if len(imglist) == 0:
-		print "No images found in gif/"
-		print "Ending Cloud_gif.py"
-		sys.exit()
-	f = open(imagelist, "w")
-	f.write("\n".join(map(lambda x: str(x), imglist)))
-	f.close()
-
-	img_list = np.genfromtxt(imagelist, usecols = [0], unpack = True, dtype = 'str')
-	print "gif list has "+str(len(img_list))+" entries"
-	cg.make_gif(180, img_list[:10])
+	while True:
+		l = cg.findImg('gif')
+		imgList = sorted(l)
+		cg.make_gif(180, imgList)
 
