@@ -47,6 +47,7 @@ class CloudGif(object):
 			print "subprocess output:"+str(stdoutp)
 			if killcount == killmax:
 				print "ran out of time"
+				return
 			else:
 				print "gif not ready"
 				print str(killcount)
@@ -64,7 +65,7 @@ class CloudGif(object):
 			shutil.copyfile("latest.gif", "/var/www/html/latest.gif")
 			#upload = threading.Thread(self.uploadImg('latest.gif'))
 			#upload.start()
-			self.uploadImg('latest.gif')
+			#self.uploadImg('latest.gif')
 		else:
 			print "gif was not created"
 		return
@@ -75,7 +76,6 @@ class CloudGif(object):
                         if os.path.isfile(img):
                                 print 'uploading',str(img)
                                 self.trans.uploadFile(img)
-				time.sleep(30)
 	              	self.trans.closeConnection()
                 except:
                 	print "could not connected to remote server"
@@ -86,7 +86,8 @@ if __name__ ==  "__main__":
 	cg = CloudGif()
 	
 	while True:
-		l = cg.findImg('giftest')
+		l = cg.findImg('gif')
 		imgList = sorted(l)
-		cg.make_gif(180, imgList[:20], 'giftest')
-
+		print imgList
+		cg.make_gif(180, imgList[:10], 'gif')
+		time.sleep(5)

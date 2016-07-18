@@ -50,7 +50,6 @@ class CloudCam(object):
         self.cg = CloudGraph()
 	self.c = CameraExpose()
 	self.ci = ClouduinoInterface()
-	os.system('rm gif/*')
 
 
     def check_exposure(self, median):

@@ -398,7 +398,7 @@ class CloudGraph(object):
 		plt.close()
 		fig.clf()
 		
-		self.uploadImg('latest.png')
+		#self.uploadImg('latest.png')
 		return
 
 	def mapImg(self, imArr = None, name = None, map = None):
@@ -413,7 +413,7 @@ class CloudGraph(object):
 		plt.draw()
 		plt.savefig(name, transparent=True, facecolor="black", edgecolor='none', bbox_inches='tight')
 		shutil.copyfile(name, os.path.join("/var/www/html/",name))
-		self.uploadImg(name)
+		#self.uploadImg(name)
 		plt.close()
 		fig1.clf()
 		return
