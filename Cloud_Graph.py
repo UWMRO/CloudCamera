@@ -267,16 +267,16 @@ class CloudGraph(object):
 		output:
 			result		(scaled image)
 		"""
-		
+		bound = 10		
 		if median > 200:
 			bytehigh = 256
 		else:
-			bytehigh = int(median + (2.0*std))
+			bytehigh = int(median + (2.0*bound))
 
 		if median < 60:
 			bytelow = 0
 		else:
-			bytelow = int(median - (2.0*std))
+			bytelow = int(median - (2.0*bound))
 		result = Scale(img.astype(float), cmax = bytehigh, cmin = bytelow) #, high = bytehigh, low = bytelow)
 		return result
 
