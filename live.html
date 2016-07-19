@@ -2,19 +2,17 @@
 <script language="javascript">
 
 function updateImage() {
-   obj1 = document.latestimg;
-   obj1.src = obj1.src + "?" + Math.random();
    obj3 = document.latest;
    obj3.src = obj3.src + "?" + Math.random();	
    obj3 = document.latestmap;
    obj3.src = obj3.src + "?" + Math.random();   
-   setTimeout("updateImage()",5000);
+   setTimeout("updateImage()",30000);
 }
 
 function updateGIF() {
    obj2 = document.latestgif;
    obj2.src = obj2.src + "?" + Math.random();
-   setTimeout("updateImage()",60000);
+   setTimeout("updateGIF()",60000);
 }
 
 fuction start(){

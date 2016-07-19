@@ -1,9 +1,10 @@
 *.pyc
 *.fits
 analyzed/
-gif
-giftest
-images
-logs
-masks
+gif/
+git_map
+giftest/
+images/
+logs/
+masks/
 
