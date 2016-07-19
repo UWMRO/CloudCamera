@@ -21,6 +21,7 @@ import paramiko
 import time
 import os
 import keyring
+import sys
 
 class transfer(object):
 	def __init__(self):
@@ -38,13 +39,14 @@ class transfer(object):
 		self.ftp = self.ssh.open_sftp()
 
 	def transProgress(self, trans, toBeTrans):
-		print ("transferred: {0:.0f} %".format((trans / toBeTrans) * 100))
-		time.sleep(5)
+		sys.stdout.write("\rtransferred: {0:.0f} %".format((trans / toBeTrans) * 100))
+		sys.stdout.flush()
 
 
 	def uploadFile(self, f_in):
-		#add changdir to public_html
+		print("uploading: ", f_in)
 		self.ftp.put(f_in,os.path.join(self.parm['server_dir'], f_in), callback=self.transProgress)
+		print("")
 		return
 
 	def closeConnection(self):

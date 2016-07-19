@@ -89,48 +89,43 @@ class CloudCam(object):
 	    if self.gain > 1:
 	    	self.gain -= 1
 
-        # if exposure reaches maximum, move the filter out of the way
     	if self.expose > 60.0:
-    	    """
-    	    if self.filterpos == 1:
-        		print "Moving filter out of FoV"
-        		self.ci.openPort()
-        		time.sleep(2)
-        		self.ci.setFilterPos(False)
-        		time.sleep(5)
-        		self.ci.closePort()
-        		self.filterpos = 0
-            else:
-            """
             print "Exposure reached maximum of 60s"
             self.expose = 60.0
 	    if self.gain < 6:
 	    	self.gain += 1
-	    return
+	return
+
+    def checkDir(self):
+	dayDir = time.strftime("%Y%m%d", time.gmtime())
+	if not os.path.isdir(os.path.join(os.getcwd(), 'images', dayDir)):
+		os.mkdir(os.path.join(os.getcwd(), 'images', dayDir))
+		print 'directory made: ', os.path.join(os.getcwd(), 'images', dayDir)
+	if not os.path.isdir(os.path.join(os.getcwd(), 'analyzed', dayDir)):
+                os.mkdir(os.path.join(os.getcwd(), 'analyzed', dayDir))
+		print 'directory made: ', os.path.join(os.getcwd(), 'analyzed', dayDir)
 
     def run_camera(self):
         """
         Take and analyze image, check exposure after analysis
         """
-
+	self.checkDir()	
         name = time.strftime("%Y%m%dT%H%M%S")+"_"+str('%.3f'%(self.expose))
-        print str('%.3f'%(self.expose))
 	if os.path.isfile('binary'):
 		os.remove('binary')
 	try:
         	self.takeImage("cloud", name+".fits", self.expose, self.dir)
 	except:
-		#raise ExposeError
 		traceback.print_exc()
         time.sleep(self.expose+2)
 	try:
-       		median = cg.run_analysis("images/"+name+".fits", "analyzed/"+name+"_analyzed.png", name, self.expose, self.gain)
+       		median = cg.run_analysis( name, self.expose, self.gain)
 		self.check_exposure(median)
 	except:
 		traceback.print_exc()
 	if self.expose < 60:
 		print "going to sleep for:", 60-self.expose, "seconds"
-	#	time.sleep(60-self.expose)
+		time.sleep(60-self.expose)
         self.check_exposure(median)
 
         return

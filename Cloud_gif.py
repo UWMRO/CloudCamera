@@ -10,11 +10,24 @@ import threading
 from PIL import Image
 from images2gif import writeGif
 import numpy as np
+import datetime
 
 class CloudGif(object):
 	def __init__(self):
 		self.trans = transfer()
 
+	def cleanDir(self, dir = None):
+		list = sorted(os.listdir(os.path.join(os.getcwd(),dir)))
+		for img in list:
+			if img.endswith(".png"):
+				t1 = img.split('_')
+				t1_split = datetime.datetime.strptime(t1[0], "%Y%m%dT%H%M%S")
+				t2 = datetime.datetime.now()
+				diff =  t2 - t1_split
+				if diff > datetime.timedelta(minutes=60):
+					os.remove(os.path.join(os.getcwd(), dir, img))
+					print 'removing: ',img, diff
+	
 	def findImg(self, dir = None):
 	       	listdirect = os.path.join(os.getcwd(),dir)
 	        
@@ -74,7 +87,6 @@ class CloudGif(object):
 		try:
                 	self.trans.openConnection()
                         if os.path.isfile(img):
-                                print 'uploading',str(img)
                                 self.trans.uploadFile(img)
 	              	self.trans.closeConnection()
                 except:
@@ -86,8 +98,10 @@ if __name__ ==  "__main__":
 	cg = CloudGif()
 	
 	while True:
-		l = cg.findImg('gif')
+		subDir = 'gif'
+		cg.cleanDir(subDir)
+		l = cg.findImg(subDir)
 		imgList = sorted(l)
-		print imgList
-		cg.make_gif(180, imgList[:10], 'gif')
+		#print imgList
+		cg.make_gif(180, imgList[:10], subDir)
 		time.sleep(5)

@@ -132,7 +132,7 @@ class CloudGraph(object):
 
 		return
 
-	def run_analysis(self, img_in, img_out, name, expose, gain):
+	def run_analysis(self, name, expose, gain):
 		"""
 		This is where the code is actually run, so the total analysis
 		package can be called from outside this file.
@@ -143,6 +143,8 @@ class CloudGraph(object):
 			img_out			(name of output png image)
 			name 			(name file for timestamp)
 		"""
+		img_in = os.path.join(os.getcwd(),'images', name + '.fits')
+		img_out = os.path.join(os.getcwd(),'analyzed', name+'_analyzed.png')
 		img = self.fits_to_list(img_in)
 		print "Analyzing "+str(img_in)
 
@@ -160,8 +162,11 @@ class CloudGraph(object):
 		masked_img, junk1, junk2, junk3 = self.dynamic_mask(img, self.large_mask)
 
 		# Produce output png with histogram info
-		self.plot_histogram(fixed_vals, bins, img_out, masked_img, median, mean, std, name, gain)
-
+		try:
+			self.plot_histogram(fixed_vals, bins, img_out, masked_img, median, mean, std, name, gain)
+		except:
+			traceback.print_exc()
+			return
 		# Add image data to the FITS header, compress the image
 		self.add_headers(expose, median, std, name, img_in)
 
@@ -390,11 +395,11 @@ class CloudGraph(object):
 
 		plt.draw()
 
-		
+		dayDir = time.strftime("%Y%m%d", time.gmtime())	
 		fig.savefig("latest.png", cmap="grey", transparent=True, facecolor="black", edgecolor='none', clobber=True)
 		shutil.copyfile("latest.png", "/var/www/html/latest.png")
-		shutil.copyfile("latest.png", os.path.join("images", name+".png"))
-		shutil.copyfile("latest.png", os.path.join("gif", name+".png"))
+		shutil.copyfile("latest.png", os.path.join(os.getcwd(),"analyzed", dayDir, name+"_analyzed.png"))
+		shutil.copyfile("latest.png", os.path.join(os.getcwd(),"gif", name+".png"))
 		plt.close()
 		fig.clf()
 		
@@ -422,7 +427,6 @@ class CloudGraph(object):
 		try:
                 	self.trans.openConnection()
                         if os.path.isfile(img):
-                                print 'uploading',str(img)
                                 self.trans.uploadFile(img)
                 	self.trans.closeConnection()
                 except:
