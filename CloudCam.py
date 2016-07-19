@@ -62,38 +62,29 @@ class CloudCam(object):
         """
 
         # Check and adjust exposure timing if necessary
-        if median < self.min:
-	    self.expose = self.expose*(1.0+self.step)
-            print "Exposure too short, increasing by "+str(self.step*100)+"%"
-        elif median > self.max:
-            self.expose = self.expose*(1.0-self.step)
-            print "Exposure too long, decreasing by "+str(self.step*100)+"%"
+        if median < self.min and self.expose != 60:
+	    if self.expose >=30.0 and self.gain == 1:
+                self.gain += 1
+                print "Gain Set To: ", self.gain
+            if self.expose <=60.0 and self.gain > 1:
+                self.expose = self.expose*(1.0+self.step)
+                print "Exposure too short, increaseing to: "+str(self.expose)+" seconds"
+		
+
+        elif median > self.max and self.expose != 60:
+	    if self.expose >=0.02 and self.gain > 1:
+            	self.gain -= 1
+		print "Gain Set To: ", self.gain
+	    if self.expose >=0.02 and self.gain == 1:
+		self.expose = self.expose*(1.0-self.step)
+                print "Exposure too long, decreasing to: "+str(self.expose)+" seconds"
         else:
             print "Exposure within bounds"
+	if self.expose < 0.02:
+		self.expose = 0.02
+	if self.expose > 60.0:
+                self.expose = 60.0
 
-        # If exposure reaches minimum, move the filter over the lens
-        if self.expose < 0.02:
-            """
-    	    if self.filterpos == 0:
-        		print "Moving filter into FoV"
-        		self.ci.openPort()
-        		time.sleep(2)
-        		self.ci.setFilterPos(False)
-        		time.sleep(5)
-        		self.ci.closePort()
-        		self.filterpos = 1
-            else:
-            """
-            print "Exposure reached minimum of 0.02s"
-            self.expose = 0.02
-	    if self.gain > 1:
-	    	self.gain -= 1
-
-    	if self.expose > 60.0:
-            print "Exposure reached maximum of 60s"
-            self.expose = 60.0
-	    if self.gain < 6:
-	    	self.gain += 1
 	return
 
     def checkDir(self):
@@ -104,7 +95,8 @@ class CloudCam(object):
 	if not os.path.isdir(os.path.join(os.getcwd(), 'analyzed', dayDir)):
                 os.mkdir(os.path.join(os.getcwd(), 'analyzed', dayDir))
 		print 'directory made: ', os.path.join(os.getcwd(), 'analyzed', dayDir)
-
+	return
+	
     def run_camera(self):
         """
         Take and analyze image, check exposure after analysis

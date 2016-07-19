@@ -55,7 +55,6 @@ import sys
 import subprocess
 import shutil
 from Cloud_Mask import CloudMask
-from Cloud_gif import CloudGif
 from transfer import transfer
 from shutil import copyfile
 from CloudParams import *
@@ -72,7 +71,6 @@ class CloudGraph(object):
 		self.dir_stats = {}
 		self.count = 0
 		self.cm = CloudMask()
-		self.Cg = CloudGif()
 		self.hdudata = None
 		self.header = None
 		self.scaleimg = scale_img
@@ -104,7 +102,6 @@ class CloudGraph(object):
 
 		# Produce any missing folders
 		folder_list = ["gif", "logs", "images", "analyzed", "masks"]
-		#shutil.rmtree('gif')
 		for folder in folder_list:
 			if (os.path.isdir(folder)) == False:
 				print "Creating directory "+str(folder)
@@ -117,10 +114,11 @@ class CloudGraph(object):
 			print "Large aperture mask file not found, making one now."
 			self.cm.make_aperture_mask(500)
 			self.cm.make_aperture_mask(300)
-			self.cm.make_wedge_mask(300)
+			#self.cm.make_wedge_mask(300)
 
 		self.large_mask = np.load("masks/aperture_mask_500.npy")
 		self.small_mask = np.load("masks/aperture_mask_300.npy")
+		'''
 		self.nw_mask = np.load("masks/1_wedge_mask.npy")
 		self.w_mask = np.load("masks/2_wedge_mask.npy")
 		self.sw_mask = np.load("masks/3_wedge_mask.npy")
@@ -129,7 +127,7 @@ class CloudGraph(object):
 		self.e_mask = np.load("masks/6_wedge_mask.npy")
 		self.ne_mask = np.load("masks/7_wedge_mask.npy")
 		self.n_mask = np.load("masks/8_wedge_mask.npy")
-
+		'''
 		return
 
 	def run_analysis(self, name, expose, gain):
@@ -153,7 +151,7 @@ class CloudGraph(object):
 		print "Median = "+str(median)+", Mean = "+str(mean)+", Standard Dev = "+str(std)
 
 		# Calculate directional statistics
-		self.directional_statistics(masked)
+		#self.directional_statistics(masked)
 		# Calculate histogram for small maksed image
 		values, bins = self.pixel_value_list(masked)
 		fixed_vals = np.append(values, 0)
@@ -207,13 +205,14 @@ class CloudGraph(object):
 		pre_masked = ma.array(image, mask=maskname)
 
 		# Mask saturated or empty
-		masked1 = ma.masked_greater(pre_masked, 254)
-		#masked1 = ma.masked_less(masked1, 0)
-
+		#upper clipping
+		#masked1 = ma.masked_greater(pre_masked, 254)
+		masked1 = pre_masked
+	
 		median = int(ma.median(masked1))
 		mean = ma.mean(masked1)
 		std = ma.std(masked1)
-
+		
 		mean = float('%.2f' % (mean))
 		std = float('%.2f' % (std))
 
@@ -269,14 +268,15 @@ class CloudGraph(object):
 			result		(scaled image)
 		"""
 		
-		bytehigh = int(median + (2.0*std))
-		if bytehigh > 255:
-			bytescale = 255
+		if median > 200:
+			bytehigh = 256
+		else:
+			bytehigh = int(median + (2.0*std))
 
-		bytelow = int(median - (1.5*std))
-		if bytelow < 0:
+		if median < 60:
 			bytelow = 0
-
+		else:
+			bytelow = int(median - (2.0*std))
 		result = Scale(img.astype(float), cmax = bytehigh, cmin = bytelow) #, high = bytehigh, low = bytelow)
 		return result
 
@@ -325,7 +325,7 @@ class CloudGraph(object):
 		fig, ax = plt.subplots(2,2)
 		fig.set_size_inches(10,10)       # width, height
 		fig.tight_layout()
-		gs = gridspec.GridSpec(10,10)		# height, width
+		gs = gridspec.GridSpec(14,10)		# height, width
 
 		#Find timestamp, change this to use header info instead
 		timestamp = name.split('_')
@@ -335,32 +335,32 @@ class CloudGraph(object):
 			exp = 'NA'
 
 		#Plot the masked image, allow for arbitrary rotation
-		ax[0,0] = plt.subplot(gs[:7,:7])
+		ax[0,0] = plt.subplot(gs[:10,:10])
 		ax[0,0].axis('off')
 
 		# Insert statistical information into the image
 
 		ax[0,0].text(600, 0, "N", size=20, color="white")
-		ax[0,0].text(600, 1100, "S", size=20, color="white")
-		ax[0,0].text(0, 550, "E", size=20, color="white")
-		ax[0,0].text(1200, 550, "W", size=20, color="white")
-		ax[0,0].text(0, 1200, name[0:4]+'-'+name[4:6]+'-'+name[6:8]+'   '+name[9:11]+':'+name[11:13]+':'+name[13:15], size = 16, color="white", horizontalalignment='left')
-		ax[0,0].text(0, 1260, 'Exposure = '+str(exp)+' [s]', size = 16, color="white", horizontalalignment='left', )
-		ax[0,0].text(0, 1320, 'Gain = '+str(gain), size = 16, color = "white", horizontalalignment = "left")
-		ax[0,0].text(1200, 1200 , 'Median = %.1f' % (median), size = 16, color="white", horizontalalignment='right')
-		ax[0,0].text(1200, 1260, "Mean = %.2f" % (mean), size = 16, color="white", horizontalalignment='right')
-		ax[0,0].text(1200, 1320, 'Standard Dev = %.2f' % (std), size = 16, color="white", horizontalalignment='right')
+		ax[0,0].text(600, 1050, "S", size=20, color="white")
+		ax[0,0].text(75, 550, "E", size=20, color="white")
+		ax[0,0].text(1150, 550, "W", size=20, color="white")
+		ax[0,0].text(0, 980, name[0:4]+'-'+name[4:6]+'-'+name[6:8]+'   '+name[9:11]+':'+name[11:13]+':'+name[13:15], size = 16, color="white", horizontalalignment='left')
+		ax[0,0].text(0, 1020, 'Exposure = '+str(exp)+' [s]', size = 16, color="white", horizontalalignment='left', )
+		ax[0,0].text(0, 1060, 'Gain = '+str(gain), size = 16, color = "white", horizontalalignment = "left")
+		ax[0,0].text(1200, 980 , 'Median = %.1f' % (median), size = 16, color="white", horizontalalignment='right')
+		ax[0,0].text(1200, 1020, "Mean = %.2f" % (mean), size = 16, color="white", horizontalalignment='right')
+		ax[0,0].text(1200, 1060, 'Standard Dev = %.2f' % (std), size = 16, color="white", horizontalalignment='right')
 		ax[0,0].imshow(img, cmap="gray")
 
 		#Plot the histogram
-		ax[1,0] = plt.subplot(gs[8:9,:10])
+		ax[1,0] = plt.subplot(gs[11:13,:10])
 		ax[1,0].bar(bins, (values*100.0), alpha=1.0)
 		ax[1,0].set_xlim(0,255)
 		ax[1,0].set_xlabel('Pixel Value', size=16)
 		ax[1,0].xaxis.label.set_color('white')
 		plt.locator_params(axis='y',nbins=6)
 		ax[1,0].tick_params(axis='x', colors='white', labelsize=12)
-
+		'''
 		#Plot directional Median values
 		ax[0,1] = plt.subplot(gs[1:4,7:])
 		sizes = [1,1,1,1,1,1,1,1]
@@ -392,7 +392,7 @@ class CloudGraph(object):
 		colors = cmap(std_data)
 		ax[1,1].pie(sizes, colors=colors)
 		ax[1,1].text(100, 100, 'STD', size=12, color="white")
-
+		'''
 		plt.draw()
 
 		dayDir = time.strftime("%Y%m%d", time.gmtime())	
@@ -409,15 +409,12 @@ class CloudGraph(object):
 	def mapImg(self, imArr = None, name = None, map = None):
 		
 		fig1 = plt.figure(figsize=(10,9.5))
-		#fig1.figsize(1024/DPI, 1280/DPI)
 		plt.imshow(imArr, cmap=map)
-		
-		#color_bar = plt.colorbar()
-		#color_bar.outline.set_color('white')                   #set colorbar box color
-		#color_bar.ax.yaxis.set_tick_params(color='white') 
 		plt.draw()
 		plt.savefig(name, transparent=True, facecolor="black", edgecolor='none', bbox_inches='tight')
 		shutil.copyfile(name, os.path.join("/var/www/html/",name))
+		if map == 'inferno':
+			shutil.copyfile(name, os.path.join(os.getcwd(),"gif_map",time.strftime("%Y%m%dT%H%M%S_map.png")))
 		self.uploadImg(name)
 		plt.close()
 		fig1.clf()

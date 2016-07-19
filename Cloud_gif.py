@@ -11,6 +11,7 @@ from PIL import Image
 from images2gif import writeGif
 import numpy as np
 import datetime
+import traceback
 
 class CloudGif(object):
 	def __init__(self):
@@ -47,38 +48,28 @@ class CloudGif(object):
 		return imglist
 
 	def make_gif(self, killmax, imglist, dir=None):
+		if dir == "gif":
+                        gifName = 'latest.gif'
+			gifPath = os.path.join(os.getcwd(), dir, gifName)
+                if dir == "gif_map":
+                        gifName = 'latest_map.gif'
+			gifPath = os.path.join(os.getcwd(), dir, gifName)
 		#produce a gif of the last 10 images when self.count == 10
 		print "Producing gif image"
-		killcount = 0
-		if os.path.isfile('latest.gif'):
-			os.remove("latest.gif")
-		
-		command = "convert -delay 40 -loop 0 "+os.getcwd()+"/"+dir+"/*.png latest.gif"
+		if os.path.isfile(gifPath):
+			os.remove(gifPath)
+	
+		print gifName, gifPath	
+		#command = "convert -delay 40 -loop 0 "+os.getcwd()+"/"+dir+"/*.png -gravity center -fill white -annotate -100+100 '%f' latest.gif"
+		command = "convert -delay 40 -loop 0 "+os.getcwd()+"/"+dir+"/*.png " + gifName
+		print command
 		out = subprocess.Popen(command, stdout = subprocess.PIPE, shell=True)
 		stdoutp, stderrp = out.communicate()
-		while os.path.isfile('latest.gif') == False:
-			print "subprocess output:"+str(stdoutp)
-			if killcount == killmax:
-				print "ran out of time"
-				return
-			else:
-				print "gif not ready"
-				print str(killcount)
-				killcount += 1
-				time.sleep(1)
-		
-		#images = [Image.open(fn) for fn in imglist]
-		#writeGif('latest.gif', images, duration=0.5, subRectangles=False)
-
-		#print "sleeping while gif is produced"
-		#time.sleep(120)
-		#writeGif("latest.gif", self.imglist, duration=0.3, repeat=True)
-		if os.path.isfile('latest.gif'):
+		print stdoutp
+		if os.path.isfile(gifName):
 			print "gif image produced"
-			shutil.copyfile("latest.gif", "/var/www/html/latest.gif")
-			#upload = threading.Thread(self.uploadImg('latest.gif'))
-			#upload.start()
-			#self.uploadImg('latest.gif')
+			shutil.copyfile(gifName, os.path.join("/var/www/html/", gifName))
+			self.uploadImg(gifName)
 		else:
 			print "gif was not created"
 		return
@@ -99,9 +90,21 @@ if __name__ ==  "__main__":
 	
 	while True:
 		subDir = 'gif'
+		subDir2 = 'gif_map'
 		cg.cleanDir(subDir)
-		l = cg.findImg(subDir)
-		imgList = sorted(l)
-		#print imgList
-		cg.make_gif(180, imgList[:10], subDir)
-		time.sleep(5)
+		cg.cleanDir(subDir2)
+		try:
+			l = cg.findImg(subDir)
+			imgList = sorted(l)
+		except:
+			traceback.print_exc()
+		"""try:
+			l2 = cg.findImg(subDir2)
+                        imgList2 = sorted(l2)
+                except:
+                        traceback.print_exc()
+		"""
+
+		cg.make_gif(180, imgList, subDir)
+		#cg.make_gif(180, imgList2, subDir2)
+		time.sleep(180)
