@@ -61,6 +61,13 @@ from CloudParams import *
 import thread
 import traceback
 import threading
+from clouduino_interface import ClouduinoInterface
+
+	"""docstring for l"""
+	def __init__(self, arg):
+		super(l, self).__init__()
+		self.arg = arg
+
 
 class CloudGraph(object):
 	def __init__(self):
@@ -71,6 +78,7 @@ class CloudGraph(object):
 		self.dir_stats = {}
 		self.count = 0
 		self.cm = CloudMask()
+		self.ci = ClouduinoInterface()
 		self.hdudata = None
 		self.header = None
 		self.scaleimg = scale_img
@@ -208,11 +216,11 @@ class CloudGraph(object):
 		#upper clipping
 		#masked1 = ma.masked_greater(pre_masked, 254)
 		masked1 = pre_masked
-	
+
 		median = int(ma.median(masked1))
 		mean = ma.mean(masked1)
 		std = ma.std(masked1)
-		
+
 		mean = float('%.2f' % (mean))
 		std = float('%.2f' % (std))
 
@@ -267,7 +275,7 @@ class CloudGraph(object):
 		output:
 			result		(scaled image)
 		"""
-		bound = 10		
+		bound = 10
 		if median > 200:
 			bytehigh = 256
 		else:
@@ -334,6 +342,7 @@ class CloudGraph(object):
 		except:
 			exp = 'NA'
 
+
 		#Plot the masked image, allow for arbitrary rotation
 		ax[0,0] = plt.subplot(gs[:10,:10])
 		ax[0,0].axis('off')
@@ -360,6 +369,15 @@ class CloudGraph(object):
 		ax[1,0].xaxis.label.set_color('white')
 		plt.locator_params(axis='y',nbins=6)
 		ax[1,0].tick_params(axis='x', colors='white', labelsize=12)
+
+		#Query rain sensor status
+		rainStatus = self.ci.checkRain()
+		if rainStatus == True:
+			ax[1,0].text(200, 100, "Rain detected", size=26, color="red")
+		elif rainStatus == False:
+			ax[1,0].text(200, 100, "No rain detected", size=26, color="green")
+		else:
+			ax[1,0].text(200, 100, "Could not read rain sensor", size=26, color="purple")
 		'''
 		#Plot directional Median values
 		ax[0,1] = plt.subplot(gs[1:4,7:])
@@ -395,19 +413,19 @@ class CloudGraph(object):
 		'''
 		plt.draw()
 
-		dayDir = time.strftime("%Y%m%d", time.gmtime())	
+		dayDir = time.strftime("%Y%m%d", time.gmtime())
 		fig.savefig("latest.png", cmap="grey", transparent=True, facecolor="black", edgecolor='none', clobber=True)
 		shutil.copyfile("latest.png", "/var/www/html/latest.png")
 		shutil.copyfile("latest.png", os.path.join(os.getcwd(),"analyzed", dayDir, name+"_analyzed.png"))
 		shutil.copyfile("latest.png", os.path.join(os.getcwd(),"gif", name+".png"))
 		plt.close()
 		fig.clf()
-		
+
 		self.uploadImg('latest.png')
 		return
 
 	def mapImg(self, imArr = None, name = None, map = None):
-		
+
 		fig1 = plt.figure(figsize=(10,9.5))
 		plt.imshow(imArr, cmap=map)
 		plt.draw()
