@@ -63,10 +63,10 @@ import traceback
 import threading
 from clouduino_interface import ClouduinoInterface
 
-	"""docstring for l"""
-	def __init__(self, arg):
-		super(l, self).__init__()
-		self.arg = arg
+"""docstring for l"""
+def __init__(self, arg):
+	super(l, self).__init__()
+	self.arg = arg
 
 
 class CloudGraph(object):
@@ -361,6 +361,15 @@ class CloudGraph(object):
 		ax[0,0].text(1200, 1060, 'Standard Dev = %.2f' % (std), size = 16, color="white", horizontalalignment='right')
 		ax[0,0].imshow(img, cmap="gray")
 
+                #Query rain sensor status
+                rainStatus = self.ci.checkRain()
+                if rainStatus == True:
+                        ax[0,0].text(1100, 500, "Rain = Yes", size=26, color="red")
+                elif rainStatus == False:
+                        ax[0,0].text(1100, 50, "Rain = No", size=26, color="green")
+                else:
+                        ax[0,0].text(1100, 50, "Rain = ?", size=26, color="yellow")
+               
 		#Plot the histogram
 		ax[1,0] = plt.subplot(gs[11:13,:10])
 		ax[1,0].bar(bins, (values*100.0), alpha=1.0)
@@ -370,14 +379,6 @@ class CloudGraph(object):
 		plt.locator_params(axis='y',nbins=6)
 		ax[1,0].tick_params(axis='x', colors='white', labelsize=12)
 
-		#Query rain sensor status
-		rainStatus = self.ci.checkRain()
-		if rainStatus == True:
-			ax[1,0].text(200, 100, "Rain detected", size=26, color="red")
-		elif rainStatus == False:
-			ax[1,0].text(200, 100, "No rain detected", size=26, color="green")
-		else:
-			ax[1,0].text(200, 100, "Could not read rain sensor", size=26, color="purple")
 		'''
 		#Plot directional Median values
 		ax[0,1] = plt.subplot(gs[1:4,7:])

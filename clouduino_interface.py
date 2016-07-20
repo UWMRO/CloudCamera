@@ -49,16 +49,19 @@ class ClouduinoInterface():
         return
 
     def checkRain(self):
-    """ Check the status of the rain sensor"""
-        self.ser.write('r')
-        time.sleep(1)
-        status = self.ser.readline()
-        if status == "rain = True":
+	""" Check the status of the rain sensor"""
+        #self.ser.write('r')
+        #time.sleep(1)
+        #status = self.ser.readline()
+        status = "rain = True"
+	"""
+	if status == "rain = True":
             return True
         elif status == "rain = False":
             return False
         else:
-            return None
+        """
+	return None
 
     def readSer(self):
 	""" Read in the arduino output, parse, and return something useful

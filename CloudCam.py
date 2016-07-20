@@ -66,9 +66,9 @@ class CloudCam(object):
 	    if self.expose >=30.0 and self.gain == 1:
                 self.gain += 1
                 print "Gain Set To: ", self.gain
-            if self.expose <=60.0 and self.gain > 1:
+            if self.expose <=60.0 and self.gain >= 1:
                 self.expose = self.expose*(1.0+self.step)
-                print "Exposure too short, increaseing to: "+str(self.expose)+" seconds"
+                print "Exposure too short, increasing to: "+str(self.expose)+" seconds"
 		
 
         elif median > self.max and self.expose != 60:
@@ -118,7 +118,7 @@ class CloudCam(object):
 	if self.expose < 60:
 		print "going to sleep for:", 60-self.expose, "seconds"
 		time.sleep(60-self.expose)
-        self.check_exposure(median)
+        #self.check_exposure(median)
 
         return
 
