@@ -30,7 +30,6 @@ void setup(void) {
 
 void checkRainSensor1(){
       int status = digitalRead(rainPin1);
-      Serial.println(status);
       if (status == 0){
         Serial.println("rain1 = True");
         }
@@ -42,7 +41,6 @@ void checkRainSensor1(){
 
 void checkRainSensor2(){
       int status = digitalRead(rainPin2);
-      Serial.println(status);
       if (status == 0){
         Serial.println("rain2 = True");
         }
