@@ -3,11 +3,12 @@
 #include <Servo.h>
 
 #define DHTPIN A0
-#define DHTTYPE DHT22 
+#define DHTTYPE DHT22
 DHT dht(DHTPIN, DHTTYPE);
 
 int servoPin = 9;       // light servo connected to pin 9
 int heatPin = 13;      // Heater connected to digital pin 13
+int rainPin = 11;       // Rain sensor to digital pin 11
 int dsPin = 10;
 int pos = 0;
 int inPos = 90;
@@ -24,8 +25,21 @@ Servo myservo;
 void setup(void) {
   Serial.begin(9600);
   //myservo.attach(servoPin);  // attaches the servo on pin 9 to the servo object
-  Serial.println("past here");
+  pinMode(rainPin, INPUT);
+  Serial.println("Pins attached");
 
+
+}
+
+void checkRainSensor(){
+      status = digitalRead(rainPin);
+      if (status = 1){
+        Serial.println("rain = True");
+        }
+      else{
+        Serial.println("rain = False");
+        }
+      return;
 }
 
 void setFilterIn(){
@@ -35,7 +49,7 @@ void setFilterIn(){
         for (pos = outPos; pos <= inPos; pos += 1) { // goes from 0 degrees to 180 degrees
         myservo.write(pos);              // tell servo to go to position in variable 'pos'
         delay(servoDelay);                       // waits 15ms for the servo to reach the position
-        }  
+        }
         delay(1500);
         pos = inPos;
     }
@@ -74,6 +88,9 @@ void loop(void) {
         break;
       case 'y':
          test();
+         break;
+      case 'r':
+         checkRainSensor();
          break;
         }
     }

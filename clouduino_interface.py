@@ -2,7 +2,7 @@
 
 """
 clouduino_interface.py
-This program is designed to read in data from an arduino.  
+This program is designed to read in data from an arduino.
 Specifically this is program interfaces to the arduino on the
 cloud camera.  Functionality includes reading the temperature,
  humidity, and light levels.
@@ -48,6 +48,18 @@ class ClouduinoInterface():
         self.ser.close()
         return
 
+    def checkRain(self):
+    """ Check the status of the rain sensor"""
+        self.ser.write('r')
+        time.sleep(1)
+        status = self.ser.readline()
+        if status == "rain = True":
+            return True
+        elif status == "rain = False":
+            return False
+        else:
+            return None
+
     def readSer(self):
 	""" Read in the arduino output, parse, and return something useful
 	Arguments:
@@ -71,8 +83,8 @@ class ClouduinoInterface():
 	else:
 		self.ser.write('o')
 	return
-	
- 
+
+
 if __name__ == "__main__":
 	c = ClouduinoInterface()
 	c.openPort()
