@@ -121,11 +121,11 @@ class CloudGraph(object):
 		else:
 			print "Large aperture mask file not found, making one now."
 			self.cm.make_aperture_mask(500)
-			self.cm.make_aperture_mask(300)
+			self.cm.make_aperture_mask(400)
 			#self.cm.make_wedge_mask(300)
 
 		self.large_mask = np.load("masks/aperture_mask_500.npy")
-		self.small_mask = np.load("masks/aperture_mask_300.npy")
+		self.small_mask = np.load("masks/aperture_mask_400.npy")
 		'''
 		self.nw_mask = np.load("masks/1_wedge_mask.npy")
 		self.w_mask = np.load("masks/2_wedge_mask.npy")
@@ -275,16 +275,20 @@ class CloudGraph(object):
 		output:
 			result		(scaled image)
 		"""
-		bound = 10
-		if median > 200:
-			bytehigh = 256
+		if median < 100:
+			scale = 2*std
+		elif median > 100 and median < 200:
+			scale = 5*std
 		else:
-			bytehigh = int(median + (2.0*bound))
+			scale=20
+		
+		bytehigh = int(median + scale)
 
 		if median < 60:
 			bytelow = 0
 		else:
-			bytelow = int(median - (2.0*bound))
+			bytelow = int(median - scale)
+		
 		result = Scale(img.astype(float), cmax = bytehigh, cmin = bytelow) #, high = bytehigh, low = bytelow)
 		return result
 
@@ -362,14 +366,33 @@ class CloudGraph(object):
 		ax[0,0].imshow(img, cmap="gray")
 
                 #Query rain sensor status
-                rainStatus = self.ci.checkRain()
-                if rainStatus == True:
-                        ax[0,0].text(1100, 500, "Rain = Yes", size=26, color="red")
-                elif rainStatus == False:
-                        ax[0,0].text(1100, 50, "Rain = No", size=26, color="green")
+                print "querying rain status"
+		self.ci.openPort()
+		time.sleep(1)
+		rainStatus1 = self.ci.checkRain1()
+		time.sleep(1)
+		#self.ci.closePort()
+                if rainStatus1 == True:
+                        ax[0,0].text(1000, 50, "Rain (1) = Yes", size=18, color="red")
+                elif rainStatus1 == False:
+                        ax[0,0].text(1000, 50, "Rain (1) = No", size=18, color="green")
                 else:
-                        ax[0,0].text(1100, 50, "Rain = ?", size=26, color="yellow")
+                        ax[0,0].text(1000, 50, "Rain (1) = Unknown", size=18, color="yellow")
                
+                #Query rain sensor status
+                #self.ci.openPort()
+		time.sleep(0.25)
+		rainStatus2 = self.ci.checkRain2()
+                self.ci.closePort()
+		if rainStatus2 == True:
+                        ax[0,0].text(1000, 100, "Rain (2) = Yes", size=18, color="red")
+                elif rainStatus2 == False:
+                        ax[0,0].text(1000, 100, "Rain (2) = No", size=18, color="green")
+                else:
+                        ax[0,0].text(1000, 100, "Rain (2) = Unknown", size=18, color="yellow")
+               
+
+
 		#Plot the histogram
 		ax[1,0] = plt.subplot(gs[11:13,:10])
 		ax[1,0].bar(bins, (values*100.0), alpha=1.0)
