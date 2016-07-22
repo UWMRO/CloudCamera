@@ -61,7 +61,7 @@ class CloudGif(object):
 	
 		print gifName, gifPath	
 		#command = "convert -delay 40 -loop 0 "+os.getcwd()+"/"+dir+"/*.png -gravity center -fill white -annotate -100+100 '%f' latest.gif"
-		command = "convert -delay 40 -loop 0 "+os.getcwd()+"/"+dir+"/*.png " + gifName
+		command = "nice -5 convert -limit memory 1G -delay 40 -loop 0 "+os.getcwd()+"/"+dir+"/*.png " + gifName
 		print command
 		out = subprocess.Popen(command, stdout = subprocess.PIPE, shell=True)
 		stdoutp, stderrp = out.communicate()
@@ -73,6 +73,8 @@ class CloudGif(object):
 		else:
 			print "gif was not created"
 		return
+
+	def makeMPEG(self, killmax, imglist, dir=None):
 
 	def uploadImg(self, img):
 		try:
