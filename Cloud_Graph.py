@@ -73,6 +73,7 @@ class CloudGraph(object):
 		#self.logType = 'cloud' # Parameter used in  Logger class to create logfile
 		self.cm = CloudMask()
 		self.ci = ClouduinoInterface()
+		self.trans = transfer()
 		
 		#==>  I think this is the memory leak, needs to be a local variable
 		self.hdudata = None
@@ -369,7 +370,7 @@ class CloudGraph(object):
 		shutil.copyfile("latest.png", os.path.join(os.getcwd(),"gif", name+".png"))
 		plt.close()
 		fig.clf()
-		transfer.uploadFile(self.host, self.user, 'latest.png', self.serverDir)
+		self.trans.uploadFile(self.host, self.user, 'latest.png', self.serverDir)
 
 		#change memory pointer to allow for garbage collection
 		img, fig, gs, masked_img, ax = None
@@ -385,7 +386,7 @@ class CloudGraph(object):
 		shutil.copyfile(name, os.path.join("/var/www/html/",name))
 		#if map == 'inferno':
 		#	shutil.copyfile(name, os.path.join(os.getcwd(),"gif_map",time.strftime("%Y%m%dT%H%M%S_map.png")))
-		transfer.uploadFile(self.host, self.user, name, self.serverDir)
+		self.trans.uploadFile(self.host, self.user, name, self.serverDir)
 		plt.close()
 		fig1.clf()
 		fig1 = None
