@@ -1,0 +1,33 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD HTML 4.01//EN">
+<html>
+  <head>
+    <meta http-equiv="refresh" content="20">
+    <title>
+      Apache Point Observatory CloudCam<br>
+    </title>
+  </head>
+  <body bgcolor="black">
+    <h2>
+        <center><font color="blue">APO CloudCam</font></center>
+    </h2>
+    <font color="white">
+    <table border="0">
+    <tr>
+    <td><a href="latest.png"><img src="latest.png" width="400"></a></td>
+    <td><a href="latestimg.png"><img src="latestimg.png" width="400"></a></td>
+    <td><a href="latest.gif"><img src="latest.gif" width="400"></a></td>
+    </tr>
+    </table>
+<br><Br>
+<center>
+Image will auto-refresh every 30 seconds.<br><br>
+</center>
+<hr>
+
+<b>GIF Movies</b><Br><Br>
+<a href="0712.gif">2016-07-12</a><br>
+<a href="0713.gif">2016-07-13</a><br>
+
+  </font>
+  </body>
+</html>

@@ -1,5 +1,5 @@
-*.pyc
-*.fits
+.pyc
+.fits
 analyzed/
 gif/
 git_map
