@@ -74,30 +74,18 @@ class CloudGraph(object):
 		self.l = Logger() #Logger class creates logfile of processes
 		self.dir = os.path.join(os.getcwd(),'logs')
 		self.logType = 'cloud' # Parameter used in  Logger class to create logfile
-		self.imglist = []
 		self.dir_stats = {}
-		self.count = 0
 		self.cm = CloudMask()
 		self.ci = ClouduinoInterface()
 		self.hdudata = None
 		self.header = None
 		self.scaleimg = scale_img
 		self.bin_eros = binary_erosion
-		self.trans = transfer()
 		self.rotate = rotate
-		self.gif_upload = True
 
-		# Memory locations for masks
-		self.large_mask = None
-		self.small_mask = None
-		self.ne_mask = None
-		self.n_mask = None
-		self.nw_mask = None
-		self.w_mask = None
-		self.sw_mask = None
-		self.s_mask = None
-		self.se_mask = None
-		self.e_mask = None
+		self.host = 'galileo.apo.nmsu.edu'
+		self.user = 'jwhueh'
+		self.serverDir = 'public_html/CloudCamera/'
 
 
 	def start_up_checks(self):
@@ -402,39 +390,6 @@ class CloudGraph(object):
 		plt.locator_params(axis='y',nbins=6)
 		ax[1,0].tick_params(axis='x', colors='white', labelsize=12)
 
-		'''
-		#Plot directional Median values
-		ax[0,1] = plt.subplot(gs[1:4,7:])
-		sizes = [1,1,1,1,1,1,1,1]
-		med_data = []
-		for key in self.dir_stats:
-			tmp_med = self.dir_stats[key]['Median']
-			#normalize to max pixel value
-			norm_tmp_med = tmp_med / 255.0
-			med_data.append(norm_tmp_med)
-		cmap = plt.cm.gray
-		colors = cmap(med_data)
-		ax[0,1].pie(sizes, colors=colors)
-		ax[0,1].text(400, 0, "Median", size=20, color="white")
-		#ax[0,1].subtitle('Median', color="white")
-
-		#Plot directional Median values
-		ax[1,1] = plt.subplot(gs[4:7,7:])
-		sizes = [1,1,1,1,1,1,1,1]
-		std_data = []
-		for key in self.dir_stats:
-			tmp_std = self.dir_stats[key]['STD']
-			#normalize to 100 std
-			if tmp_std <= 50:
-				tmp_std = tmp_std / 50
-			else:
-				tmp_std = 1.0
-			std_data.append(tmp_std)
-		cmap = plt.cm.gray
-		colors = cmap(std_data)
-		ax[1,1].pie(sizes, colors=colors)
-		ax[1,1].text(100, 100, 'STD', size=12, color="white")
-		'''
 		plt.draw()
 
 		dayDir = time.strftime("%Y%m%d", time.gmtime())
@@ -445,7 +400,7 @@ class CloudGraph(object):
 		plt.close()
 		fig.clf()
 
-		self.uploadImg('latest.png')
+		transfer.uploadFile(self.host, self.user, 'latest.png', self.serverDir)
 		return
 
 	def mapImg(self, imArr = None, name = None, map = None):
@@ -460,35 +415,6 @@ class CloudGraph(object):
 		self.uploadImg(name)
 		plt.close()
 		fig1.clf()
-		return
-
-	def uploadImg(self, img):
-		try:
-                	self.trans.openConnection()
-                        if os.path.isfile(img):
-                                self.trans.uploadFile(img)
-                	self.trans.closeConnection()
-                except:
-			traceback.print_exc()
-		return
-
-	def makeGifOld(self, imArr):
-		#produce a gif of the last 10 images when self.count == 10
-		print "Producing gif image"
-		if os.path.isfile('latest.gif'):
-			os.remove("latest.gif")
-		command = "convert -delay 40 -loop 0 "+os.getcwd()+"/gif/*.png latest.gif"
-		out = subprocess.Popen(command, stdout = subprocess.PIPE, shell=True)
-		print out.communicate()
-		print "sleeping while gif is produced"
-		time.sleep(120)
-		#writeGif("latest.gif", self.imglist, duration=0.3, repeat=True)
-		if os.path.isfile('latest.gif'):
-			shutil.copyfile("latest.gif", "/var/www/html/latest.gif")
-		self.uploadImg('latest.gif')
-		print "gif image produced"
-		plt.close("all")
-		plt.close()
 		return
 
 	def add_headers(self, expose, median, std, name, img_in):
