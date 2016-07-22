@@ -61,6 +61,13 @@ from CloudParams import *
 import thread
 import traceback
 import threading
+from clouduino_interface import ClouduinoInterface
+
+"""docstring for l"""
+def __init__(self, arg):
+	super(l, self).__init__()
+	self.arg = arg
+
 
 class CloudGraph(object):
 	def __init__(self):
@@ -71,6 +78,7 @@ class CloudGraph(object):
 		self.dir_stats = {}
 		self.count = 0
 		self.cm = CloudMask()
+		self.ci = ClouduinoInterface()
 		self.hdudata = None
 		self.header = None
 		self.scaleimg = scale_img
@@ -113,11 +121,11 @@ class CloudGraph(object):
 		else:
 			print "Large aperture mask file not found, making one now."
 			self.cm.make_aperture_mask(500)
-			self.cm.make_aperture_mask(300)
+			self.cm.make_aperture_mask(400)
 			#self.cm.make_wedge_mask(300)
 
 		self.large_mask = np.load("masks/aperture_mask_500.npy")
-		self.small_mask = np.load("masks/aperture_mask_300.npy")
+		self.small_mask = np.load("masks/aperture_mask_400.npy")
 		'''
 		self.nw_mask = np.load("masks/1_wedge_mask.npy")
 		self.w_mask = np.load("masks/2_wedge_mask.npy")
@@ -208,11 +216,11 @@ class CloudGraph(object):
 		#upper clipping
 		#masked1 = ma.masked_greater(pre_masked, 254)
 		masked1 = pre_masked
-	
+
 		median = int(ma.median(masked1))
 		mean = ma.mean(masked1)
 		std = ma.std(masked1)
-		
+
 		mean = float('%.2f' % (mean))
 		std = float('%.2f' % (std))
 
@@ -267,16 +275,20 @@ class CloudGraph(object):
 		output:
 			result		(scaled image)
 		"""
-		bound = 10		
-		if median > 200:
-			bytehigh = 256
+		if median < 100:
+			scale = 2*std
+		elif median > 100 and median < 200:
+			scale = 5*std
 		else:
-			bytehigh = int(median + (2.0*bound))
+			scale=20
+		
+		bytehigh = int(median + scale)
 
 		if median < 60:
 			bytelow = 0
 		else:
-			bytelow = int(median - (2.0*bound))
+			bytelow = int(median - scale)
+		
 		result = Scale(img.astype(float), cmax = bytehigh, cmin = bytelow) #, high = bytehigh, low = bytelow)
 		return result
 
@@ -334,6 +346,7 @@ class CloudGraph(object):
 		except:
 			exp = 'NA'
 
+
 		#Plot the masked image, allow for arbitrary rotation
 		ax[0,0] = plt.subplot(gs[:10,:10])
 		ax[0,0].axis('off')
@@ -352,6 +365,34 @@ class CloudGraph(object):
 		ax[0,0].text(1200, 1060, 'Standard Dev = %.2f' % (std), size = 16, color="white", horizontalalignment='right')
 		ax[0,0].imshow(img, cmap="gray")
 
+                #Query rain sensor status
+                print "querying rain status"
+		self.ci.openPort()
+		time.sleep(1)
+		rainStatus1 = self.ci.checkRain1()
+		time.sleep(1)
+		#self.ci.closePort()
+                if rainStatus1 == True:
+                        ax[0,0].text(1000, 50, "Rain (1) = Yes", size=18, color="red")
+                elif rainStatus1 == False:
+                        ax[0,0].text(1000, 50, "Rain (1) = No", size=18, color="green")
+                else:
+                        ax[0,0].text(1000, 50, "Rain (1) = Unknown", size=18, color="yellow")
+               
+                #Query rain sensor status
+                #self.ci.openPort()
+		time.sleep(0.25)
+		rainStatus2 = self.ci.checkRain2()
+                self.ci.closePort()
+		if rainStatus2 == True:
+                        ax[0,0].text(1000, 100, "Rain (2) = Yes", size=18, color="red")
+                elif rainStatus2 == False:
+                        ax[0,0].text(1000, 100, "Rain (2) = No", size=18, color="green")
+                else:
+                        ax[0,0].text(1000, 100, "Rain (2) = Unknown", size=18, color="yellow")
+               
+
+
 		#Plot the histogram
 		ax[1,0] = plt.subplot(gs[11:13,:10])
 		ax[1,0].bar(bins, (values*100.0), alpha=1.0)
@@ -360,6 +401,7 @@ class CloudGraph(object):
 		ax[1,0].xaxis.label.set_color('white')
 		plt.locator_params(axis='y',nbins=6)
 		ax[1,0].tick_params(axis='x', colors='white', labelsize=12)
+
 		'''
 		#Plot directional Median values
 		ax[0,1] = plt.subplot(gs[1:4,7:])
@@ -395,19 +437,19 @@ class CloudGraph(object):
 		'''
 		plt.draw()
 
-		dayDir = time.strftime("%Y%m%d", time.gmtime())	
+		dayDir = time.strftime("%Y%m%d", time.gmtime())
 		fig.savefig("latest.png", cmap="grey", transparent=True, facecolor="black", edgecolor='none', clobber=True)
 		shutil.copyfile("latest.png", "/var/www/html/latest.png")
 		shutil.copyfile("latest.png", os.path.join(os.getcwd(),"analyzed", dayDir, name+"_analyzed.png"))
 		shutil.copyfile("latest.png", os.path.join(os.getcwd(),"gif", name+".png"))
 		plt.close()
 		fig.clf()
-		
+
 		self.uploadImg('latest.png')
 		return
 
 	def mapImg(self, imArr = None, name = None, map = None):
-		
+
 		fig1 = plt.figure(figsize=(10,9.5))
 		plt.imshow(imArr, cmap=map)
 		plt.draw()

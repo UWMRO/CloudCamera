@@ -2,21 +2,18 @@
 #include <OneWire.h>
 #include <Servo.h>
 
-#define DHTPIN A0
-#define DHTTYPE DHT22 
-DHT dht(DHTPIN, DHTTYPE);
+// #define DHTPIN A0
+// #define DHTTYPE DHT22
+// DHT dht(DHTPIN, DHTTYPE);
 
 int servoPin = 9;       // light servo connected to pin 9
-int heatPin = 13;      // Heater connected to digital pin 13
-int dsPin = 10;
+int heatPin = 12;      // Heater connected to digital pin 12
+int rainPin1 = 10;       // Rain sensor 2 to digital pin 11
+int rainPin2 = 11;       // Rain sensor 1 to digital pin 10
 int pos = 0;
 int inPos = 90;
 int outPos = 45;
 int servoDelay = 10;
-
-#define ONE_WIRE_BUS dsPin
-OneWire oneWire(ONE_WIRE_BUS);
-OneWire  ds(dsPin);
 
 Servo myservo;
 
@@ -24,8 +21,33 @@ Servo myservo;
 void setup(void) {
   Serial.begin(9600);
   //myservo.attach(servoPin);  // attaches the servo on pin 9 to the servo object
-  Serial.println("past here");
+  pinMode(rainPin1, INPUT_PULLUP);
+  pinMode(rainPin2, INPUT_PULLUP);
+  Serial.println("Pins attached");
 
+
+}
+
+void checkRainSensor1(){
+      int status = digitalRead(rainPin1);
+      if (status == 0){
+        Serial.println("rain1 = True");
+        }
+      else{
+        Serial.println("rain1 = False");
+        }
+      return;
+}
+
+void checkRainSensor2(){
+      int status = digitalRead(rainPin2);
+      if (status == 0){
+        Serial.println("rain2 = True");
+        }
+      else{
+        Serial.println("rain2 = False");
+        }
+      return;
 }
 
 void setFilterIn(){
@@ -35,7 +57,7 @@ void setFilterIn(){
         for (pos = outPos; pos <= inPos; pos += 1) { // goes from 0 degrees to 180 degrees
         myservo.write(pos);              // tell servo to go to position in variable 'pos'
         delay(servoDelay);                       // waits 15ms for the servo to reach the position
-        }  
+        }
         delay(1500);
         pos = inPos;
     }
@@ -74,6 +96,12 @@ void loop(void) {
         break;
       case 'y':
          test();
+         break;
+      case 'r':
+         checkRainSensor1();
+         break;
+      case 't':
+         checkRainSensor2();
          break;
         }
     }
