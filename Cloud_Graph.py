@@ -285,7 +285,7 @@ class CloudGraph(object):
 		bytehigh = int(median + scale)
 
 		if median < 60:
-			bytelow = 0
+			bytelow = 1
 		else:
 			bytelow = int(median - scale)
 		

@@ -46,6 +46,7 @@ class CloudCam(object):
         self.dir = os.path.join(os.getcwd(),'images')
         self.gain = gain
 	self.filterpos = 0
+	self.gainmax = gainmax
 
         self.cg = CloudGraph()
 	self.c = CameraExpose()
@@ -62,14 +63,17 @@ class CloudCam(object):
         """
 
         # Check and adjust exposure timing if necessary
-        if median < self.min and self.expose != 60:
-	    if self.expose >=30.0 and self.gain == 1:
+        if median < self.min:
+	    if self.expose >=30.0 and self.gain >= 1:
                 self.gain += 1
+		if self.gain > self.gainmax:
+			self.gain = self.gainmax
                 print "Gain Set To: ", self.gain
             if self.expose <=60.0 and self.gain >= 1:
                 self.expose = self.expose*(1.0+self.step)
                 print "Exposure too short, increasing to: "+str(self.expose)+" seconds"
-		
+	    if self.expose > 60.0:
+		self.expose = 60.0
 
         elif median > self.max and self.expose != 60:
 	    if self.expose >=0.02 and self.gain > 1:
