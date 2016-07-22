@@ -1,9 +1,11 @@
 binary
 .pyc
 .fits
+fit
+png
 analyzed/
 gif/
-git_map
+gif_map/
 giftest/
 images/
 logs/
