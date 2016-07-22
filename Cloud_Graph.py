@@ -50,7 +50,6 @@ from logger import *
 import os
 from PIL import Image
 from PIL import ImageOps
-import itertools
 import sys
 import subprocess
 import shutil
@@ -58,9 +57,7 @@ from Cloud_Mask import CloudMask
 from transfer import transfer
 from shutil import copyfile
 from CloudParams import *
-import thread
 import traceback
-import threading
 from clouduino_interface import ClouduinoInterface
 
 """docstring for l"""
@@ -71,16 +68,17 @@ def __init__(self, arg):
 
 class CloudGraph(object):
 	def __init__(self):
-		self.l = Logger() #Logger class creates logfile of processes
-		self.dir = os.path.join(os.getcwd(),'logs')
-		self.logType = 'cloud' # Parameter used in  Logger class to create logfile
-		self.dir_stats = {}
+		#self.l = Logger() #Logger class creates logfile of processes
+		#self.dir = os.path.join(os.getcwd(),'logs')
+		#self.logType = 'cloud' # Parameter used in  Logger class to create logfile
 		self.cm = CloudMask()
 		self.ci = ClouduinoInterface()
+		
+		#==>  I think this is the memory leak, needs to be a local variable
 		self.hdudata = None
 		self.header = None
+
 		self.scaleimg = scale_img
-		self.bin_eros = binary_erosion
 		self.rotate = rotate
 
 		self.host = 'galileo.apo.nmsu.edu'
@@ -114,16 +112,6 @@ class CloudGraph(object):
 
 		self.large_mask = np.load("masks/aperture_mask_500.npy")
 		self.small_mask = np.load("masks/aperture_mask_400.npy")
-		'''
-		self.nw_mask = np.load("masks/1_wedge_mask.npy")
-		self.w_mask = np.load("masks/2_wedge_mask.npy")
-		self.sw_mask = np.load("masks/3_wedge_mask.npy")
-		self.s_mask = np.load("masks/4_wedge_mask.npy")
-		self.se_mask = np.load("masks/5_wedge_mask.npy")
-		self.e_mask = np.load("masks/6_wedge_mask.npy")
-		self.ne_mask = np.load("masks/7_wedge_mask.npy")
-		self.n_mask = np.load("masks/8_wedge_mask.npy")
-		'''
 		return
 
 	def run_analysis(self, name, expose, gain):
@@ -139,6 +127,8 @@ class CloudGraph(object):
 		"""
 		img_in = os.path.join(os.getcwd(),'images', name + '.fits')
 		img_out = os.path.join(os.getcwd(),'analyzed', name+'_analyzed.png')
+
+		#==>  Why not return the hdu list, or something that can be in local memory then perform functions on it and close.  saving as a global means that memory is never being re-allocated.
 		img = self.fits_to_list(img_in)
 		print "Analyzing "+str(img_in)
 
@@ -146,8 +136,6 @@ class CloudGraph(object):
 		masked, median, mean, std = self.dynamic_mask(img, self.small_mask)
 		print "Median = "+str(median)+", Mean = "+str(mean)+", Standard Dev = "+str(std)
 
-		# Calculate directional statistics
-		#self.directional_statistics(masked)
 		# Calculate histogram for small maksed image
 		values, bins = self.pixel_value_list(masked)
 		fixed_vals = np.append(values, 0)
@@ -165,8 +153,7 @@ class CloudGraph(object):
 		self.add_headers(expose, median, std, name, img_in)
 
 		# Log the activity
-		self.l.logStr('Image\t%s,%s,%s,%s' % (str(img_out), str(median), str(mean), str(std)), self.logType)
-
+		#self.l.logStr('Image\t%s,%s,%s,%s' % (str(img_out), str(median), str(mean), str(std)), self.logType)
 
 		return median
 
@@ -180,7 +167,6 @@ class CloudGraph(object):
 		Input: File name
 		Output: Numpy array of image data
 		"""
-		#fits.open(file_name, mode='w')
 		self.hdudata, self.header = Fits.getdata(file_name, header=True)
 		return np.asarray(self.hdudata)
 
@@ -213,22 +199,6 @@ class CloudGraph(object):
 		std = float('%.2f' % (std))
 
 		return masked1, median, mean, std
-
-	def directional_statistics(self, image):
-		# Compute directional statistics
-		directions = ['NE', 'N', 'NW', 'W', 'SW', 'S', 'SE', 'E']
-		dirdict = {'NE': self.ne_mask, 'N': self.n_mask, 'NW': self.nw_mask, 'W': self.w_mask, 'SW': self.sw_mask, 'S': self.s_mask, 'SE': self.se_mask, 'E': self.e_mask}
-		for d in directions:
-			#print "Statistics for "+str(d)+" directional mask:"
-			mask = dirdict[d]
-			tmp_img, tmp_median, tmp_mean, tmp_std = self.dynamic_mask(image, mask)
-			#print "Median = "+str(tmp_median)
-			#print "Mean = "+str(tmp_mean)
-			#print "STD = "+str(tmp_std)
-			self.header[str(d)+"_MED"] = tmp_median
-			self.header[str(d)+"_STD"] = tmp_std
-			self.dir_stats[d] = {'Median':tmp_median, 'Mean':tmp_mean, 'STD':tmp_std}
-		return
 
 	def pixel_value_list(self, image):
 		"""
@@ -399,8 +369,11 @@ class CloudGraph(object):
 		shutil.copyfile("latest.png", os.path.join(os.getcwd(),"gif", name+".png"))
 		plt.close()
 		fig.clf()
-
 		transfer.uploadFile(self.host, self.user, 'latest.png', self.serverDir)
+
+		#change memory pointer to allow for garbage collection
+		img, fig, gs, masked_img, ax = None
+
 		return
 
 	def mapImg(self, imArr = None, name = None, map = None):
@@ -410,11 +383,12 @@ class CloudGraph(object):
 		plt.draw()
 		plt.savefig(name, transparent=True, facecolor="black", edgecolor='none', bbox_inches='tight')
 		shutil.copyfile(name, os.path.join("/var/www/html/",name))
-		if map == 'inferno':
-			shutil.copyfile(name, os.path.join(os.getcwd(),"gif_map",time.strftime("%Y%m%dT%H%M%S_map.png")))
-		self.uploadImg(name)
+		#if map == 'inferno':
+		#	shutil.copyfile(name, os.path.join(os.getcwd(),"gif_map",time.strftime("%Y%m%dT%H%M%S_map.png")))
+		transfer.uploadFile(self.host, self.user, name, self.serverDir)
 		plt.close()
 		fig1.clf()
+		fig1 = None
 		return
 
 	def add_headers(self, expose, median, std, name, img_in):
@@ -443,7 +417,8 @@ class CloudGraph(object):
 		# Close and compress the FITS file, saving the header
 		compressed = Fits.CompImageHDU(self.hdudata, self.header, name=name)
 		compressed.writeto(img_in, clobber=True)
-
+		compressed.close()
+		compressed = None
 		return
 
 
