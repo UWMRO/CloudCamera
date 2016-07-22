@@ -22,6 +22,8 @@ import time
 import os
 import keyring
 import sys
+import stat
+import traceback
 
 class transfer(object):
 	def __init__(self):
@@ -63,6 +65,12 @@ class transfer(object):
 	def findFiles(self, server = None, user = None, server_dir = None):
 		print(time.strftime("%Y%m%dT%H%M%S  Looking in:  "), server_dir)
                 self.openConnection(server, user)
+		try:
+			 self.ftp.stat(server_dir)
+		except:
+			traceback.print_exc()
+			self.closeConnection()
+			return False	
 		files = self.ftp.listdir(server_dir)
 		self.closeConnection()
                 print(time.strftime("%Y%m%dT%H%M%S  Connection Closed"))
@@ -79,5 +87,5 @@ if __name__ == "__main__":
 	#t.closeConnection()
 	#t.uploadFile('galileo.apo.nmsu.edu', 'jwhueh', 'test.png', 'public_html/CloudCamera/')
 	#t.downloadFile('galileo.apo.nmsu.edu', 'jwhueh', 'public_html/CloudCamera/test.png', 'test.png')
-	print (t.findFiles('galileo.apo.nmsu.edu', 'jwhueh', 'public_html/CloudCamera/'))
+	print (t.findFiles('irsc.apo.nmsu.edu', 'irsc', 'data/56916'))
 
