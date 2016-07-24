@@ -381,6 +381,9 @@ class CloudGraph(object):
 
 		return
 
+	#def pullIR(self):
+		
+
 	def mapImg(self, imArr = None, name = None, map = None):
 
 		fig1 = plt.figure(figsize=(10,9.5))

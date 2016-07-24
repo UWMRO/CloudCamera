@@ -16,6 +16,10 @@ import traceback
 class CloudGif(object):
 	def __init__(self):
 		self.trans = transfer()
+		self.host = 'galileo.apo.nmsu.edu'
+                self.user = 'jwhueh'
+                self.serverDir = 'public_html/CloudCamera/'
+
 
 	def cleanDir(self, dir = None):
 		list = sorted(os.listdir(os.path.join(os.getcwd(),dir)))
@@ -61,7 +65,7 @@ class CloudGif(object):
 	
 		print gifName, gifPath	
 		#command = "convert -delay 40 -loop 0 "+os.getcwd()+"/"+dir+"/*.png -gravity center -fill white -annotate -100+100 '%f' latest.gif"
-		command = "nice -5 convert -limit memory 1G -delay 40 -loop 0 "+os.getcwd()+"/"+dir+"/*.png " + gifName
+		command = "nice -5 convert -limit memory 500M -delay 40 -loop 0 "+os.getcwd()+"/"+dir+"/*.png " + gifName
 		print command
 		out = subprocess.Popen(command, stdout = subprocess.PIPE, shell=True)
 		stdoutp, stderrp = out.communicate()
@@ -69,12 +73,12 @@ class CloudGif(object):
 		if os.path.isfile(gifName):
 			print "gif image produced"
 			shutil.copyfile(gifName, os.path.join("/var/www/html/", gifName))
-			self.uploadImg(gifName)
+			self.trans.uploadFile(self.host, self.user, gifName, self.serverDir)
 		else:
 			print "gif was not created"
 		return
 
-	def makeMPEG(self, killmax, imglist, dir=None):
+	#def makeMPEG(self, killmax, imglist, dir=None):
 
 	def uploadImg(self, img):
 		try:
