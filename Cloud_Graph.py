@@ -1,4 +1,4 @@
-#! /usr/bin/python
+# /usr/bin/python
 
 """
 Cloud_Graph.py
@@ -191,10 +191,13 @@ class CloudGraph(object):
 		#upper clipping
 		#masked1 = ma.masked_greater(pre_masked, 254)
 		masked1 = pre_masked
-
-		median = int(ma.median(masked1))
-		mean = ma.mean(masked1)
-		std = ma.std(masked1)
+		try:
+			median = int(ma.median(masked1))
+			mean = ma.mean(masked1)
+			std = ma.std(masked1)
+		except:
+			traceback.print_exc()
+			return
 
 		mean = float('%.2f' % (mean))
 		std = float('%.2f' % (std))
