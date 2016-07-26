@@ -18,19 +18,16 @@ import pyfits
 import subprocess
 import time
 import os
-#import Image
 import thread
-from logger import *
+import traceback
+
 
 class CameraExpose(object):
     def __init__(self):
-        self.l = Logger()
         self.wait = 1.0
         self.status = None
         self.ssag = os.getcwd()+"/camera"
-        #self.ssag = 'camera2'
         self.statusDict = {1:'idle', 2:'expose', 3:'reading'}
-        self.logType = 'cloud'
         self.gain = 1
 
     def expose(self, name, exp, dir, gain):
@@ -53,18 +50,15 @@ class CameraExpose(object):
         if '.fit' not in name:
             name = name+'.fits'
         name = dir+'/'+str(name)
-        #print dir, name, self.ssag, exp
+        print dir, name, self.ssag, exp
         expose = float(exp)*1000
-        #print expose
 
         if gain == None:
             gain = self.gain
 
-
         try:
 
             subprocess.Popen([self.ssag, 'image', 'binary', str(expose), str(gain)])
-            #self.l.logStr(str('Expose\t%s image binary %s' % (self.ssag,str(exp * 1000))), self.logType)
             self.status = 2
             #Pause for the camera to run
             time.sleep(self.wait+float(exp))
@@ -97,14 +91,12 @@ class CameraExpose(object):
         except Exception,e:
             print "failed"
             print str(e)
-	    #self.l.logStr('Exception: '+str(e))
+	    traceback.print_exc()
             return False
 
     def checkFile(self, fileName):
         if os.path.exists(fileName):
-            #print '%s exists, appending unique date stamp' % fileName
             name = fileName.replace('.fits','')+time.strftime('_%Y%m%dT%H%M%S.fits')
-            #print 'New filename is %s' % name
             return name
         else:
             return fileName

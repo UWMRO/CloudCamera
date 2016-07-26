@@ -16,7 +16,7 @@ def indProc():
         run_gif='no'
         for x,f in enumerate(q):
                 u=f.split()
-                if re.search('/home/cloudcam/CloudCamera/Cloud_gif.py', u[11]):
+                if re.search('/home/cloudcam/CloudCamera/wiggleCloud.py', u[11]):
                         run_gif='yes'
 
 
@@ -26,7 +26,7 @@ def indProc():
 		run_cam='yes'
 	if run_gif=='no':
 		print 'starting gif'
-                os.system('nohup python /home/cloudcam/CloudCamera/Cloud_gif.py &')
+                os.system('nohup python /home/cloudcam/CloudCamera/wiggleCloud.py &')
 		run_gif='yes'
 	
 	return [run_cam,run_gif]

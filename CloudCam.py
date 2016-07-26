@@ -17,9 +17,8 @@ Usage:
 
 
 import numpy as np
-from Cloud_Graph import *
+from graphCloud import *
 from camera import *
-from logger import *
 import datetime
 from clouduino_interface import ClouduinoInterface
 import os
@@ -44,8 +43,8 @@ class CloudCam(object):
         self.step = step_size
         self.expose = expose
         self.dir = os.path.join(os.getcwd(),'images')
+	self.dayDir = None
         self.gain = gain
-	self.filterpos = 0
 	self.gainmax = gainmax
 
         self.cg = CloudGraph()
@@ -62,7 +61,7 @@ class CloudCam(object):
             median      (median value from analysis)
         """
 
-        # Check and adjust exposure timing if necessary
+        # Check and adjust exposure timing for low light
         if median < self.min:
 	    if self.expose >=30.0 and self.gain >= 1:
                 self.gain += 1
@@ -75,6 +74,7 @@ class CloudCam(object):
 	    if self.expose > 60.0:
 		self.expose = 60.0
 
+	# Check and adjust exposure and gain for high light
         elif median > self.max and self.expose != 60:
 	    if self.expose >=0.02 and self.gain > 1:
             	self.gain -= 1
@@ -92,30 +92,44 @@ class CloudCam(object):
 	return
 
     def checkDir(self):
+	"""
+	This function checks for needed image storage directories
+	and creates them if necessary
+	"""
 	dayDir = time.strftime("%Y%m%d", time.gmtime())
+	
+	#Check for fits image storage folder for today, make if needed
 	if not os.path.isdir(os.path.join(os.getcwd(), 'images', dayDir)):
 		os.mkdir(os.path.join(os.getcwd(), 'images', dayDir))
 		print 'directory made: ', os.path.join(os.getcwd(), 'images', dayDir)
+	
+	#Check for analyzed image storage folder for today, make if needed
 	if not os.path.isdir(os.path.join(os.getcwd(), 'analyzed', dayDir)):
                 os.mkdir(os.path.join(os.getcwd(), 'analyzed', dayDir))
 		print 'directory made: ', os.path.join(os.getcwd(), 'analyzed', dayDir)
-	return
+	return dayDir
 	
     def run_camera(self):
         """
         Take and analyze image, check exposure after analysis
         """
-	self.checkDir()	
+	dayDir = os.path.join(os.getcwd(),'images',self.checkDir())
         name = time.strftime("%Y%m%dT%H%M%S")+"_"+str('%.3f'%(self.expose))
+
+	#Remove the old image binary file
 	if os.path.isfile('binary'):
 		os.remove('binary')
+	
+	#Try to take an image
 	try:
-        	self.takeImage("cloud", name+".fits", self.expose, self.dir)
+        	self.takeImage("cloud", name+".fits", self.expose, dayDir)
 	except:
 		traceback.print_exc()
         time.sleep(self.expose+2)
+	
+	#Run the analysis and check the exposure timing
 	try:
-       		median = cg.run_analysis( name, self.expose, self.gain)
+       		median = cg.run_analysis(os.path.join(dayDir,name), self.expose, self.gain)
 		self.check_exposure(median)
 	except:
 		traceback.print_exc()
@@ -123,7 +137,6 @@ class CloudCam(object):
 	if self.expose < 60:
 		print "going to sleep for:", 60-self.expose, "seconds"
 		time.sleep(60-self.expose)
-        #self.check_exposure(median)
 
         return
 
@@ -148,12 +161,10 @@ class CloudCam(object):
         Raises:
             Exception
         """
-        l = Logger()
         self.fakeOut =  False
         im = False
         if self.fakeOut != True:
             im = self.c.runExpose(str(imgName), str(imExp), str(imDir), self.gain)
-            #l.logStr('Image\t%s %s %s' % (str(imgName), str(imExp), str(imDir)), self.logType)
             if im == True: # check on completion and save of image exposure
                 time.sleep(1)
                 return 0

@@ -1,16 +1,14 @@
 '''
 Parameter file for CloudCam options.
-
-
 '''
 
 #CloudCam.py
 min_median = 40			#Lower limit for median value
 max_median = 100		#Upper limit for median value
-step_size = 0.40		#Exposure scaling step size, %
+step_size = 0.60		#Exposure scaling step size, %
 expose = 1			#Set starting exposure
 gain = 1			#Set starting gain
-gainmax = 3
+gainmax = 6
 
 #Cloud_Graph.py
 scale_img = True		#Toggle image scaling
