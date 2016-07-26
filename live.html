@@ -1,6 +1,6 @@
 <html>
-<head>
 <script language="javascript">
+
 function updateImage() {
    obj3 = document.latest;
    obj3.src = obj3.src + "?" + Math.random();	
@@ -8,10 +8,11 @@ function updateImage() {
    obj1.src = obj1.src + "?" + Math.random();   
    obj2 = document.latestmap;
    obj2.src = obj2.src + "?" + Math.random();
-   setInterval("updateImage()",60000);
+   setInterval("updateImage()",6000);
 }
 
 </script>
+<head>
 <title>APO Optical Cloud Camera</title>
 </head>
 
@@ -23,7 +24,8 @@ function updateImage() {
     <table border="0">
     <tr>
     <td><a href="latest.png"><img src="latest.png" width="400"  name="latest"></a></td>
-    <td><a href="latest.gif"><img src="latest.gif" width="400"  name="latestgif"></a></td>
+    <td><a href="latest.mp4" width="400"  name="latestgif"><video width="400" height="400" controls>
+  <source src="latest.mp4" type="video/mp4"></a></td>
     <td><a href="latest_map.png"><img src="latest_map.png" width="400" name="latestmap"></a></td>
     </tr>
     </table>
@@ -33,14 +35,7 @@ Image will auto-refresh<br><br>
 </center>
 <hr>
 
-<b>GIF Movies</b><Br><Br>
-<a href="0712.gif">2016-07-12</a><br>
-<a href="0713.gif">2016-07-13</a><br>
-
   </font>
-
-
-
 
 </body>
 </html>

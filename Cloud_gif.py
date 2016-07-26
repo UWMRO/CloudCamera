@@ -53,7 +53,8 @@ class CloudGif(object):
 
 	def make_gif(self, killmax, imglist, dir=None):
 		if dir == "gif":
-                        gifName = 'latest.gif'
+                        #gifName = 'latest.gif'
+			gifName = 'latest.mp4'
 			gifPath = os.path.join(os.getcwd(), dir, gifName)
                 if dir == "gif_map":
                         gifName = 'latest_map.gif'
@@ -65,11 +66,13 @@ class CloudGif(object):
 	
 		print gifName, gifPath	
 		#command = "convert -delay 40 -loop 0 "+os.getcwd()+"/"+dir+"/*.png -gravity center -fill white -annotate -100+100 '%f' latest.gif"
-		command = "nice -5 convert -limit memory 500M -delay 40 -loop 0 "+os.getcwd()+"/"+dir+"/*.png " + gifName
+		#command = "nice -5 convert -limit memory 500M -delay 40 -loop 0 "+os.getcwd()+"/"+dir+"/*.png " + gifName
+		command = "nice -5 ffmpeg -y -f image2 -r 6 -pattern_type glob -i 'gif/*.png' " + str(gifName)
 		print command
 		out = subprocess.Popen(command, stdout = subprocess.PIPE, shell=True)
 		stdoutp, stderrp = out.communicate()
 		print stdoutp
+		print gifName, os.path.isfile(gifName)
 		if os.path.isfile(gifName):
 			print "gif image produced"
 			shutil.copyfile(gifName, os.path.join("/var/www/html/", gifName))
