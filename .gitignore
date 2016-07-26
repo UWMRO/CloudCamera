@@ -1,6 +1,7 @@
 binary
 .pyc
 .fits
+nohup.out
 fit
 png
 analyzed/
