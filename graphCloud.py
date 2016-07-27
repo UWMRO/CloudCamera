@@ -83,14 +83,6 @@ class CloudGraph(object):
 		Creates them if necessary
 		"""
 
-
-		# Produce any missing folders
-		folder_list = ["gif", "logs", "images", "analyzed", "masks"]
-		for folder in folder_list:
-			if (os.path.isdir(folder)) == False:
-				print "Creating directory "+str(folder)
-				os.makedirs(folder)
-
 		# Load masks into memory
 		if os.path.isfile("masks/aperture_mask_500.npy") == True:
 			print 'Loading mask files into memory.'
@@ -116,12 +108,12 @@ class CloudGraph(object):
 			name 			(name file for timestamp)
 		"""
 		start =  time.time()
-		print start
+		print '0'
 		img_out = os.path.join(os.getcwd(),'analyzed', name+'_analyzed.png')
 	
-		img = self.fits_to_list(name)
+		img = self.fits_to_list(name+'.fits')
 		print "Analyzing "+str(name)
-		name = name.split('/')
+		name_arr = name.split('/')
 
 		# Use small mask to calculate image statistics
 		masked, median, mean, std = self.dynamic_mask(img, self.small_mask)
@@ -145,8 +137,8 @@ class CloudGraph(object):
                 img = img.rotate(self.rotate).resize((1280,1024), Image.ANTIALIAS)
                 img = scipy.ndimage.median_filter(img, 3)
 
-                #self.mapImg(img, 'latest_map.png', 'inferno')
-                #self.mapImg(img, 'latestimg.png', 'gray')
+                self.mapImg(img, 'latest_map.png', 'inferno')
+                self.mapImg(img, 'latestimg.png', 'gray')
 
                 #Fill in the masked image for processing
                 masked_img = masked.filled(fill_value = 0)
@@ -155,16 +147,17 @@ class CloudGraph(object):
 
 		# Produce output png with histogram info
 		try:
-			stat_arr = [median, mean, std, name, gain]
-			print stat_arr
+			stat_arr = [median, mean, std, name_arr, gain]
 			self.plot_histogram(img, fixed_vals, bins, img_out, stat_arr)
 		except:
 			traceback.print_exc()
 			return
+		print time.time() - start
 		# Add image data to the FITS header, compress the image
-		self.add_headers(expose, median, std, name, img_in)
+		self.add_headers(expose, median, std, name)
 
 		img = None
+		print time.time() - start
 		return median
 
 	def fits_to_list(self, file_name):
@@ -291,14 +284,14 @@ class CloudGraph(object):
 		gs = gridspec.GridSpec(14,10)		# height, width
 
 		#Find timestamp, change this to use header info instead
-		timestamp = stat_arr[3][2].split('_')
-		t = time.strptime(timestamp[0], "%Y%m%dT%H%M%S")
-		text_name = time.strftime("%Y-%m-%d  %H:%M:%S", t)
 		try:
+			timestamp = stat_arr[3][6].split('_')
+			t = time.strptime(timestamp[0], "%Y%m%dT%H%M%S")
+			text_name = time.strftime("%Y-%m-%d  %H:%M:%S", t)
 			exp = timestamp[1]
 		except:
 			exp = 'NA'
-
+			traceback.print_exc()
 
 		#Plot the masked image, allow for arbitrary rotation
 		ax[0,0] = plt.subplot(gs[:10,:10])
@@ -320,7 +313,6 @@ class CloudGraph(object):
 		ax[0,0].imshow(img, cmap="gray")
 
                 #Query rain sensor status
-                print "querying rain status"
 		rainStatus1 = self.rainSensors(1)
                 if rainStatus1 == True:
                         ax[0,0].text(1000, 50, "Rain (1) = Yes", size=18, color="red")
@@ -329,7 +321,7 @@ class CloudGraph(object):
                 else:
                         ax[0,0].text(1000, 50, "Rain (1) = Unknown", size=18, color="yellow")
                
-		rainStatus2 = self. self.rainSensors(2)
+		rainStatus2 = self.rainSensors(2)
 		if rainStatus2 == True:
                         ax[0,0].text(1000, 100, "Rain (2) = Yes", size=18, color="red")
                 elif rainStatus2 == False:
@@ -368,8 +360,8 @@ class CloudGraph(object):
 
 		return
 	def rainSensors(self, sensor = None):
-		               #Query rain sensor status
-                print "querying rain status"
+		#Query rain sensor status
+                print "querying rain status of sensor ", sensor
                 self.ci.openPort()
                 time.sleep(1)
 		if sensor == 1:
@@ -395,7 +387,7 @@ class CloudGraph(object):
 		fig1 = None
 		return
 
-	def add_headers(self, expose, median, std, name, img_in):
+	def add_headers(self, expose, median, std, name):
 		"""
 		Add statistical and image information
 		to the FITS header, close the FITS file,
@@ -411,16 +403,15 @@ class CloudGraph(object):
 			Saved and compressed FITS image
 		"""
 		# Add info to the FITS header
-		self.header['IMG_NAME'] = name
+		self.header['IMG_NAME'] = name.split('/')[5]
 		self.header['IMAGTYP'] = 'CloudCam'
 		self.header['EXPTIME'] = float(expose)
 		self.header['MEDIAN'] = median
 		self.header['STD'] = std
-
-
+		img_out = os.path.join(os.getcwd(),name)
 		# Close and compress the FITS file, saving the header
-		compressed = Fits.CompImageHDU(self.hdudata, self.header, name=name)
-		compressed.writeto(img_in, clobber=True)
+		compressed = Fits.CompImageHDU(self.hdudata, self.header, name=name.split('/')[5])
+		compressed.writeto(img_out, clobber=True)
 		compressed = None
 		return
 
@@ -429,4 +420,4 @@ if __name__=="__main__":
 	cg = CloudGraph()
 	cg.start_up_checks()
 
-	cg.run_analysis('images/20160726/20160726T095434_0.020.fits', '0.2', '1' )
+	cg.run_analysis('images/20160726/20160726T095434_0.020', '0.2', '1' )

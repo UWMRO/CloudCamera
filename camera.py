@@ -50,7 +50,7 @@ class CameraExpose(object):
         if '.fit' not in name:
             name = name+'.fits'
         name = dir+'/'+str(name)
-        print dir, name, self.ssag, exp
+        #print dir, name, self.ssag, exp
         expose = float(exp)*1000
 
         if gain == None:
