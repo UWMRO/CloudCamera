@@ -11,7 +11,7 @@ def indProc():
 		if  re.search('/home/cloudcam/CloudCamera/CloudCam.py', u[11]):
 			run_cam='yes'
 
-	p=subprocess.Popen(['ps -aux | grep Cloud_gif.py'],shell=True, stdin=subprocess.PIPE,stdout=subprocess.PIPE,stderr=subprocess.PIPE)
+	p=subprocess.Popen(['ps -aux | grep wiggleCloud.py'],shell=True, stdin=subprocess.PIPE,stdout=subprocess.PIPE,stderr=subprocess.PIPE)
         q=p.stdout.readlines()
         run_gif='no'
         for x,f in enumerate(q):

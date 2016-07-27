@@ -75,6 +75,8 @@ class CloudGraph(object):
 		self.user = 'jwhueh'
 		self.serverDir = 'public_html/CloudCamera/'
 
+		self.start = None
+
 
 	def start_up_checks(self):
 		"""
@@ -107,8 +109,7 @@ class CloudGraph(object):
 			img_out			(name of output png image)
 			name 			(name file for timestamp)
 		"""
-		start =  time.time()
-		print '0'
+		self.start =  time.time()
 		img_out = os.path.join(os.getcwd(),'analyzed', name+'_analyzed.png')
 	
 		img = self.fits_to_list(name+'.fits')
@@ -136,14 +137,17 @@ class CloudGraph(object):
                         img = Image.fromarray(masked_img)
                 img = img.rotate(self.rotate).resize((1280,1024), Image.ANTIALIAS)
                 img = scipy.ndimage.median_filter(img, 3)
-
+		
+		print time.time() - self.start
                 self.mapImg(img, 'latest_map.png', 'inferno')
+		print time.time() - self.start
                 self.mapImg(img, 'latestimg.png', 'gray')
+		print time.time() - self.start
+                
 
-                #Fill in the masked image for processing
-                masked_img = masked.filled(fill_value = 0)
+		#Fill in the masked image for processing
+                #masked_img = masked.filled(fill_value = 0)
 
-		print time.time() - start
 
 		# Produce output png with histogram info
 		try:
@@ -152,12 +156,10 @@ class CloudGraph(object):
 		except:
 			traceback.print_exc()
 			return
-		print time.time() - start
 		# Add image data to the FITS header, compress the image
 		self.add_headers(expose, median, std, name)
 
 		img = None
-		print time.time() - start
 		return median
 
 	def fits_to_list(self, file_name):
@@ -312,24 +314,25 @@ class CloudGraph(object):
 		ax[0,0].text(1200, 1060, 'Standard Dev = %.2f' % (stat_arr[2]), size = 16, color="white", horizontalalignment='right')
 		ax[0,0].imshow(img, cmap="gray")
 
+		print time.time() - self.start
+
                 #Query rain sensor status
-		rainStatus1 = self.rainSensors(1)
-                if rainStatus1 == True:
+		rainStatus = self.rainSensors()
+                if rainStatus[0] == True:
                         ax[0,0].text(1000, 50, "Rain (1) = Yes", size=18, color="red")
-                elif rainStatus1 == False:
+                elif rainStatus[0] == False:
                         ax[0,0].text(1000, 50, "Rain (1) = No", size=18, color="green")
                 else:
                         ax[0,0].text(1000, 50, "Rain (1) = Unknown", size=18, color="yellow")
                
-		rainStatus2 = self.rainSensors(2)
-		if rainStatus2 == True:
+		if rainStatus[1] == True:
                         ax[0,0].text(1000, 100, "Rain (2) = Yes", size=18, color="red")
-                elif rainStatus2 == False:
+                elif rainStatus[1] == False:
                         ax[0,0].text(1000, 100, "Rain (2) = No", size=18, color="green")
                 else:
                         ax[0,0].text(1000, 100, "Rain (2) = Unknown", size=18, color="yellow")
                
-
+		print time.time() - self.start
 
 		#Plot the histogram
 		ax[1,0] = plt.subplot(gs[11:13,:10])
@@ -341,7 +344,8 @@ class CloudGraph(object):
 		ax[1,0].tick_params(axis='x', colors='white', labelsize=12)
 
 		plt.draw()
-		name = stat_arr[3][2].rstrip('.fits')
+		name = stat_arr[3][6].rstrip('.fits')
+		print name
 		dayDir = time.strftime("%Y%m%d", time.gmtime())
 		fig.savefig("latest.png", cmap="grey", transparent=True, facecolor="black", edgecolor='none', clobber=True)
 		shutil.copyfile("latest.png", "/var/www/html/latest.png")
@@ -357,20 +361,19 @@ class CloudGraph(object):
 		gs = None
 		masked_img = None
 		ax = None
-
+		print time.time() - self.start
 		return
-	def rainSensors(self, sensor = None):
+
+
+	def rainSensors(self):
 		#Query rain sensor status
-                print "querying rain status of sensor ", sensor
                 self.ci.openPort()
-                time.sleep(1)
-		if sensor == 1:
-                	rainStatus = self.ci.checkRain1()
-		else:
-			rainStatus = self.ci.checkRain2()
-                time.sleep(1)
+                #time.sleep(1)
+                rain = [self.ci.checkRain1(),self.ci.checkRain2()]
+                #time.sleep(1)
 		self.ci.closePort()
-		return rainStatus
+		print ('rain sensors (1|2): ',rain)		
+		return rain
 
 	def mapImg(self, imArr = None, name = None, map = None):
 
