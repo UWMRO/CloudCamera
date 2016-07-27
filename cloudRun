@@ -1,16 +1,11 @@
 #!/bin/bash
 
-if test -z $ARCTICICC_DIR; then
-    echo "The arcticICC is not setup" >&1
-    exit 1
-fi
-
 echo
-echo ====================== Using arcticICC in $ARCTICICC_DIR='/home/arctic/code/arcticICC'
+echo ==== Using cloudRun $CLOUD_DIR ====
 echo
 
 usage() {
-    echo "usage: $0 start|stop|restart|status" >&2
+    echo "usage: $0 start|stop|stopall|restart|status" >&2
     exit 1
 }
 
@@ -23,13 +18,23 @@ cmd=$1
 #
 get_pid() {
     PID=""
-    pid=`/bin/ps -e -ww -o pid,user,command | egrep -v 'awk|grep' | grep 'runArcticICC.py' | awk '{print $1}'`
+    pid=`/bin/ps -e -ww -o pid,user,command | egrep -v 'awk|grep' | grep 'runCloudProcess.py' | awk '{print $1}'`
     PID=$pid
+	
+    PID2=""
+    pid2=`/bin/ps -e -ww -o pid,user,command | egrep -v 'awk|grep' | grep 'CloudCam.py' | awk '{print $1}'`
+    PID2=$pid2
+
+    PID3=""
+    pid3=`/bin/ps -e -ww -o pid,user,command | egrep -v 'awk|grep' | grep 'wiggleCloud.py' | awk '{print $1}'`
+    PID3=$pid3
     
     if test "$pid"; then
-        echo "arcticICC is running on port 35000 as process $pid"
+        echo "runCloudProcess is running as process $pid"
+	echo "CloudCam is running as process $pid2"
+	echo "wiggleCloud is running as process $pid3"
     else
-        echo "arcticICC is not running"
+        echo "CloudCamera is not running"
     fi
 }
 
@@ -49,8 +54,8 @@ do_start() {
     # disable buffering of stdout using "stdbuf -o0"
     # redirect stdout to logger at priority "warning" and stderr at priority "error"
     {
-        stdbuf -o0 runArcticICC.py 2>&3 | logger -p local1.warning
-    } 3>&1 | logger -p local1.error &
+        stdbuf -o0 python runCloudProcess.py  
+    }  &
     
     # Check that it really started...
     #
@@ -64,7 +69,7 @@ do_start() {
     fi
 }
 
-# Stop any running actor. 
+# Stop runCloudProcess. 
 #
 do_stop() {
     get_pid
@@ -73,8 +78,36 @@ do_stop() {
         return
     fi
     
-    echo "Stopping arcticICC."
+    echo "Stopping runCloudProcess."
     kill -TERM $PID
+}
+
+
+# Stop all Cloud associated process.
+#
+do_stopall() {
+    get_pid
+
+    if test ! "$PID"; then
+        return
+    fi
+
+    echo "Stopping runCloudProcess."
+    kill -TERM $PID
+
+    if test ! "$PID2"; then
+        return
+    fi
+
+    echo "Stopping CloudCam."
+    kill -TERM $PID2
+
+    if test ! "$PID3"; then
+        return
+    fi
+
+    echo "Stopping wiggleCloud."
+    kill -TERM $PID3
 }
 
 # Stop any running actor fairly violently. 
@@ -101,6 +134,9 @@ case $cmd in
     stop)
         do_stop
         ;;
+    stopall)
+	do_stopall
+	;;
     stopdead)
         do_stopdead
         ;;

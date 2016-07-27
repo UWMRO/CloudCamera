@@ -33,6 +33,15 @@ __maintainer__ = "J. Matt Armstrong"
 __email__ = "jmarmstr@uw.edu"
 __status__ = "Developement"
 
+
+import time
+import datetime
+import os
+import sys
+import subprocess
+import shutil
+import traceback
+
 import numpy as np
 import numpy.ma as ma
 from astropy.io import fits as Fits
@@ -45,18 +54,12 @@ import matplotlib.image as mpimg
 from matplotlib.figure import Figure
 from matplotlib import gridspec
 import matplotlib.ticker as mtick
-import datetime
-import os
 from PIL import Image
-import sys
-import subprocess
-import shutil
+
 from Cloud_Mask import CloudMask
 from transfer import transfer
 from CloudParams import *
-import traceback
 from clouduino_interface import ClouduinoInterface
-import time
 
 class CloudGraph(object):
 	def __init__(self):
@@ -87,9 +90,9 @@ class CloudGraph(object):
 
 		# Load masks into memory
 		if os.path.isfile("masks/aperture_mask_500.npy") == True:
-			print 'Loading mask files into memory.'
+			print ('Loading mask files into memory.')
 		else:
-			print "Large aperture mask file not found, making one now."
+			print ("Large aperture mask file not found, making one now.")
 			self.cm.make_aperture_mask(500)
 			self.cm.make_aperture_mask(400)
 			#self.cm.make_wedge_mask(300)
@@ -113,12 +116,12 @@ class CloudGraph(object):
 		img_out = os.path.join(os.getcwd(),'analyzed', name+'_analyzed.png')
 	
 		img = self.fits_to_list(name+'.fits')
-		print "Analyzing "+str(name)
+		print ("Analyzing ", str(name))
 		name_arr = name.split('/')
 
 		# Use small mask to calculate image statistics
 		masked, median, mean, std = self.dynamic_mask(img, self.small_mask)
-		print "Median = "+str(median)+", Mean = "+str(mean)+", Standard Dev = "+str(std)
+		print ("Median = "+str(median)+", Mean = "+str(mean)+", Standard Dev = "+str(std))
 
 		# Calculate histogram for small maksed image
 		values, bins = self.pixel_value_list(masked)
@@ -126,6 +129,7 @@ class CloudGraph(object):
 
 		# Use large mask to produce image
 		masked, junk1, junk2, junk3 = self.dynamic_mask(img, self.large_mask)
+		print ('end dynamic mask ', (time.time() - self.start))
 
 		#Fill in the masked image for processing
                 masked_img = masked.filled(fill_value = 0)
@@ -137,18 +141,11 @@ class CloudGraph(object):
                         img = Image.fromarray(masked_img)
                 img = img.rotate(self.rotate).resize((1280,1024), Image.ANTIALIAS)
                 img = scipy.ndimage.median_filter(img, 3)
+		print ('end rot and filter ', (time.time() - self.start))
 		
-		print time.time() - self.start
                 self.mapImg(img, 'latest_map.png', 'inferno')
-		print time.time() - self.start
                 self.mapImg(img, 'latestimg.png', 'gray')
-		print time.time() - self.start
                 
-
-		#Fill in the masked image for processing
-                #masked_img = masked.filled(fill_value = 0)
-
-
 		# Produce output png with histogram info
 		try:
 			stat_arr = [median, mean, std, name_arr, gain]
@@ -160,6 +157,7 @@ class CloudGraph(object):
 		self.add_headers(expose, median, std, name)
 
 		img = None
+		print ('end run_analysis ', (time.time() - self.start))
 		return median
 
 	def fits_to_list(self, file_name):
@@ -173,6 +171,7 @@ class CloudGraph(object):
 		Output: Numpy array of image data
 		"""
 		self.hdudata, self.header = Fits.getdata(file_name, header=True)
+		print ('end fits_to_list ', (time.time() - self.start))
 		return np.asarray(self.hdudata)
 
 	def dynamic_mask(self, image = None, maskname = None):
@@ -301,7 +300,6 @@ class CloudGraph(object):
 
 		# Insert statistical information into the image
 
-		print stat_arr
 		ax[0,0].text(600, 0, "N", size=20, color="white")
 		ax[0,0].text(600, 1050, "S", size=20, color="white")
 		ax[0,0].text(75, 550, "E", size=20, color="white")
@@ -314,7 +312,6 @@ class CloudGraph(object):
 		ax[0,0].text(1200, 1060, 'Standard Dev = %.2f' % (stat_arr[2]), size = 16, color="white", horizontalalignment='right')
 		ax[0,0].imshow(img, cmap="gray")
 
-		print time.time() - self.start
 
                 #Query rain sensor status
 		rainStatus = self.rainSensors()
@@ -332,7 +329,6 @@ class CloudGraph(object):
                 else:
                         ax[0,0].text(1000, 100, "Rain (2) = Unknown", size=18, color="yellow")
                
-		print time.time() - self.start
 
 		#Plot the histogram
 		ax[1,0] = plt.subplot(gs[11:13,:10])
@@ -345,7 +341,6 @@ class CloudGraph(object):
 
 		plt.draw()
 		name = stat_arr[3][6].rstrip('.fits')
-		print name
 		dayDir = time.strftime("%Y%m%d", time.gmtime())
 		fig.savefig("latest.png", cmap="grey", transparent=True, facecolor="black", edgecolor='none', clobber=True)
 		shutil.copyfile("latest.png", "/var/www/html/latest.png")
@@ -361,22 +356,18 @@ class CloudGraph(object):
 		gs = None
 		masked_img = None
 		ax = None
-		print time.time() - self.start
+		print ('end plot_hist ', (time.time() - self.start))
 		return
 
 
 	def rainSensors(self):
-		#Query rain sensor status
                 self.ci.openPort()
-                #time.sleep(1)
                 rain = [self.ci.checkRain1(),self.ci.checkRain2()]
-                #time.sleep(1)
 		self.ci.closePort()
-		print ('rain sensors (1|2): ',rain)		
+		print ('rain sensors (1|2): ',rain, (time.time() - self.start))		
 		return rain
 
 	def mapImg(self, imArr = None, name = None, map = None):
-
 		fig1 = plt.figure(figsize=(10,9.5))
 		plt.imshow(imArr, cmap=map)
 		plt.draw()
@@ -388,6 +379,7 @@ class CloudGraph(object):
 		plt.close()
 		fig1.clf()
 		fig1 = None
+		print ('end mapImg ', (time.time() - self.start))
 		return
 
 	def add_headers(self, expose, median, std, name):
@@ -416,6 +408,7 @@ class CloudGraph(object):
 		compressed = Fits.CompImageHDU(self.hdudata, self.header, name=name.split('/')[5])
 		compressed.writeto(img_out, clobber=True)
 		compressed = None
+		print ('end add_headers ', (time.time() - self.start))
 		return
 
 
