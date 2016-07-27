@@ -54,20 +54,19 @@ class CloudGif(object):
 					os.remove(os.path.join(os.getcwd(), dir, img))
 					print ('removing: ',img, diff)
 	
-	def make_gif(self, dir=None):
+	def hourWiggle(self, dir=None):
+		self.cleanDir(dir)
 		if dir == "gif":
 			gifName = 'latest.mp4'
 			gifPath = os.path.join(os.getcwd(), dir, gifName)
                 if dir == "gif_map":
-                        gifName = 'latest_map.gif'
+                        gifName = 'latest_map.mp4'
 			gifPath = os.path.join(os.getcwd(), dir, gifName)
 		print ("Producing gif image")
 		if os.path.isfile(gifPath):
 			os.remove(gifPath)
 	
-		#command = "nice -5 convert -limit memory 500M -delay 40 -loop 0 "+os.getcwd()+"/"+dir+"/*.png " + gifName
 		command = "nice -5 ffmpeg -y -f image2 -r 6 -pattern_type glob -i 'gif/*.png' " + str(gifName)
-		print (command)
 		out = subprocess.Popen(command, stdout = subprocess.PIPE, shell=True)
 		stdoutp, stderrp = out.communicate()
 		print (stdoutp)
@@ -79,12 +78,37 @@ class CloudGif(object):
 			print ("gif was not created")
 		return
 
+	def dayWiggle(self):
+		dayName = time.strftime("%Y%m%d.mp4")
+                gifPath = os.path.join(os.getcwd(), dayName)
+                print ("Producing movie")
+                if os.path.isfile(gifPath):
+                        os.remove(gifPath)
+
+		dayDir = os.path.join(os.getcwd(),'analyzed',time.strftime("%Y%m%d"))
+                command = "nice -5 ffmpeg -y -f image2 -r 6 -pattern_type glob -i '%s/*.png' %s" % (str(dayDir),str(dayName))
+		print (command)
+                out = subprocess.Popen(command, stdout = subprocess.PIPE, shell=True)
+                stdoutp, stderrp = out.communicate()
+                print (stdoutp)
+                if os.path.isfile(dayName):
+                        print ("gif image produced")
+                        shutil.copyfile(dayName, os.path.join("/var/www/html/", dayName))
+                        self.trans.uploadFile(self.host, self.user, dayName, self.serverDir)
+                else:
+                        print ("gif was not created")
+                return
+
 
 if __name__ ==  "__main__":
 	cg = CloudGif()
-	
+	x = 0	
 	while True:
-		subDir = 'gif'
-		cg.cleanDir(subDir)
-		cg.make_gif(subDir)
+		cg.hourWiggle('gif')
+		x = x+1
+		if x == 20:
+			print ('making long term gif')
+			cg.dayWiggle()
+			x = 0
 		time.sleep(180)
+		
