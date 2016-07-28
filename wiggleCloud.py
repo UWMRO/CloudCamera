@@ -79,24 +79,10 @@ class CloudGif(object):
 		return
 
 	def dayWiggle(self):
-		dayName = time.strftime("%Y%m%d.mp4")
-                gifPath = os.path.join(os.getcwd(), dayName)
-                print ("Producing movie")
-                if os.path.isfile(gifPath):
-                        os.remove(gifPath)
-
-		dayDir = os.path.join(os.getcwd(),'analyzed',time.strftime("%Y%m%d"))
-                command = "nice -5 ffmpeg -y -f image2 -r 6 -pattern_type glob -i '%s/*.png' %s" % (str(dayDir),str(dayName))
-		print (command)
-                out = subprocess.Popen(command, stdout = subprocess.PIPE, shell=True)
-                stdoutp, stderrp = out.communicate()
-                print (stdoutp)
-                if os.path.isfile(dayName):
-                        print ("gif image produced")
-                        shutil.copyfile(dayName, os.path.join("/var/www/html/", dayName))
-                        self.trans.uploadFile(self.host, self.user, dayName, self.serverDir)
-                else:
-                        print ("gif was not created")
+		dayName = time.strftime("%Y%m%d")
+                gifPath = os.path.join('/raid/CloudCamera/', dayName)
+		command = "ffmpeg -y -f image2 -r 6 -pattern_type glob -i '%s/*.png' %s" % (str(gifPath),str(dayName+'.mp4'))
+		self.trans.remoteCommand('analysis', 'jwhueh', command)
                 return
 
 

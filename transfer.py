@@ -24,6 +24,9 @@ import keyring
 import sys
 import stat
 import traceback
+from paramiko import SSHConfig
+
+
 
 class transfer(object):
 	def __init__(self):
@@ -32,11 +35,22 @@ class transfer(object):
 
 	def openConnection(self, server = None, user = None):
 		self.ssh = paramiko.SSHClient()
+
+		# ssh config file
+		config = SSHConfig()
+		#config.parse(open('/Users/jwhueh/.ssh/config'))
+		config.parse(open(os.path.join(os.path.expanduser('~'),'.ssh/config')))
+		serv = config.lookup(server)
+		proxy = paramiko.ProxyCommand(serv['proxycommand'])
 		keyfile = os.path.expanduser('~/.ssh/id_rsa')
 		password = keyring.get_password('SSH', keyfile)
-		key = paramiko.RSAKey.from_private_key_file(keyfile, password='mro2015')
+		key = paramiko.RSAKey.from_private_key_file(keyfile, password=password)
 		self.ssh.set_missing_host_key_policy(paramiko.AutoAddPolicy())
-		self.ssh.connect(server, username=user, pkey = key, timeout = 30)
+		if proxy:
+			self.ssh.connect(serv['hostname'], username=serv['user'], pkey = key, timeout = 30, sock=proxy)
+		else:
+			self.ssh.connect(serv['hostname'], username=serv['user'], pkey = key, timeout = 30)
+
 		self.ftp = self.ssh.open_sftp()
 		return
 
@@ -81,11 +95,21 @@ class transfer(object):
 		self.ssh.close()
 		return
 
+	def remoteCommand(self, server = None, user = None, command = None):
+		print(time.strftime("%Y%m%dT%H%M%S  Connecting: "), command)
+                self.openConnection(server, user)
+                stdin, stdout, stderr = self.ssh.exec_command(command)
+               	print (stdout.read())
+		print(time.strftime("%Y%m%dT%H%M%S  Connection Closed"))
+                self.closeConnection()
+
+
 if __name__ == "__main__":
 	t = transfer()
 	#t.openConnection('galileo.apo.nmsu.edu','jwhueh')
 	#t.closeConnection()
 	#t.uploadFile('galileo.apo.nmsu.edu', 'jwhueh', 'test.png', 'public_html/CloudCamera/')
 	#t.downloadFile('galileo.apo.nmsu.edu', 'jwhueh', 'public_html/CloudCamera/test.png', 'test.png')
-	print (t.findFiles('irsc.apo.nmsu.edu', 'irsc', 'data/56916'))
+	#print (t.findFiles('irsc.apo.nmsu.edu', 'irsc', 'data/56916'))
+	t.test()
 
