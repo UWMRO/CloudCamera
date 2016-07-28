@@ -89,8 +89,8 @@ class CameraExpose(object):
             return True
 
         except Exception,e:
-            print "failed"
-            print str(e)
+            print ("failed")
+            print (str(e))
 	    traceback.print_exc()
             return False
 
@@ -114,19 +114,19 @@ class CameraExpose(object):
         return prihdr
 
     def checkStatus(self):
-        print "return some status message"
-        print self.status, self.statusDict[self.status]
+        print ("return some status message")
+        print (self.status, self.statusDict[self.status])
         return self.status
 
     def checkConnection(self):
         try:
             subprocess.Popen([self.ssag, '0', '0', '0'])
         except Exception, e:
-            print e
+            print (e)
 
 
     def help(self):
-        print __doc__
+        print (__doc__)
         return
 
 if __name__=="__main__":

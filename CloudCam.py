@@ -67,10 +67,10 @@ class CloudCam(object):
                 self.gain += 1
 		if self.gain > self.gainmax:
 			self.gain = self.gainmax
-                print "Gain Set To: ", self.gain
+                print ("Gain Set To: "+str(self.gain))
             if self.expose <=60.0 and self.gain >= 1:
                 self.expose = self.expose*(1.0+self.step)
-                print "Exposure too short, increasing to: "+str(self.expose)+" seconds"
+                print ("Exposure too short, increasing to: "+str(self.expose)+" seconds")
 	    if self.expose > 60.0:
 		self.expose = 60.0
 
@@ -78,12 +78,12 @@ class CloudCam(object):
         elif median > self.max and self.expose != 60:
 	    if self.expose >=0.02 and self.gain > 1:
             	self.gain -= 1
-		print "Gain Set To: ", self.gain
+		print ("Gain Set To: "+ str(self.gain))
 	    if self.expose >=0.02 and self.gain == 1:
 		self.expose = self.expose*(1.0-self.step)
-                print "Exposure too long, decreasing to: "+str(self.expose)+" seconds"
+                print ("Exposure too long, decreasing to: "+str(self.expose)+" seconds")
         else:
-            print "Exposure within bounds"
+            print ("Exposure within bounds")
 	if self.expose < 0.02:
 		self.expose = 0.02
 	if self.expose > 60.0:
@@ -101,12 +101,12 @@ class CloudCam(object):
 	#Check for fits image storage folder for today, make if needed
 	if not os.path.isdir(os.path.join(os.getcwd(), 'images', dayDir)):
 		os.mkdir(os.path.join(os.getcwd(), 'images', dayDir))
-		print 'directory made: ', os.path.join(os.getcwd(), 'images', dayDir)
+		print ('directory made: ', os.path.join(os.getcwd(), 'images', dayDir))
 	
 	#Check for analyzed image storage folder for today, make if needed
 	if not os.path.isdir(os.path.join(os.getcwd(), 'analyzed', dayDir)):
                 os.mkdir(os.path.join(os.getcwd(), 'analyzed', dayDir))
-		print 'directory made: ', os.path.join(os.getcwd(), 'analyzed', dayDir)
+		print ('directory made: ', os.path.join(os.getcwd(), 'analyzed', dayDir))
 	return dayDir
 	
     def run_camera(self):
@@ -135,7 +135,7 @@ class CloudCam(object):
 		traceback.print_exc()
 		self.expose = 1.0
 	if self.expose < 60:
-		print "going to sleep for:", 60-self.expose, "seconds"
+		print ("going to sleep for: "+str(60-self.expose)+" seconds")
 		time.sleep(60-self.expose)
 
         return

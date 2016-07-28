@@ -1,11 +1,11 @@
 #-------------------------
-07/26/16  19:46:16
+07/27/16  17:53:41
 CloudCam.py: yes
 wiggleCloud.py: yes
 cloudcam  1457  0.0  1.3 126712 12904 ?        Sl   Jul20   0:04 /usr/bin/python3 /usr/bin/blueman-applet
 cloudcam  1469  0.0  1.0  39560 10040 ?        Sl   Jul20   0:04 /usr/bin/python3 /usr/share/system-config-printer/applet.py
-cloudcam 18078  0.0  0.5   8596  4988 pts/5    S+   19:46   0:00 python runCloudProcess.py
-cloudcam 18086  0.0  0.3   6172  3476 pts/5    R+   19:46   0:00 python /home/cloudcam/CloudCamera/CloudCam.py
-cloudcam 18088  0.0  0.3   6172  3472 pts/5    R+   19:46   0:00 python /home/cloudcam/CloudCamera/wiggleCloud.py
-cloudcam 18089  0.0  0.0   1620   424 pts/5    S+   19:46   0:00 sh -c ps aux | grep python >> output.txt
-cloudcam 18091  0.0  0.0   4320   556 pts/5    S+   19:46   0:00 grep python
+cloudcam  8704  0.0  0.4   8528  4124 ?        S    07:00   0:03 python runCloudProcess.py
+cloudcam 22657  0.4  1.9  56760 18556 ?        S    13:15   1:13 python /home/cloudcam/CloudCamera/wiggleCloud.py
+cloudcam 23739 21.1 21.7 249972 205924 ?       S    13:42  52:57 python /home/cloudcam/CloudCamera/CloudCam.py
+cloudcam 31724  0.0  0.0   1548   388 ?        S    17:53   0:00 sh -c ps aux | grep python >> output.txt
+cloudcam 31726  0.0  0.0   4244   548 ?        S    17:53   0:00 grep python

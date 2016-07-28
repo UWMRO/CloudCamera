@@ -54,7 +54,7 @@ do_start() {
     # disable buffering of stdout using "stdbuf -o0"
     # redirect stdout to logger at priority "warning" and stderr at priority "error"
     {
-        stdbuf -o0 python runCloudProcess.py  
+        nohup python runCloudProcess.py  
     }  &
     
     # Check that it really started...
