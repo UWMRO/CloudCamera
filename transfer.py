@@ -41,19 +41,22 @@ class transfer(object):
 		#config.parse(open('/Users/jwhueh/.ssh/config'))
 		config.parse(open(os.path.join(os.path.expanduser('~'),'.ssh/config')))
 		serv = config.lookup(server)
-		try:
-			proxy = paramiko.ProxyCommand(serv['proxycommand'])
-		except:	
-			proxy == False
-			traceback.print_exc()
+		if 'proxycommand' not in serv:
+                	proxy = False
+		else:
+			try:
+				proxy = paramiko.ProxyCommand(serv['proxycommand'])
+			except:	
+				proxy = False
+				traceback.print_exc()
 		keyfile = os.path.expanduser('~/.ssh/id_rsa')
 		password = keyring.get_password('SSH', keyfile)
-		key = paramiko.RSAKey.from_private_key_file(keyfile, password=password)
+		key = paramiko.RSAKey.from_private_key_file(keyfile, password='mro2015')
 		self.ssh.set_missing_host_key_policy(paramiko.AutoAddPolicy())
 		if proxy:
 			self.ssh.connect(serv['hostname'], username=serv['user'], pkey = key, timeout = 30, sock=proxy)
 		else:
-			self.ssh.connect(serv['hostname'], username=serv['user'], pkey = key, timeout = 30)
+			self.ssh.connect(server, username=user, pkey = key, timeout = 30)
 
 		self.ftp = self.ssh.open_sftp()
 		return
@@ -112,8 +115,8 @@ if __name__ == "__main__":
 	t = transfer()
 	#t.openConnection('galileo.apo.nmsu.edu','jwhueh')
 	#t.closeConnection()
-	#t.uploadFile('galileo.apo.nmsu.edu', 'jwhueh', 'test.png', 'public_html/CloudCamera/')
+	t.uploadFile('galileo.apo.nmsu.edu', 'jwhueh', 'test.png', 'public_html/CloudCamera/')
 	#t.downloadFile('galileo.apo.nmsu.edu', 'jwhueh', 'public_html/CloudCamera/test.png', 'test.png')
 	#print (t.findFiles('irsc.apo.nmsu.edu', 'irsc', 'data/56916'))
-	t.test()
+	
 

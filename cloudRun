@@ -44,11 +44,11 @@ do_start() {
     get_pid
     
     if test "$PID"; then
-        echo "NOT starting new arcticICC. Use restart if you want a new one."
+        echo "NOT starting new CloudCamera. Use restart if you want a new one."
         return
     fi
     
-    echo "Starting new arcticICC..."
+    echo "Starting new CloudCamera..."
 
     # run the actor, as follows:
     # disable buffering of stdout using "stdbuf -o0"
@@ -80,6 +80,10 @@ do_stop() {
     
     echo "Stopping runCloudProcess."
     kill -TERM $PID
+    echo "Stopping CloudCam."
+    kill -TERM $PID2
+    echo "Stopping wiggleCloud."
+    kill -TERM $PID3
 }
 
 
@@ -125,6 +129,8 @@ do_stopdead() {
 
     echo "Stopping arcticICC meanly."
     kill -KILL $PID
+    kill -KILL $PID2
+    kill -KILL $PID3
 }
 
 case $cmd in
