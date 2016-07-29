@@ -41,7 +41,11 @@ class transfer(object):
 		#config.parse(open('/Users/jwhueh/.ssh/config'))
 		config.parse(open(os.path.join(os.path.expanduser('~'),'.ssh/config')))
 		serv = config.lookup(server)
-		proxy = paramiko.ProxyCommand(serv['proxycommand'])
+		try:
+			proxy = paramiko.ProxyCommand(serv['proxycommand'])
+		except:	
+			proxy == False
+			traceback.print_exc()
 		keyfile = os.path.expanduser('~/.ssh/id_rsa')
 		password = keyring.get_password('SSH', keyfile)
 		key = paramiko.RSAKey.from_private_key_file(keyfile, password=password)
