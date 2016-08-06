@@ -1,11 +1,12 @@
 #-------------------------
-08/02/16  19:10:39
+08/06/16  07:12:07
 CloudCam.py: yes
 wiggleCloud.py: yes
-cloudcam  2062  0.0  1.3 117424 12916 ?        Sl   Jul29   0:04 /usr/bin/python3 /usr/bin/blueman-applet
-cloudcam  2071  0.0  1.1  39560 11224 ?        Sl   Jul29   0:12 /usr/bin/python3 /usr/share/system-config-printer/applet.py
-cloudcam  9239  0.0  0.3   8528  3776 ?        S    Jul29   0:35 python runCloudProcess.py
-cloudcam 12695 21.9 19.2 227240 182716 ?       S    15:33  47:30 python /home/cloudcam/CloudCamera/CloudCam.py
-cloudcam 19138  0.4  2.6  57048 24748 ?        S    18:40   0:08 python /home/cloudcam/CloudCamera/wiggleCloud.py
-cloudcam 20174  0.0  0.0   1548   400 ?        S    19:10   0:00 sh -c ps aux | grep python >> output.txt
-cloudcam 20176  0.0  0.0   4244   588 ?        S    19:10   0:00 grep python
+cloudcam  2062  0.0  1.3 117424 12936 ?        Sl   Jul29   0:04 /usr/bin/python3 /usr/bin/blueman-applet
+cloudcam  2071  0.0  1.0  39560 10056 ?        Sl   Jul29   0:15 /usr/bin/python3 /usr/share/system-config-printer/applet.py
+cloudcam  3943  0.0  0.4   8528  4176 ?        S    Aug05   0:03 python runCloudProcess.py
+cloudcam 21787 21.7 13.3 162392 126564 ?       S    05:53  17:02 python /home/cloudcam/CloudCamera/CloudCam.py
+cloudcam 23568  0.3  2.6  57048 25312 ?        S    06:35   0:08 python /home/cloudcam/CloudCamera/wiggleCloud.py
+cloudcam 23804  0.0  1.5 240268 14840 ?        Sl   Aug05   0:03 /usr/bin/python3 /usr/share/apport/apport-gtk
+cloudcam 24705  0.0  0.0   1548   420 ?        S    07:12   0:00 sh -c ps aux | grep python >> output.txt
+cloudcam 24707  0.0  0.0   4244   596 ?        S    07:12   0:00 grep python
