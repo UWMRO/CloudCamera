@@ -50,7 +50,7 @@ class CloudGif(object):
 				t1_split = datetime.datetime.strptime(t1[0], "%Y%m%dT%H%M%S")
 				t2 = datetime.datetime.now()
 				diff =  t2 - t1_split
-				if diff > datetime.timedelta(minutes=60):
+				if diff > datetime.timedelta(minutes=90):
 					os.remove(os.path.join(os.getcwd(), dir, img))
 					print ('removing: ',img, diff)
 	
@@ -65,8 +65,8 @@ class CloudGif(object):
 		print ("Producing gif image")
 		if os.path.isfile(gifPath):
 			os.remove(gifPath)
-	
-		command = "nice -5 ffmpeg -y -f image2 -r 6 -pattern_type glob -i 'gif/*.png' " + str(gifName)
+		fps = 5
+		command = "nice -5 ffmpeg -y -f image2 -r " + str(fps) + " -pattern_type glob -i 'gif/*.png' " + str(gifName)
 		out = subprocess.Popen(command, stdout = subprocess.PIPE, shell=True)
 		stdoutp, stderrp = out.communicate()
 		print (stdoutp)

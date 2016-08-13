@@ -255,6 +255,7 @@ class CloudGraph(object):
 			bytelow = int(median - scale)
 		
 		result = Scale(img.astype(float), cmax = bytehigh, cmin = bytelow) #, high = bytehigh, low = bytelow)
+		result, junk1, junk2, junk3 = self.dynamic_mask(result, self.large_mask) 
 		return result
 
 	def plot_histogram(self, img, values, bins, img_out, stat_arr):
@@ -403,7 +404,7 @@ class CloudGraph(object):
 		self.header['EXPTIME'] = float(expose)
 		self.header['MEDIAN'] = median
 		self.header['STD'] = std
-		img_out = os.path.join(os.getcwd(),name)
+		img_out = os.path.join(os.getcwd(),name+".fits")
 		# Close and compress the FITS file, saving the header
 		compressed = Fits.CompImageHDU(self.hdudata, self.header, name=name.split('/')[5])
 		compressed.writeto(img_out, clobber=True)

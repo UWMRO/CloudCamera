@@ -46,6 +46,7 @@ class CloudCam(object):
 	self.dayDir = None
         self.gain = gain
 	self.gainmax = gainmax
+	self.backupFile = "backupParams.txt"
 
         self.cg = CloudGraph()
 	self.c = CameraExpose()
@@ -61,7 +62,7 @@ class CloudCam(object):
             median      (median value from analysis)
         """
 
-        # Check and adjust exposure timing for low light
+	# Check and adjust exposure timing for low light
         if median < self.min:
 	    if self.expose >=30.0 and self.gain >= 1:
                 self.gain += 1
@@ -88,6 +89,14 @@ class CloudCam(object):
 		self.expose = 0.02
 	if self.expose > 60.0:
                 self.expose = 60.0
+
+	try:
+		backupParams = str(self.expose)+", "+str(self.gain)
+		backup = open(self.backupFile, "w")
+		backup.write(backupParams)
+		backup.close()
+	except:
+		print("Could not write backup file")
 
 	return
 
@@ -119,6 +128,15 @@ class CloudCam(object):
 	#Remove the old image binary file
 	if os.path.isfile('binary'):
 		os.remove('binary')
+
+	try:
+                backupParams = np.genfromtxt(self.backupFile, delimiter=",")
+                self.expose = backupParams[0]
+                self.gain = backupParams[1]
+                os.remove(self.backupFile)
+        except:
+                print("Could not load backup file")
+
 	
 	#Try to take an image
 	try:

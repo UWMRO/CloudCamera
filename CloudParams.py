@@ -8,12 +8,12 @@ max_median = 100		#Upper limit for median value
 step_size = 0.60		#Exposure scaling step size, %
 expose = 1			#Set starting exposure
 gain = 1			#Set starting gain
-gainmax = 6
+gainmax = 9
 
 #Cloud_Graph.py
 scale_img = True		#Toggle image scaling
 binary_erosion = False		#Toggle binary erosion filtering
-rotate = 112			#How much to rotate the image
+rotate = 90			#How much to rotate the image
 
 #Cloud_Mask.py
 radius = 500			#large aperture mask radius, pixels
