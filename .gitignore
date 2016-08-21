@@ -4,9 +4,9 @@ fits
 mp4
 nohup.out
 fit
-png
-nohup.out
-latest.png
+*iso
+*png
+latestimg.png
 latest.mp4
 analyzed/
 gif/

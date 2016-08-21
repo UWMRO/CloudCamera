@@ -18,7 +18,7 @@ cmd=$1
 #
 get_pid() {
     PID=""
-    pid=`/bin/ps -e -ww -o pid,user,command | egrep -v 'awk|grep' | grep 'runCloudProcess.py' | awk '{print $1}'`
+    pid=`/bin/ps -e -ww -o pid,user,command | egrep -v 'awk|grep' | grep 'cloudProcess.py' | awk '{print $1}'`
     PID=$pid
 	
     PID2=""
@@ -28,14 +28,38 @@ get_pid() {
     PID3=""
     pid3=`/bin/ps -e -ww -o pid,user,command | egrep -v 'awk|grep' | grep 'wiggleCloud.py' | awk '{print $1}'`
     PID3=$pid3
+
+
+    PID4=""
+    pid4=`/bin/ps -e -ww -o pid,user,command | egrep -v 'awk|grep' | grep 'clouduino_interface.py' | awk '{print $1}'`
+    PID4=$pid4
     
     if test "$pid"; then
-        echo "runCloudProcess is running as process $pid"
-	echo "CloudCam is running as process $pid2"
-	echo "wiggleCloud is running as process $pid3"
+        echo "cloudProcess is running as process $pid"
+    else
+        echo "cloudProcess is not running"
+    fi
+
+
+    if test "$pid2"; then
+        echo "CloudCam is running as process $pid2"
     else
         echo "CloudCamera is not running"
     fi
+
+    if test "$pid3"; then
+        echo "wiggleCloud is running as process $pid3"
+    else
+        echo "wiggleCloud is not running"
+    fi
+
+    if test "$pid4"; then
+        echo "clouduino_interface is running as process $pid4"
+    else
+        echo "clouduino_inteface is not running"
+    fi
+
+
 }
 
 # Start a new actor. Complain if the actor is already running,  and do not start a new one.
@@ -54,7 +78,7 @@ do_start() {
     # disable buffering of stdout using "stdbuf -o0"
     # redirect stdout to logger at priority "warning" and stderr at priority "error"
     {
-        nohup python runCloudProcess.py  
+        nohup python cloudProcess.py  
     }  &
     
     # Check that it really started...
@@ -84,6 +108,8 @@ do_stop() {
     kill -TERM $PID2
     echo "Stopping wiggleCloud."
     kill -TERM $PID3
+    echo "Stopping clouduino_interface."
+    kill -TERM $PID4
 }
 
 
@@ -112,6 +138,14 @@ do_stopall() {
 
     echo "Stopping wiggleCloud."
     kill -TERM $PID3
+
+    if test ! "$PID4"; then
+        return
+    fi
+
+    echo "Stopping clouduino_interface."
+    kill -TERM $PID4
+
 }
 
 # Stop any running actor fairly violently. 
@@ -131,6 +165,7 @@ do_stopdead() {
     kill -KILL $PID
     kill -KILL $PID2
     kill -KILL $PID3
+    kill -KILL $PID4
 }
 
 case $cmd in
