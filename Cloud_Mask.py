@@ -115,6 +115,6 @@ class CloudMask(object):
 
 if __name__ == "__main__":
     cm = CloudMask()
-    #cm.make_aperture_mask(500)
-    #cm.make_aperture_mask(300)
-    cm.make_wedge_mask(300)
+    cm.make_aperture_mask(500)
+    cm.make_aperture_mask(400)
+    #cm.make_wedge_mask(300)

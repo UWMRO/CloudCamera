@@ -66,7 +66,7 @@ class CloudGif(object):
 		if os.path.isfile(gifPath):
 			os.remove(gifPath)
 		fps = 5
-		command = "nice -5 ffmpeg -y -f image2 -r " + str(fps) + " -pattern_type glob -i 'gif/*.png' " + str(gifName)
+		command = "nice -20 ffmpeg -y -f image2 -r " + str(fps) + " -pattern_type glob -i 'gif/*.png' " + str(gifName)
 		out = subprocess.Popen(command, stdout = subprocess.PIPE, shell=True)
 		stdoutp, stderrp = out.communicate()
 		print (stdoutp)
@@ -88,13 +88,5 @@ class CloudGif(object):
 
 if __name__ ==  "__main__":
 	cg = CloudGif()
-	x = 0	
-	while True:
-		cg.hourWiggle('gif')
-		x = x+1
-		if x == 20:
-			print ('making long term gif')
-			cg.dayWiggle()
-			x = 0
-		time.sleep(180)
+	cg.hourWiggle('gif')
 		

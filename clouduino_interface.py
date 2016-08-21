@@ -21,6 +21,7 @@ __status__ = "Developement"
 
 import serial
 import time
+import os
 
 class ClouduinoInterface():
     def __init__(self):
@@ -53,10 +54,6 @@ class ClouduinoInterface():
         self.ser.write('r')
         time.sleep(1)
         status = self.readSer()
-        #status = "rain = True"
-	#print "status = "
-	#print status
-	#print "end status"
 	if status == "rain1 = True":
             #print "rain1 = true"
 	    return True
@@ -72,7 +69,6 @@ class ClouduinoInterface():
         self.ser.write('t')
         time.sleep(1)
         status = self.readSer()
-        #status = "rain = True"
 
         if status == "rain2 = True":
             return True
@@ -80,6 +76,18 @@ class ClouduinoInterface():
             return False
         else:
             return None
+
+
+    def checkRain(self):
+        """ Check the status of the rain sensor"""
+	rain1 = self.checkRain1()
+	rain2 = self.checkRain2()
+	print time.strftime("%Y%d%mT%H%M%SMDT"),rain1, rain2
+        if rain1 == False and rain2 == False:
+            return False
+        else:
+            return True
+
 
 
     def readSer(self):
@@ -107,15 +115,17 @@ class ClouduinoInterface():
 	return
 
 
+    def rainOut(self, status = None):
+	f_out = open(os.path.join(os.getcwd(),'rain.dat'),'w')
+	f_out.write(str(status))
+	f_out.close()
+
 if __name__ == "__main__":
 	c = ClouduinoInterface()
 	c.openPort()
 	time.sleep(1)
 	print 'port open'
-	#c.readSer()
-	#c.readSer()
-	print c.checkRain1()
-	time.sleep(1)
-	#print c.checkRain2()
-	time.sleep(2)
+	while True:
+		c.rainOut(c.checkRain())	
+		time.sleep(5)
 	c.closePort()

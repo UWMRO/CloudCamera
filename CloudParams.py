@@ -13,10 +13,10 @@ gainmax = 9
 #Cloud_Graph.py
 scale_img = True		#Toggle image scaling
 binary_erosion = False		#Toggle binary erosion filtering
-rotate = 90			#How much to rotate the image
+rotate = 110			#How much to rotate the image
 
 #Cloud_Mask.py
 radius = 500			#large aperture mask radius, pixels
 x_center = 512			#Center pixel on x axis
-y_center = 640			#Center pixel on y axis
+y_center = 670			#Center pixel on y axis
 

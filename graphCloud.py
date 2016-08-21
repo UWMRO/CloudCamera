@@ -60,6 +60,7 @@ from Cloud_Mask import CloudMask
 from transfer import transfer
 from CloudParams import *
 from clouduino_interface import ClouduinoInterface
+import gzip
 
 class CloudGraph(object):
 	def __init__(self):
@@ -144,7 +145,7 @@ class CloudGraph(object):
 		print ('end rot and filter ', (time.time() - self.start))
 		
                 self.mapImg(img, 'latest_map.png', 'inferno')
-                self.mapImg(img, 'latestimg.png', 'gray')
+                #self.mapImg(img, 'latestimg.png', 'gray')
                 
 		# Produce output png with histogram info
 		try:
@@ -155,8 +156,8 @@ class CloudGraph(object):
 			return
 		# Add image data to the FITS header, compress the image
 		self.add_headers(expose, median, std, name)
-
 		img = None
+	
 		print ('end run_analysis ', (time.time() - self.start))
 		return median
 
@@ -314,22 +315,15 @@ class CloudGraph(object):
 		ax[0,0].imshow(img, cmap="gray")
 
 
-                #Query rain sensor status
 		rainStatus = self.rainSensors()
-                if rainStatus[0] == True:
-                        ax[0,0].text(1000, 50, "Rain (1) = Yes", size=18, color="red")
-                elif rainStatus[0] == False:
-                        ax[0,0].text(1000, 50, "Rain (1) = No", size=18, color="green")
+		print 'rainStatus: ', rainStatus
+		if rainStatus == 'True':
+                        ax[0,0].text(1000, 50, "Rain = Yes", size=18, color="red")
+                elif rainStatus == 'False':
+                        ax[0,0].text(1000, 50, "Rain = No", size=18, color="green")
                 else:
-                        ax[0,0].text(1000, 50, "Rain (1) = Unknown", size=18, color="yellow")
-               
-		if rainStatus[1] == True:
-                        ax[0,0].text(1000, 100, "Rain (2) = Yes", size=18, color="red")
-                elif rainStatus[1] == False:
-                        ax[0,0].text(1000, 100, "Rain (2) = No", size=18, color="green")
-                else:
-                        ax[0,0].text(1000, 100, "Rain (2) = Unknown", size=18, color="yellow")
-               
+                        ax[0,0].text(1000, 50, "Rain = Unknown", size=18, color="yellow")
+ 
 
 		#Plot the histogram
 		ax[1,0] = plt.subplot(gs[11:13,:10])
@@ -362,6 +356,19 @@ class CloudGraph(object):
 
 
 	def rainSensors(self):
+		rain = 'Unknown'
+		try:
+			f_in = open(os.path.join(os.getcwd(),'rain.dat'),'r')
+			for line in f_in:
+				rain = line.rstrip('\n')
+			f_in.close()
+		except:
+			return 'Unknown'
+		print rain
+		return rain
+		
+
+	def rainSensorsOld(self):
                 self.ci.openPort()
                 rain = [self.ci.checkRain1(),self.ci.checkRain2()]
 		self.ci.closePort()
@@ -409,9 +416,20 @@ class CloudGraph(object):
 		compressed = Fits.CompImageHDU(self.hdudata, self.header, name=name.split('/')[5])
 		compressed.writeto(img_out, clobber=True)
 		compressed = None
+		#zip output
+		self.zipFile(img_out)
 		print ('end add_headers ', (time.time() - self.start))
 		return
 
+	def zipFile(self, f = None):
+		 #zip output
+                f_in=open(f)
+                f_out = gzip.open(f+'.gz', 'wb')
+                f_out.writelines(f_in)
+                f_out.close()
+                f_in.close()
+                os.remove(f)
+		return
 
 if __name__=="__main__":
 	cg = CloudGraph()
