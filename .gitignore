@@ -1,12 +1,12 @@
 binary
-pyc
-fits
-mp4
+*pyc
+*fits
+*mp4
 nohup.out
-fit
+*fit
 *iso
 *png
-latestimg.png
+latest.png
 latest.mp4
 analyzed/
 gif/
