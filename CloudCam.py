@@ -143,7 +143,7 @@ class CloudCam(object):
         	self.takeImage("cloud", name+".fits", self.expose, dayDir)
 	except:
 		traceback.print_exc()
-        time.sleep(self.expose+2)
+        #time.sleep(self.expose+2)
 	
 	#Run the analysis and check the exposure timing
 	try:
@@ -154,7 +154,7 @@ class CloudCam(object):
 		self.expose = 1.0
 	if self.expose < 60:
 		print ("going to sleep for: "+str(60-self.expose)+" seconds")
-		time.sleep(60-self.expose)
+		#time.sleep(60-self.expose)
 
         return
 

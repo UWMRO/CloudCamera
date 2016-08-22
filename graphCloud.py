@@ -302,16 +302,16 @@ class CloudGraph(object):
 
 		# Insert statistical information into the image
 
-		ax[0,0].text(600, 0, "N", size=20, color="white")
-		ax[0,0].text(600, 1050, "S", size=20, color="white")
-		ax[0,0].text(75, 550, "E", size=20, color="white")
-		ax[0,0].text(1150, 550, "W", size=20, color="white")
-		ax[0,0].text(0, 980, text_name, size = 16, color="white", horizontalalignment='left')
-		ax[0,0].text(0, 1020, 'Exposure = '+str(exp)+' [s]', size = 16, color="white", horizontalalignment='left', )
-		ax[0,0].text(0, 1060, 'Gain = '+str(stat_arr[4]), size = 16, color = "white", horizontalalignment = "left")
-		ax[0,0].text(1200, 980 , 'Median = %.1f' % (stat_arr[0]), size = 16, color="white", horizontalalignment='right')
-		ax[0,0].text(1200, 1020, "Mean = %.2f" % (stat_arr[1]), size = 16, color="white", horizontalalignment='right')
-		ax[0,0].text(1200, 1060, 'Standard Dev = %.2f' % (stat_arr[2]), size = 16, color="white", horizontalalignment='right')
+		ax[0,0].text(640, 15, "N", size=20, color="white")
+		ax[0,0].text(640, 1075, "S", size=20, color="white")
+		ax[0,0].text(110, 550, "E", size=20, color="white")
+		ax[0,0].text(1180, 550, "W", size=20, color="white")
+		ax[0,0].text(-30, 980, text_name, size = 16, color="white", horizontalalignment='left')
+		ax[0,0].text(-30, 1020, 'Exposure = '+str(exp)+' [s]', size = 16, color="white", horizontalalignment='left', )
+		ax[0,0].text(-30, 1060, 'Gain = '+str(stat_arr[4]), size = 16, color = "white", horizontalalignment = "left")
+		ax[0,0].text(1240, 980 , 'Median = %.1f' % (stat_arr[0]), size = 16, color="white", horizontalalignment='right')
+		ax[0,0].text(1240, 1020, "Mean = %.2f" % (stat_arr[1]), size = 16, color="white", horizontalalignment='right')
+		ax[0,0].text(1240, 1060, 'Standard Dev = %.2f' % (stat_arr[2]), size = 16, color="white", horizontalalignment='right')
 		ax[0,0].imshow(img, cmap="gray")
 
 
