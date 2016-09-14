@@ -46,6 +46,7 @@ class CloudCam(object):
 	self.dayDir = None
         self.gain = gain
 	self.gainmax = gainmax
+	self.maxExp = max_exp
 	self.backupFile = "backupParams.txt"
 
         self.cg = CloudGraph()
@@ -63,20 +64,19 @@ class CloudCam(object):
         """
 
 	# Check and adjust exposure timing for low light
+	print "bounds (minMed, maxMed, maxGain, maxExp: ", self.min, self.max, self.gainmax, self.maxExp
         if median < self.min:
-	    if self.expose >=30.0 and self.gain >= 1:
+	    if self.expose >=self.maxExp and self.gain >= 1:
                 self.gain += 1
 		if self.gain > self.gainmax:
 			self.gain = self.gainmax
                 print ("Gain Set To: "+str(self.gain))
-            if self.expose <=60.0 and self.gain >= 1:
+            if self.expose <= self.maxExp and self.gain == self.gainmax:
                 self.expose = self.expose*(1.0+self.step)
                 print ("Exposure too short, increasing to: "+str(self.expose)+" seconds")
-	    if self.expose > 60.0:
-		self.expose = 60.0
 
 	# Check and adjust exposure and gain for high light
-        elif median > self.max and self.expose != 60:
+        elif median > self.max:
 	    if self.expose >=0.02 and self.gain > 1:
             	self.gain -= 1
 		print ("Gain Set To: "+ str(self.gain))
@@ -87,9 +87,8 @@ class CloudCam(object):
             print ("Exposure within bounds")
 	if self.expose < 0.02:
 		self.expose = 0.02
-	if self.expose > 60.0:
-                self.expose = 60.0
-
+	if self.expose > self.maxExp:
+                self.expose = self.maxExp
 	try:
 		backupParams = str(self.expose)+", "+str(self.gain)
 		backup = open(self.backupFile, "w")
@@ -133,7 +132,7 @@ class CloudCam(object):
                 backupParams = np.genfromtxt(self.backupFile, delimiter=",")
                 self.expose = backupParams[0]
                 self.gain = backupParams[1]
-                os.remove(self.backupFile)
+                #os.remove(self.backupFile)
         except:
                 print("Could not load backup file")
 
@@ -143,7 +142,7 @@ class CloudCam(object):
         	self.takeImage("cloud", name+".fits", self.expose, dayDir)
 	except:
 		traceback.print_exc()
-        #time.sleep(self.expose+2)
+        #time.sleep(self.expose+2)  # go to sleep while the image is taken
 	
 	#Run the analysis and check the exposure timing
 	try:
@@ -151,10 +150,10 @@ class CloudCam(object):
 		self.check_exposure(median)
 	except:
 		traceback.print_exc()
-		self.expose = 1.0
-	if self.expose < 60:
+		#self.expose = 1.0
+	"""if self.expose < 60:
 		print ("going to sleep for: "+str(60-self.expose)+" seconds")
-		#time.sleep(60-self.expose)
+		time.sleep(60-self.expose)"""
 
         return
 
@@ -182,6 +181,7 @@ class CloudCam(object):
         self.fakeOut =  False
         im = False
         if self.fakeOut != True:
+	    print imExp, self.gain
             im = self.c.runExpose(str(imgName), str(imExp), str(imDir), self.gain)
             if im == True: # check on completion and save of image exposure
                 time.sleep(1)
