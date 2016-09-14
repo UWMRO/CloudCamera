@@ -130,7 +130,7 @@ class CloudGraph(object):
 
 		# Use large mask to produce image
 		masked, junk1, junk2, junk3 = self.dynamic_mask(img, self.large_mask)
-		print ('end dynamic mask ', (time.time() - self.start))
+		#print ('end dynamic mask ', (time.time() - self.start))
 
 		#Fill in the masked image for processing
                 masked_img = masked.filled(fill_value = 0)
@@ -142,7 +142,7 @@ class CloudGraph(object):
                         img = Image.fromarray(masked_img)
                 img = img.rotate(self.rotate).resize((1280,1024), Image.ANTIALIAS)
                 img = scipy.ndimage.median_filter(img, 3)
-		print ('end rot and filter ', (time.time() - self.start))
+		#print ('end rot and filter ', (time.time() - self.start))
 		
                 self.mapImg(img, 'latest_map.png', 'inferno')
                 #self.mapImg(img, 'latestimg.png', 'gray')
@@ -172,7 +172,7 @@ class CloudGraph(object):
 		Output: Numpy array of image data
 		"""
 		self.hdudata, self.header = Fits.getdata(file_name, header=True)
-		print ('end fits_to_list ', (time.time() - self.start))
+		#print ('end fits_to_list ', (time.time() - self.start))
 		return np.asarray(self.hdudata)
 
 	def dynamic_mask(self, image = None, maskname = None):
@@ -351,7 +351,7 @@ class CloudGraph(object):
 		gs = None
 		masked_img = None
 		ax = None
-		print ('end plot_hist ', (time.time() - self.start))
+		#print ('end plot_hist ', (time.time() - self.start))
 		return
 
 
@@ -387,7 +387,7 @@ class CloudGraph(object):
 		plt.close()
 		fig1.clf()
 		fig1 = None
-		print ('end mapImg ', (time.time() - self.start))
+		#print ('end mapImg ', (time.time() - self.start))
 		return
 
 	def add_headers(self, expose, median, std, name):

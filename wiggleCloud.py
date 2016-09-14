@@ -45,14 +45,14 @@ class CloudGif(object):
 		list = sorted(os.listdir(os.path.join(os.getcwd(),dir)))
 		for img in list:
 			if img.endswith(".png"):
-				print (img)
+				#print (img)
 				t1 = img.split('_')
 				t1_split = datetime.datetime.strptime(t1[0], "%Y%m%dT%H%M%S")
 				t2 = datetime.datetime.now()
 				diff =  t2 - t1_split
 				if diff > datetime.timedelta(minutes=90):
 					os.remove(os.path.join(os.getcwd(), dir, img))
-					print ('removing: ',img, diff)
+					#print ('removing: ',img, diff)
 	
 	def hourWiggle(self, dir=None):
 		self.cleanDir(dir)

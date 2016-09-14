@@ -38,6 +38,7 @@ class CloudCam(object):
             self.filterpos  (where is the filter arm? 0 = out, 1 = in)
         """
 
+	self.debug = False
         self.min = min_median
         self.max = max_median
         self.step = step_size
@@ -142,7 +143,8 @@ class CloudCam(object):
         	self.takeImage("cloud", name+".fits", self.expose, dayDir)
 	except:
 		traceback.print_exc()
-        #time.sleep(self.expose+2)  # go to sleep while the image is taken
+	if self.debug != True:
+        	time.sleep(self.expose+2)  # go to sleep while the image is taken
 	
 	#Run the analysis and check the exposure timing
 	try:
@@ -151,9 +153,10 @@ class CloudCam(object):
 	except:
 		traceback.print_exc()
 		#self.expose = 1.0
-	"""if self.expose < 60:
-		print ("going to sleep for: "+str(60-self.expose)+" seconds")
-		time.sleep(60-self.expose)"""
+	if self.debug != True:
+		if self.expose < 60:
+			print (str(60-self.expose)+" seconds till next exposure")
+			time.sleep(60-self.expose)
 
         return
 
