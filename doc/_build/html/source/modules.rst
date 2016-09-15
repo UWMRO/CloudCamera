@@ -13,6 +13,5 @@ CloudCamera
    graphCloud
    irsc
    transfer
-   weather
    weather_sample
    wiggleCloud

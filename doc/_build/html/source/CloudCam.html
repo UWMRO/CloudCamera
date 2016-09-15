@@ -6,7 +6,7 @@
   <head>
     <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
     
-    <title>CloudCam module &#8212; CloudCamera 1.0 documentation</title>
+    <title>CloudCam module &mdash; CloudCamera 1.0 documentation</title>
     
     <link rel="stylesheet" href="../_static/alabaster.css" type="text/css" />
     <link rel="stylesheet" href="../_static/pygments.css" type="text/css" />
@@ -25,22 +25,89 @@
     <script type="text/javascript" src="../_static/doctools.js"></script>
     <link rel="top" title="CloudCamera 1.0 documentation" href="../index.html" />
    
-  <link rel="stylesheet" href="../_static/custom.css" type="text/css" />
-  
   
   <meta name="viewport" content="width=device-width, initial-scale=0.9, maximum-scale=0.9" />
 
   </head>
-  <body role="document">
-  
+  <body role="document">  
 
     <div class="document">
       <div class="documentwrapper">
         <div class="bodywrapper">
           <div class="body" role="main">
             
-  <div class="section" id="cloudcam-module">
-<h1>CloudCam module<a class="headerlink" href="#cloudcam-module" title="Permalink to this headline">¶</a></h1>
+  <div class="section" id="module-CloudCam">
+<span id="cloudcam-module"></span><h1>CloudCam module<a class="headerlink" href="#module-CloudCam" title="Permalink to this headline">¶</a></h1>
+<p>CloudCam.py
+Operates the CloudCam hardware and analysis software</p>
+<p>TODO:</p>
+<dl class="docutils">
+<dt>Usage:</dt>
+<dd><dl class="first docutils">
+<dt>Automatic camera operation and data analysis from command line:</dt>
+<dd>python CloudCam.py</dd>
+</dl>
+<p class="last">Live data is displayed by opening a web browser and looking at
+the IP of the CloudCam</p>
+</dd>
+</dl>
+<dl class="class">
+<dt id="CloudCam.CloudCam">
+<em class="property">class </em><code class="descclassname">CloudCam.</code><code class="descname">CloudCam</code><a class="reference internal" href="../_modules/CloudCam.html#CloudCam"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#CloudCam.CloudCam" title="Permalink to this definition">¶</a></dt>
+<dd><p>Bases: <code class="xref py py-class docutils literal"><span class="pre">object</span></code></p>
+<dl class="method">
+<dt id="CloudCam.CloudCam.checkDir">
+<code class="descname">checkDir</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="../_modules/CloudCam.html#CloudCam.checkDir"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#CloudCam.CloudCam.checkDir" title="Permalink to this definition">¶</a></dt>
+<dd><p>This function checks for needed image storage directories
+and creates them if necessary</p>
+</dd></dl>
+
+<dl class="method">
+<dt id="CloudCam.CloudCam.check_exposure">
+<code class="descname">check_exposure</code><span class="sig-paren">(</span><em>median</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/CloudCam.html#CloudCam.check_exposure"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#CloudCam.CloudCam.check_exposure" title="Permalink to this definition">¶</a></dt>
+<dd><p>Adjusts the exposure timing and filter arm position
+to try and keep the median between self.min and self.max</p>
+<dl class="docutils">
+<dt>input:</dt>
+<dd>median      (median value from analysis)</dd>
+</dl>
+</dd></dl>
+
+<dl class="method">
+<dt id="CloudCam.CloudCam.run_camera">
+<code class="descname">run_camera</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="../_modules/CloudCam.html#CloudCam.run_camera"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#CloudCam.CloudCam.run_camera" title="Permalink to this definition">¶</a></dt>
+<dd><p>Take and analyze image, check exposure after analysis</p>
+</dd></dl>
+
+<dl class="method">
+<dt id="CloudCam.CloudCam.takeImage">
+<code class="descname">takeImage</code><span class="sig-paren">(</span><em>imType=None</em>, <em>imgName=None</em>, <em>imExp=None</em>, <em>imDir=None</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/CloudCam.html#CloudCam.takeImage"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#CloudCam.CloudCam.takeImage" title="Permalink to this definition">¶</a></dt>
+<dd><p>Takes the class, a string keyword for image type, a string for image
+name, an integer for exposure tiem, and a string for directory name.
+The function checks if the variable fakeOut is equal to true first
+&#8211; if so, ends function and carries out rest of code using existing
+images.  If not, the function takes an image using the CameraExpose
+object defined in the constructor, and checks that the image has
+been taken and saved.
+Args:</p>
+<blockquote>
+<div>imType (str): the type of image (bias, dark, object)
+imgName (str): the name of the image
+imExp (str): the exposure length in seconds
+imDir (str):  the directory of the image to be saved</div></blockquote>
+<dl class="docutils">
+<dt>Returns:</dt>
+<dd>int.
+0 &#8211; image was taken
+1 &#8211; image not taken
+2 &#8211; unknown state</dd>
+<dt>Raises:</dt>
+<dd>Exception</dd>
+</dl>
+</dd></dl>
+
+</dd></dl>
+
 </div>
 
 
@@ -65,11 +132,14 @@
 <div id="searchbox" style="display: none" role="search">
   <h3>Quick search</h3>
     <form class="search" action="../search.html" method="get">
-      <div><input type="text" name="q" /></div>
-      <div><input type="submit" value="Go" /></div>
+      <input type="text" name="q" />
+      <input type="submit" value="Go" />
       <input type="hidden" name="check_keywords" value="yes" />
       <input type="hidden" name="area" value="default" />
     </form>
+    <p class="searchtip" style="font-size: 90%">
+    Enter search terms or a module, class or function name.
+    </p>
 </div>
 <script type="text/javascript">$('#searchbox').show(0);</script>
         </div>
@@ -80,8 +150,8 @@
       &copy;2016, Matt Armstrong, Joseph Huehnerhoff.
       
       |
-      Powered by <a href="http://sphinx-doc.org/">Sphinx 1.4.6</a>
-      &amp; <a href="https://github.com/bitprophet/alabaster">Alabaster 0.7.9</a>
+      Powered by <a href="http://sphinx-doc.org/">Sphinx 1.3.6</a>
+      &amp; <a href="https://github.com/bitprophet/alabaster">Alabaster 0.7.7</a>
       
       |
       <a href="../_sources/source/CloudCam.txt"

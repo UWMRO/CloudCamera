@@ -6,7 +6,7 @@
   <head>
     <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
     
-    <title>graphCloud module &#8212; CloudCamera 1.0 documentation</title>
+    <title>graphCloud module &mdash; CloudCamera 1.0 documentation</title>
     
     <link rel="stylesheet" href="../_static/alabaster.css" type="text/css" />
     <link rel="stylesheet" href="../_static/pygments.css" type="text/css" />
@@ -25,22 +25,177 @@
     <script type="text/javascript" src="../_static/doctools.js"></script>
     <link rel="top" title="CloudCamera 1.0 documentation" href="../index.html" />
    
-  <link rel="stylesheet" href="../_static/custom.css" type="text/css" />
-  
   
   <meta name="viewport" content="width=device-width, initial-scale=0.9, maximum-scale=0.9" />
 
   </head>
-  <body role="document">
-  
+  <body role="document">  
 
     <div class="document">
       <div class="documentwrapper">
         <div class="bodywrapper">
           <div class="body" role="main">
             
-  <div class="section" id="graphcloud-module">
-<h1>graphCloud module<a class="headerlink" href="#graphcloud-module" title="Permalink to this headline">¶</a></h1>
+  <div class="section" id="module-graphCloud">
+<span id="graphcloud-module"></span><h1>graphCloud module<a class="headerlink" href="#module-graphCloud" title="Permalink to this headline">¶</a></h1>
+<p>Cloud_Graph.py
+Analyze and process images from the CloudCam. Applies masks, calculates
+statistics, and outputs a .png image to analyzed/</p>
+<p>All statistical information is saved in the FITS header,
+and the FITS image is compressed.</p>
+<dl class="docutils">
+<dt>TODO:</dt>
+<dd>Fix png naming to use a timestamp, not a chopped name</dd>
+<dt>Dependencies:</dt>
+<dd>Run ./make to install all dependencies</dd>
+<dt>Usage:</dt>
+<dd><dl class="first docutils">
+<dt>Analyze all .fits images in images/:</dt>
+<dd>python Cloud_Graph.py</dd>
+</dl>
+<p class="last">Typically called from CloudCam.py</p>
+</dd>
+<dt>Output:</dt>
+<dd>Analyzed image, with histogram plot and statistics is
+output to analyzed as (Input_Name)_analyzed.png</dd>
+</dl>
+<dl class="class">
+<dt id="graphCloud.CloudGraph">
+<em class="property">class </em><code class="descclassname">graphCloud.</code><code class="descname">CloudGraph</code><a class="reference internal" href="../_modules/graphCloud.html#CloudGraph"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#graphCloud.CloudGraph" title="Permalink to this definition">¶</a></dt>
+<dd><p>Bases: <code class="xref py py-class docutils literal"><span class="pre">object</span></code></p>
+<dl class="method">
+<dt id="graphCloud.CloudGraph.add_headers">
+<code class="descname">add_headers</code><span class="sig-paren">(</span><em>expose</em>, <em>median</em>, <em>std</em>, <em>name</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/graphCloud.html#CloudGraph.add_headers"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#graphCloud.CloudGraph.add_headers" title="Permalink to this definition">¶</a></dt>
+<dd><p>Add statistical and image information
+to the FITS header, close the FITS file,
+and zip the image to save space.</p>
+<dl class="docutils">
+<dt>Input:</dt>
+<dd>expose          The length of the image exposure in seconds
+median          The statistical median of the image
+std                     The statistical standard dev. of the image
+img_in          The name of the image</dd>
+<dt>Output:</dt>
+<dd>Saved and compressed FITS image</dd>
+</dl>
+</dd></dl>
+
+<dl class="method">
+<dt id="graphCloud.CloudGraph.dynamic_mask">
+<code class="descname">dynamic_mask</code><span class="sig-paren">(</span><em>image=None</em>, <em>maskname=None</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/graphCloud.html#CloudGraph.dynamic_mask"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#graphCloud.CloudGraph.dynamic_mask" title="Permalink to this definition">¶</a></dt>
+<dd><p>Creates a numpy mask on the image, filtering out any
+pixel values that are negative or saturated</p>
+<dl class="docutils">
+<dt>Input:</dt>
+<dd>image                   (Aperture masked numpy image)</dd>
+<dt>Output: Masked numpy array covering any pixels above or below the standard dev range</dt>
+<dd>masked1                 (masked numpy array)
+median  <em>Float</em> (median value of masked array)
+mean    <em>Float</em> (mean value of masked array)</dd>
+</dl>
+</dd></dl>
+
+<dl class="method">
+<dt id="graphCloud.CloudGraph.fits_to_list">
+<code class="descname">fits_to_list</code><span class="sig-paren">(</span><em>file_name</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/graphCloud.html#CloudGraph.fits_to_list"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#graphCloud.CloudGraph.fits_to_list" title="Permalink to this definition">¶</a></dt>
+<dd><p>Try to open the fits file.
+If the file doesn&#8217;t exist, say so and return.
+Otherwise, select just the image data as a numpy array
+and close the fits file.</p>
+<p>Input: File name
+Output: Numpy array of image data</p>
+</dd></dl>
+
+<dl class="method">
+<dt id="graphCloud.CloudGraph.mapImg">
+<code class="descname">mapImg</code><span class="sig-paren">(</span><em>imArr=None</em>, <em>name=None</em>, <em>map=None</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/graphCloud.html#CloudGraph.mapImg"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#graphCloud.CloudGraph.mapImg" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="method">
+<dt id="graphCloud.CloudGraph.pixel_value_list">
+<code class="descname">pixel_value_list</code><span class="sig-paren">(</span><em>image</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/graphCloud.html#CloudGraph.pixel_value_list"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#graphCloud.CloudGraph.pixel_value_list" title="Permalink to this definition">¶</a></dt>
+<dd><p>Produce two arrays, the first is a list of the binned pixel values
+and the second is the number of pixels at that value</p>
+<p>Input: masked numpy array of the image
+Output: Two lists of histogram data on the image. ([bins],[values])</p>
+</dd></dl>
+
+<dl class="method">
+<dt id="graphCloud.CloudGraph.plot_histogram">
+<code class="descname">plot_histogram</code><span class="sig-paren">(</span><em>img</em>, <em>values</em>, <em>bins</em>, <em>img_out</em>, <em>stat_arr</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/graphCloud.html#CloudGraph.plot_histogram"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#graphCloud.CloudGraph.plot_histogram" title="Permalink to this definition">¶</a></dt>
+<dd><p>Statistical plotting and output function.</p>
+<dl class="docutils">
+<dt>Input: Value list, Bin list, Name of output, Masked image, median value, mean value, standard dev, image name</dt>
+<dd>img             (image array)
+values          (List of histogram counts)
+bins            (List of histogram bins)
+img_out         (Name of output image)
+stat_arr = [median, mean, std, name, gain]</dd>
+<dt>Output: png image file with the masked image, statistical and image information, and histogram plot</dt>
+<dd><dl class="first last docutils">
+<dt>Saves three copies of the image</dt>
+<dd>analyzed/img_out.png                    (Archive storage location)
+gif/img_out.png                                 (Temp directory used to produce a gif)
+/var/www/html/latest.png                (Live view webpage displays this image)</dd>
+<dt>Every 10 images, produces a gif of the images in gif/</dt>
+<dd>/var/www/html/latest.png                (Live view webpage displays this gif)</dd>
+</dl>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="method">
+<dt id="graphCloud.CloudGraph.rainSensors">
+<code class="descname">rainSensors</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="../_modules/graphCloud.html#CloudGraph.rainSensors"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#graphCloud.CloudGraph.rainSensors" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="method">
+<dt id="graphCloud.CloudGraph.rainSensorsOld">
+<code class="descname">rainSensorsOld</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="../_modules/graphCloud.html#CloudGraph.rainSensorsOld"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#graphCloud.CloudGraph.rainSensorsOld" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="method">
+<dt id="graphCloud.CloudGraph.run_analysis">
+<code class="descname">run_analysis</code><span class="sig-paren">(</span><em>name</em>, <em>expose</em>, <em>gain</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/graphCloud.html#CloudGraph.run_analysis"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#graphCloud.CloudGraph.run_analysis" title="Permalink to this definition">¶</a></dt>
+<dd><p>This is where the code is actually run, so the total analysis
+package can be called from outside this file.</p>
+<p>Input: name of image in, name of image out, and chopped file name
+input:</p>
+<blockquote>
+<div>img_in                  (name of input .fits image)
+img_out                 (name of output png image)
+name                    (name file for timestamp)</div></blockquote>
+</dd></dl>
+
+<dl class="method">
+<dt id="graphCloud.CloudGraph.scale_img">
+<code class="descname">scale_img</code><span class="sig-paren">(</span><em>img</em>, <em>median</em>, <em>std</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/graphCloud.html#CloudGraph.scale_img"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#graphCloud.CloudGraph.scale_img" title="Permalink to this definition">¶</a></dt>
+<dd><p>Scale the image based on the median and std
+Brings out cloud detail</p>
+<dl class="docutils">
+<dt>input:</dt>
+<dd>img                     (masked numpy image to scale)                   median          (median value of image)
+std                     (std value of image)</dd>
+<dt>output:</dt>
+<dd>result          (scaled image)</dd>
+</dl>
+</dd></dl>
+
+<dl class="method">
+<dt id="graphCloud.CloudGraph.start_up_checks">
+<code class="descname">start_up_checks</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="../_modules/graphCloud.html#CloudGraph.start_up_checks"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#graphCloud.CloudGraph.start_up_checks" title="Permalink to this definition">¶</a></dt>
+<dd><p>Run once at start-up
+Checks for necessary folders and files
+Creates them if necessary</p>
+</dd></dl>
+
+<dl class="method">
+<dt id="graphCloud.CloudGraph.zipFile">
+<code class="descname">zipFile</code><span class="sig-paren">(</span><em>f=None</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/graphCloud.html#CloudGraph.zipFile"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#graphCloud.CloudGraph.zipFile" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+</dd></dl>
+
 </div>
 
 
@@ -65,11 +220,14 @@
 <div id="searchbox" style="display: none" role="search">
   <h3>Quick search</h3>
     <form class="search" action="../search.html" method="get">
-      <div><input type="text" name="q" /></div>
-      <div><input type="submit" value="Go" /></div>
+      <input type="text" name="q" />
+      <input type="submit" value="Go" />
       <input type="hidden" name="check_keywords" value="yes" />
       <input type="hidden" name="area" value="default" />
     </form>
+    <p class="searchtip" style="font-size: 90%">
+    Enter search terms or a module, class or function name.
+    </p>
 </div>
 <script type="text/javascript">$('#searchbox').show(0);</script>
         </div>
@@ -80,8 +238,8 @@
       &copy;2016, Matt Armstrong, Joseph Huehnerhoff.
       
       |
-      Powered by <a href="http://sphinx-doc.org/">Sphinx 1.4.6</a>
-      &amp; <a href="https://github.com/bitprophet/alabaster">Alabaster 0.7.9</a>
+      Powered by <a href="http://sphinx-doc.org/">Sphinx 1.3.6</a>
+      &amp; <a href="https://github.com/bitprophet/alabaster">Alabaster 0.7.7</a>
       
       |
       <a href="../_sources/source/graphCloud.txt"

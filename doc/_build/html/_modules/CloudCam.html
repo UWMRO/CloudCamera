@@ -1,0 +1,292 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN"
+  "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+
+
+<html xmlns="http://www.w3.org/1999/xhtml">
+  <head>
+    <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+    
+    <title>CloudCam &mdash; CloudCamera 1.0 documentation</title>
+    
+    <link rel="stylesheet" href="../_static/alabaster.css" type="text/css" />
+    <link rel="stylesheet" href="../_static/pygments.css" type="text/css" />
+    
+    <script type="text/javascript">
+      var DOCUMENTATION_OPTIONS = {
+        URL_ROOT:    '../',
+        VERSION:     '1.0',
+        COLLAPSE_INDEX: false,
+        FILE_SUFFIX: '.html',
+        HAS_SOURCE:  true
+      };
+    </script>
+    <script type="text/javascript" src="../_static/jquery.js"></script>
+    <script type="text/javascript" src="../_static/underscore.js"></script>
+    <script type="text/javascript" src="../_static/doctools.js"></script>
+    <link rel="top" title="CloudCamera 1.0 documentation" href="../index.html" />
+    <link rel="up" title="Module code" href="index.html" />
+   
+  
+  <meta name="viewport" content="width=device-width, initial-scale=0.9, maximum-scale=0.9" />
+
+  </head>
+  <body role="document">  
+
+    <div class="document">
+      <div class="documentwrapper">
+        <div class="bodywrapper">
+          <div class="body" role="main">
+            
+  <h1>Source code for CloudCam</h1><div class="highlight"><pre>
+<span class="ch">#! /usr/bin/python</span>
+
+<span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">CloudCam.py</span>
+<span class="sd">Operates the CloudCam hardware and analysis software</span>
+
+<span class="sd">TODO:</span>
+
+
+<span class="sd">Usage:</span>
+<span class="sd">    Automatic camera operation and data analysis from command line:</span>
+<span class="sd">        python CloudCam.py</span>
+
+<span class="sd">    Live data is displayed by opening a web browser and looking at</span>
+<span class="sd">    the IP of the CloudCam</span>
+<span class="sd">&quot;&quot;&quot;</span>
+
+
+<span class="kn">import</span> <span class="nn">numpy</span> <span class="kn">as</span> <span class="nn">np</span>
+<span class="kn">from</span> <span class="nn">graphCloud</span> <span class="kn">import</span> <span class="o">*</span>
+<span class="kn">from</span> <span class="nn">camera</span> <span class="kn">import</span> <span class="o">*</span>
+<span class="kn">import</span> <span class="nn">datetime</span>
+<span class="kn">from</span> <span class="nn">clouduino_interface</span> <span class="kn">import</span> <span class="n">ClouduinoInterface</span>
+<span class="kn">import</span> <span class="nn">os</span>
+<span class="kn">from</span> <span class="nn">CloudParams</span> <span class="kn">import</span> <span class="o">*</span>
+<span class="kn">import</span> <span class="nn">traceback</span>
+
+<div class="viewcode-block" id="CloudCam"><a class="viewcode-back" href="../source/CloudCam.html#CloudCam.CloudCam">[docs]</a><span class="k">class</span> <span class="nc">CloudCam</span><span class="p">(</span><span class="nb">object</span><span class="p">):</span>
+    <span class="k">def</span> <span class="nf">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Options:</span>
+<span class="sd">            self.min        (minimum median value for exposure control)</span>
+<span class="sd">            self.max        (maximum median value for exposure control)</span>
+<span class="sd">            self.step       (What percent the exp value changes under exposure control)</span>
+<span class="sd">            self.expose     (starting exposure length [s])</span>
+<span class="sd">            self.dir        (where are the .fits images saved)</span>
+<span class="sd">            self.gain       (camera gain setting)</span>
+<span class="sd">            self.filterpos  (where is the filter arm? 0 = out, 1 = in)</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+
+	<span class="bp">self</span><span class="o">.</span><span class="n">debug</span> <span class="o">=</span> <span class="bp">False</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">min</span> <span class="o">=</span> <span class="n">min_median</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">max</span> <span class="o">=</span> <span class="n">max_median</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">step</span> <span class="o">=</span> <span class="n">step_size</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">expose</span> <span class="o">=</span> <span class="n">expose</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">dir</span> <span class="o">=</span> <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="n">os</span><span class="o">.</span><span class="n">getcwd</span><span class="p">(),</span><span class="s1">&#39;images&#39;</span><span class="p">)</span>
+	<span class="bp">self</span><span class="o">.</span><span class="n">dayDir</span> <span class="o">=</span> <span class="bp">None</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">gain</span> <span class="o">=</span> <span class="n">gain</span>
+	<span class="bp">self</span><span class="o">.</span><span class="n">gainmax</span> <span class="o">=</span> <span class="n">gainmax</span>
+	<span class="bp">self</span><span class="o">.</span><span class="n">maxExp</span> <span class="o">=</span> <span class="n">max_exp</span>
+	<span class="bp">self</span><span class="o">.</span><span class="n">backupFile</span> <span class="o">=</span> <span class="s2">&quot;backupParams.txt&quot;</span>
+
+        <span class="bp">self</span><span class="o">.</span><span class="n">cg</span> <span class="o">=</span> <span class="n">CloudGraph</span><span class="p">()</span>
+	<span class="bp">self</span><span class="o">.</span><span class="n">c</span> <span class="o">=</span> <span class="n">CameraExpose</span><span class="p">()</span>
+	<span class="bp">self</span><span class="o">.</span><span class="n">ci</span> <span class="o">=</span> <span class="n">ClouduinoInterface</span><span class="p">()</span>
+
+
+<div class="viewcode-block" id="CloudCam.check_exposure"><a class="viewcode-back" href="../source/CloudCam.html#CloudCam.CloudCam.check_exposure">[docs]</a>    <span class="k">def</span> <span class="nf">check_exposure</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">median</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Adjusts the exposure timing and filter arm position</span>
+<span class="sd">        to try and keep the median between self.min and self.max</span>
+
+<span class="sd">        input:</span>
+<span class="sd">            median      (median value from analysis)</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+
+	<span class="c1"># Check and adjust exposure timing for low light</span>
+	<span class="k">print</span> <span class="s2">&quot;bounds (minMed, maxMed, maxGain, maxExp: &quot;</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">min</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">max</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">gainmax</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">maxExp</span>
+        <span class="k">if</span> <span class="n">median</span> <span class="o">&lt;</span> <span class="bp">self</span><span class="o">.</span><span class="n">min</span><span class="p">:</span>
+	    <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">expose</span> <span class="o">&gt;=</span><span class="bp">self</span><span class="o">.</span><span class="n">maxExp</span> <span class="ow">and</span> <span class="bp">self</span><span class="o">.</span><span class="n">gain</span> <span class="o">&gt;=</span> <span class="mi">1</span><span class="p">:</span>
+                <span class="bp">self</span><span class="o">.</span><span class="n">gain</span> <span class="o">+=</span> <span class="mi">1</span>
+		<span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">gain</span> <span class="o">&gt;</span> <span class="bp">self</span><span class="o">.</span><span class="n">gainmax</span><span class="p">:</span>
+			<span class="bp">self</span><span class="o">.</span><span class="n">gain</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">gainmax</span>
+                <span class="k">print</span> <span class="p">(</span><span class="s2">&quot;Gain Set To: &quot;</span><span class="o">+</span><span class="nb">str</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">gain</span><span class="p">))</span>
+            <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">expose</span> <span class="o">&lt;=</span> <span class="bp">self</span><span class="o">.</span><span class="n">maxExp</span> <span class="ow">and</span> <span class="bp">self</span><span class="o">.</span><span class="n">gain</span> <span class="o">==</span> <span class="bp">self</span><span class="o">.</span><span class="n">gainmax</span><span class="p">:</span>
+                <span class="bp">self</span><span class="o">.</span><span class="n">expose</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">expose</span><span class="o">*</span><span class="p">(</span><span class="mf">1.0</span><span class="o">+</span><span class="bp">self</span><span class="o">.</span><span class="n">step</span><span class="p">)</span>
+                <span class="k">print</span> <span class="p">(</span><span class="s2">&quot;Exposure too short, increasing to: &quot;</span><span class="o">+</span><span class="nb">str</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">expose</span><span class="p">)</span><span class="o">+</span><span class="s2">&quot; seconds&quot;</span><span class="p">)</span>
+
+	<span class="c1"># Check and adjust exposure and gain for high light</span>
+        <span class="k">elif</span> <span class="n">median</span> <span class="o">&gt;</span> <span class="bp">self</span><span class="o">.</span><span class="n">max</span><span class="p">:</span>
+	    <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">expose</span> <span class="o">&gt;=</span><span class="mf">0.02</span> <span class="ow">and</span> <span class="bp">self</span><span class="o">.</span><span class="n">gain</span> <span class="o">&gt;</span> <span class="mi">1</span><span class="p">:</span>
+            	<span class="bp">self</span><span class="o">.</span><span class="n">gain</span> <span class="o">-=</span> <span class="mi">1</span>
+		<span class="k">print</span> <span class="p">(</span><span class="s2">&quot;Gain Set To: &quot;</span><span class="o">+</span> <span class="nb">str</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">gain</span><span class="p">))</span>
+	    <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">expose</span> <span class="o">&gt;=</span><span class="mf">0.02</span> <span class="ow">and</span> <span class="bp">self</span><span class="o">.</span><span class="n">gain</span> <span class="o">==</span> <span class="mi">1</span><span class="p">:</span>
+		<span class="bp">self</span><span class="o">.</span><span class="n">expose</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">expose</span><span class="o">*</span><span class="p">(</span><span class="mf">1.0</span><span class="o">-</span><span class="bp">self</span><span class="o">.</span><span class="n">step</span><span class="p">)</span>
+                <span class="k">print</span> <span class="p">(</span><span class="s2">&quot;Exposure too long, decreasing to: &quot;</span><span class="o">+</span><span class="nb">str</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">expose</span><span class="p">)</span><span class="o">+</span><span class="s2">&quot; seconds&quot;</span><span class="p">)</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="k">print</span> <span class="p">(</span><span class="s2">&quot;Exposure within bounds&quot;</span><span class="p">)</span>
+	<span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">expose</span> <span class="o">&lt;</span> <span class="mf">0.02</span><span class="p">:</span>
+		<span class="bp">self</span><span class="o">.</span><span class="n">expose</span> <span class="o">=</span> <span class="mf">0.02</span>
+	<span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">expose</span> <span class="o">&gt;</span> <span class="bp">self</span><span class="o">.</span><span class="n">maxExp</span><span class="p">:</span>
+                <span class="bp">self</span><span class="o">.</span><span class="n">expose</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">maxExp</span>
+	<span class="k">try</span><span class="p">:</span>
+		<span class="n">backupParams</span> <span class="o">=</span> <span class="nb">str</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">expose</span><span class="p">)</span><span class="o">+</span><span class="s2">&quot;, &quot;</span><span class="o">+</span><span class="nb">str</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">gain</span><span class="p">)</span>
+		<span class="n">backup</span> <span class="o">=</span> <span class="nb">open</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">backupFile</span><span class="p">,</span> <span class="s2">&quot;w&quot;</span><span class="p">)</span>
+		<span class="n">backup</span><span class="o">.</span><span class="n">write</span><span class="p">(</span><span class="n">backupParams</span><span class="p">)</span>
+		<span class="n">backup</span><span class="o">.</span><span class="n">close</span><span class="p">()</span>
+	<span class="k">except</span><span class="p">:</span>
+		<span class="k">print</span><span class="p">(</span><span class="s2">&quot;Could not write backup file&quot;</span><span class="p">)</span>
+
+	<span class="k">return</span></div>
+
+<div class="viewcode-block" id="CloudCam.checkDir"><a class="viewcode-back" href="../source/CloudCam.html#CloudCam.CloudCam.checkDir">[docs]</a>    <span class="k">def</span> <span class="nf">checkDir</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+	<span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">	This function checks for needed image storage directories</span>
+<span class="sd">	and creates them if necessary</span>
+<span class="sd">	&quot;&quot;&quot;</span>
+	<span class="n">dayDir</span> <span class="o">=</span> <span class="n">time</span><span class="o">.</span><span class="n">strftime</span><span class="p">(</span><span class="s2">&quot;%Y%m</span><span class="si">%d</span><span class="s2">&quot;</span><span class="p">,</span> <span class="n">time</span><span class="o">.</span><span class="n">gmtime</span><span class="p">())</span>
+	
+	<span class="c1">#Check for fits image storage folder for today, make if needed</span>
+	<span class="k">if</span> <span class="ow">not</span> <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">isdir</span><span class="p">(</span><span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="n">os</span><span class="o">.</span><span class="n">getcwd</span><span class="p">(),</span> <span class="s1">&#39;images&#39;</span><span class="p">,</span> <span class="n">dayDir</span><span class="p">)):</span>
+		<span class="n">os</span><span class="o">.</span><span class="n">mkdir</span><span class="p">(</span><span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="n">os</span><span class="o">.</span><span class="n">getcwd</span><span class="p">(),</span> <span class="s1">&#39;images&#39;</span><span class="p">,</span> <span class="n">dayDir</span><span class="p">))</span>
+		<span class="k">print</span> <span class="p">(</span><span class="s1">&#39;directory made: &#39;</span><span class="p">,</span> <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="n">os</span><span class="o">.</span><span class="n">getcwd</span><span class="p">(),</span> <span class="s1">&#39;images&#39;</span><span class="p">,</span> <span class="n">dayDir</span><span class="p">))</span>
+	
+	<span class="c1">#Check for analyzed image storage folder for today, make if needed</span>
+	<span class="k">if</span> <span class="ow">not</span> <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">isdir</span><span class="p">(</span><span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="n">os</span><span class="o">.</span><span class="n">getcwd</span><span class="p">(),</span> <span class="s1">&#39;analyzed&#39;</span><span class="p">,</span> <span class="n">dayDir</span><span class="p">)):</span>
+                <span class="n">os</span><span class="o">.</span><span class="n">mkdir</span><span class="p">(</span><span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="n">os</span><span class="o">.</span><span class="n">getcwd</span><span class="p">(),</span> <span class="s1">&#39;analyzed&#39;</span><span class="p">,</span> <span class="n">dayDir</span><span class="p">))</span>
+		<span class="k">print</span> <span class="p">(</span><span class="s1">&#39;directory made: &#39;</span><span class="p">,</span> <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="n">os</span><span class="o">.</span><span class="n">getcwd</span><span class="p">(),</span> <span class="s1">&#39;analyzed&#39;</span><span class="p">,</span> <span class="n">dayDir</span><span class="p">))</span>
+	<span class="k">return</span> <span class="n">dayDir</span></div>
+	
+<div class="viewcode-block" id="CloudCam.run_camera"><a class="viewcode-back" href="../source/CloudCam.html#CloudCam.CloudCam.run_camera">[docs]</a>    <span class="k">def</span> <span class="nf">run_camera</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Take and analyze image, check exposure after analysis</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+	<span class="n">dayDir</span> <span class="o">=</span> <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="n">os</span><span class="o">.</span><span class="n">getcwd</span><span class="p">(),</span><span class="s1">&#39;images&#39;</span><span class="p">,</span><span class="bp">self</span><span class="o">.</span><span class="n">checkDir</span><span class="p">())</span>
+        <span class="n">name</span> <span class="o">=</span> <span class="n">time</span><span class="o">.</span><span class="n">strftime</span><span class="p">(</span><span class="s2">&quot;%Y%m</span><span class="si">%d</span><span class="s2">T%H%M%S&quot;</span><span class="p">)</span><span class="o">+</span><span class="s2">&quot;_&quot;</span><span class="o">+</span><span class="nb">str</span><span class="p">(</span><span class="s1">&#39;</span><span class="si">%.3f</span><span class="s1">&#39;</span><span class="o">%</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">expose</span><span class="p">))</span>
+
+	<span class="c1">#Remove the old image binary file</span>
+	<span class="k">if</span> <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">isfile</span><span class="p">(</span><span class="s1">&#39;binary&#39;</span><span class="p">):</span>
+		<span class="n">os</span><span class="o">.</span><span class="n">remove</span><span class="p">(</span><span class="s1">&#39;binary&#39;</span><span class="p">)</span>
+
+	<span class="k">try</span><span class="p">:</span>
+                <span class="n">backupParams</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">genfromtxt</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">backupFile</span><span class="p">,</span> <span class="n">delimiter</span><span class="o">=</span><span class="s2">&quot;,&quot;</span><span class="p">)</span>
+                <span class="bp">self</span><span class="o">.</span><span class="n">expose</span> <span class="o">=</span> <span class="n">backupParams</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span>
+                <span class="bp">self</span><span class="o">.</span><span class="n">gain</span> <span class="o">=</span> <span class="n">backupParams</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span>
+                <span class="c1">#os.remove(self.backupFile)</span>
+        <span class="k">except</span><span class="p">:</span>
+                <span class="k">print</span><span class="p">(</span><span class="s2">&quot;Could not load backup file&quot;</span><span class="p">)</span>
+
+	
+	<span class="c1">#Try to take an image</span>
+	<span class="k">try</span><span class="p">:</span>
+        	<span class="bp">self</span><span class="o">.</span><span class="n">takeImage</span><span class="p">(</span><span class="s2">&quot;cloud&quot;</span><span class="p">,</span> <span class="n">name</span><span class="o">+</span><span class="s2">&quot;.fits&quot;</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">expose</span><span class="p">,</span> <span class="n">dayDir</span><span class="p">)</span>
+	<span class="k">except</span><span class="p">:</span>
+		<span class="n">traceback</span><span class="o">.</span><span class="n">print_exc</span><span class="p">()</span>
+	<span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">debug</span> <span class="o">!=</span> <span class="bp">True</span><span class="p">:</span>
+        	<span class="n">time</span><span class="o">.</span><span class="n">sleep</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">expose</span><span class="o">+</span><span class="mi">2</span><span class="p">)</span>  <span class="c1"># go to sleep while the image is taken</span>
+	
+	<span class="c1">#Run the analysis and check the exposure timing</span>
+	<span class="k">try</span><span class="p">:</span>
+       		<span class="n">median</span> <span class="o">=</span> <span class="n">cg</span><span class="o">.</span><span class="n">run_analysis</span><span class="p">(</span><span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="n">dayDir</span><span class="p">,</span><span class="n">name</span><span class="p">),</span> <span class="bp">self</span><span class="o">.</span><span class="n">expose</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">gain</span><span class="p">)</span>
+		<span class="bp">self</span><span class="o">.</span><span class="n">check_exposure</span><span class="p">(</span><span class="n">median</span><span class="p">)</span>
+	<span class="k">except</span><span class="p">:</span>
+		<span class="n">traceback</span><span class="o">.</span><span class="n">print_exc</span><span class="p">()</span>
+		<span class="c1">#self.expose = 1.0</span>
+	<span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">debug</span> <span class="o">!=</span> <span class="bp">True</span><span class="p">:</span>
+		<span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">expose</span> <span class="o">&lt;</span> <span class="mi">60</span><span class="p">:</span>
+			<span class="k">print</span> <span class="p">(</span><span class="nb">str</span><span class="p">(</span><span class="mi">60</span><span class="o">-</span><span class="bp">self</span><span class="o">.</span><span class="n">expose</span><span class="p">)</span><span class="o">+</span><span class="s2">&quot; seconds till next exposure&quot;</span><span class="p">)</span>
+			<span class="n">time</span><span class="o">.</span><span class="n">sleep</span><span class="p">(</span><span class="mi">60</span><span class="o">-</span><span class="bp">self</span><span class="o">.</span><span class="n">expose</span><span class="p">)</span>
+
+        <span class="k">return</span></div>
+
+<div class="viewcode-block" id="CloudCam.takeImage"><a class="viewcode-back" href="../source/CloudCam.html#CloudCam.CloudCam.takeImage">[docs]</a>    <span class="k">def</span> <span class="nf">takeImage</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">imType</span> <span class="o">=</span> <span class="bp">None</span><span class="p">,</span> <span class="n">imgName</span> <span class="o">=</span> <span class="bp">None</span><span class="p">,</span> <span class="n">imExp</span> <span class="o">=</span> <span class="bp">None</span><span class="p">,</span> <span class="n">imDir</span> <span class="o">=</span> <span class="bp">None</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;Takes the class, a string keyword for image type, a string for image</span>
+<span class="sd">        name, an integer for exposure tiem, and a string for directory name.</span>
+<span class="sd">        The function checks if the variable fakeOut is equal to true first</span>
+<span class="sd">        -- if so, ends function and carries out rest of code using existing</span>
+<span class="sd">        images.  If not, the function takes an image using the CameraExpose</span>
+<span class="sd">        object defined in the constructor, and checks that the image has</span>
+<span class="sd">        been taken and saved.</span>
+<span class="sd">        Args:</span>
+<span class="sd">            imType (str): the type of image (bias, dark, object)</span>
+<span class="sd">            imgName (str): the name of the image</span>
+<span class="sd">            imExp (str): the exposure length in seconds</span>
+<span class="sd">            imDir (str):  the directory of the image to be saved</span>
+<span class="sd">        Returns:</span>
+<span class="sd">            int.</span>
+<span class="sd">            0 -- image was taken</span>
+<span class="sd">            1 -- image not taken</span>
+<span class="sd">            2 -- unknown state</span>
+<span class="sd">        Raises:</span>
+<span class="sd">            Exception</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">fakeOut</span> <span class="o">=</span>  <span class="bp">False</span>
+        <span class="n">im</span> <span class="o">=</span> <span class="bp">False</span>
+        <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">fakeOut</span> <span class="o">!=</span> <span class="bp">True</span><span class="p">:</span>
+	    <span class="k">print</span> <span class="n">imExp</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">gain</span>
+            <span class="n">im</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">c</span><span class="o">.</span><span class="n">runExpose</span><span class="p">(</span><span class="nb">str</span><span class="p">(</span><span class="n">imgName</span><span class="p">),</span> <span class="nb">str</span><span class="p">(</span><span class="n">imExp</span><span class="p">),</span> <span class="nb">str</span><span class="p">(</span><span class="n">imDir</span><span class="p">),</span> <span class="bp">self</span><span class="o">.</span><span class="n">gain</span><span class="p">)</span>
+            <span class="k">if</span> <span class="n">im</span> <span class="o">==</span> <span class="bp">True</span><span class="p">:</span> <span class="c1"># check on completion and save of image exposure</span>
+                <span class="n">time</span><span class="o">.</span><span class="n">sleep</span><span class="p">(</span><span class="mi">1</span><span class="p">)</span>
+                <span class="k">return</span> <span class="mi">0</span>
+            <span class="k">else</span><span class="p">:</span>
+                <span class="k">raise</span> <span class="ne">Exception</span><span class="p">(</span><span class="s2">&quot;Image exposure not completed&quot;</span><span class="p">)</span>
+                <span class="k">return</span> <span class="mi">1</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="k">return</span> <span class="mi">3</span> <span class="c1"># Simply returns if no exception raised</span></div></div>
+
+
+<span class="k">if</span> <span class="n">__name__</span> <span class="o">==</span> <span class="s2">&quot;__main__&quot;</span><span class="p">:</span>
+    <span class="n">cg</span> <span class="o">=</span> <span class="n">CloudGraph</span><span class="p">()</span>
+    <span class="n">cc</span> <span class="o">=</span> <span class="n">CloudCam</span><span class="p">()</span>
+    <span class="n">cg</span><span class="o">.</span><span class="n">start_up_checks</span><span class="p">()</span>
+
+    <span class="n">run</span> <span class="o">=</span> <span class="bp">True</span>
+    <span class="k">while</span> <span class="n">run</span> <span class="o">==</span> <span class="bp">True</span><span class="p">:</span>
+        <span class="n">cc</span><span class="o">.</span><span class="n">run_camera</span><span class="p">()</span>
+</pre></div>
+
+          </div>
+        </div>
+      </div>
+      <div class="sphinxsidebar" role="navigation" aria-label="main navigation">
+        <div class="sphinxsidebarwrapper"><div class="relations">
+<h3>Related Topics</h3>
+<ul>
+  <li><a href="../index.html">Documentation overview</a><ul>
+  <li><a href="index.html">Module code</a><ul>
+  </ul></li>
+  </ul></li>
+</ul>
+</div>
+<div id="searchbox" style="display: none" role="search">
+  <h3>Quick search</h3>
+    <form class="search" action="../search.html" method="get">
+      <input type="text" name="q" />
+      <input type="submit" value="Go" />
+      <input type="hidden" name="check_keywords" value="yes" />
+      <input type="hidden" name="area" value="default" />
+    </form>
+    <p class="searchtip" style="font-size: 90%">
+    Enter search terms or a module, class or function name.
+    </p>
+</div>
+<script type="text/javascript">$('#searchbox').show(0);</script>
+        </div>
+      </div>
+      <div class="clearer"></div>
+    </div>
+    <div class="footer">
+      &copy;2016, Matt Armstrong, Joseph Huehnerhoff.
+      
+      |
+      Powered by <a href="http://sphinx-doc.org/">Sphinx 1.3.6</a>
+      &amp; <a href="https://github.com/bitprophet/alabaster">Alabaster 0.7.7</a>
+      
+    </div>
+
+    
+
+    
+  </body>
+</html>

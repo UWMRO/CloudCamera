@@ -6,7 +6,7 @@
   <head>
     <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
     
-    <title>Cloud_Mask &#8212; CloudCamera 1.0 documentation</title>
+    <title>Cloud_Mask &mdash; CloudCamera 1.0 documentation</title>
     
     <link rel="stylesheet" href="../_static/alabaster.css" type="text/css" />
     <link rel="stylesheet" href="../_static/pygments.css" type="text/css" />
@@ -26,14 +26,11 @@
     <link rel="top" title="CloudCamera 1.0 documentation" href="../index.html" />
     <link rel="up" title="Module code" href="index.html" />
    
-  <link rel="stylesheet" href="../_static/custom.css" type="text/css" />
-  
   
   <meta name="viewport" content="width=device-width, initial-scale=0.9, maximum-scale=0.9" />
 
   </head>
-  <body role="document">
-  
+  <body role="document">  
 
     <div class="document">
       <div class="documentwrapper">
@@ -41,7 +38,7 @@
           <div class="body" role="main">
             
   <h1>Source code for Cloud_Mask</h1><div class="highlight"><pre>
-<span></span><span class="ch">#! /usr/bin/python</span>
+<span class="ch">#! /usr/bin/python</span>
 
 <span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">Cloud_Mask.py</span>
@@ -52,8 +49,8 @@
 <span class="sd">masks.</span>
 <span class="sd">&quot;&quot;&quot;</span>
 
-<span class="kn">import</span> <span class="nn">numpy</span> <span class="k">as</span> <span class="nn">np</span>
-<span class="kn">from</span> <span class="nn">CloudParams</span> <span class="k">import</span> <span class="o">*</span>
+<span class="kn">import</span> <span class="nn">numpy</span> <span class="kn">as</span> <span class="nn">np</span>
+<span class="kn">from</span> <span class="nn">CloudParams</span> <span class="kn">import</span> <span class="o">*</span>
 
 <div class="viewcode-block" id="CloudMask"><a class="viewcode-back" href="../source/Cloud_Mask.html#Cloud_Mask.CloudMask">[docs]</a><span class="k">class</span> <span class="nc">CloudMask</span><span class="p">(</span><span class="nb">object</span><span class="p">):</span>
     <span class="k">def</span> <span class="nf">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
@@ -75,7 +72,7 @@
 <span class="sd">        &quot;&quot;&quot;</span>
         <span class="n">result</span> <span class="o">=</span> <span class="p">[]</span>
 
-        <span class="nb">print</span> <span class="s2">&quot;Producing aperture mask with radius = &quot;</span><span class="o">+</span><span class="nb">str</span><span class="p">(</span><span class="n">radius</span><span class="p">)</span>
+        <span class="k">print</span> <span class="s2">&quot;Producing aperture mask with radius = &quot;</span><span class="o">+</span><span class="nb">str</span><span class="p">(</span><span class="n">radius</span><span class="p">)</span>
         <span class="k">for</span> <span class="n">x</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="mi">1024</span><span class="p">):</span>
             <span class="n">shift_x</span> <span class="o">=</span> <span class="n">x</span><span class="o">-</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">xcenter</span><span class="p">)</span>
             <span class="n">temp_row</span> <span class="o">=</span> <span class="p">[]</span>
@@ -110,8 +107,8 @@
             <span class="k">if</span> <span class="n">theta_high</span> <span class="o">&gt;</span> <span class="n">np</span><span class="o">.</span><span class="n">pi</span><span class="p">:</span>
                 <span class="n">theta_high</span> <span class="o">=</span> <span class="n">theta_high</span> <span class="o">-</span> <span class="p">(</span><span class="mi">2</span> <span class="o">*</span> <span class="n">np</span><span class="o">.</span><span class="n">pi</span><span class="p">)</span>
 
-            <span class="nb">print</span> <span class="s2">&quot;Theta low = &quot;</span><span class="o">+</span><span class="nb">str</span><span class="p">(</span><span class="n">theta_low</span> <span class="o">/</span> <span class="n">np</span><span class="o">.</span><span class="n">pi</span><span class="p">)</span>
-            <span class="nb">print</span> <span class="s2">&quot;Theta high = &quot;</span><span class="o">+</span><span class="nb">str</span><span class="p">(</span><span class="n">theta_high</span> <span class="o">/</span> <span class="n">np</span><span class="o">.</span><span class="n">pi</span><span class="p">)</span>
+            <span class="k">print</span> <span class="s2">&quot;Theta low = &quot;</span><span class="o">+</span><span class="nb">str</span><span class="p">(</span><span class="n">theta_low</span> <span class="o">/</span> <span class="n">np</span><span class="o">.</span><span class="n">pi</span><span class="p">)</span>
+            <span class="k">print</span> <span class="s2">&quot;Theta high = &quot;</span><span class="o">+</span><span class="nb">str</span><span class="p">(</span><span class="n">theta_high</span> <span class="o">/</span> <span class="n">np</span><span class="o">.</span><span class="n">pi</span><span class="p">)</span>
 
             <span class="n">result</span> <span class="o">=</span> <span class="p">[]</span>
             <span class="c1"># Move coordinate system to center of image</span>
@@ -148,9 +145,9 @@
                 <span class="n">result</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">temp_row</span><span class="p">)</span>
 
             <span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="n">result</span><span class="p">[</span><span class="bp">self</span><span class="o">.</span><span class="n">xcenter</span><span class="o">-</span><span class="mi">10</span><span class="p">:</span><span class="bp">self</span><span class="o">.</span><span class="n">xcenter</span><span class="o">+</span><span class="mi">10</span><span class="p">]:</span>
-                <span class="nb">print</span> <span class="n">i</span><span class="p">[</span><span class="bp">self</span><span class="o">.</span><span class="n">ycenter</span><span class="o">-</span><span class="mi">10</span><span class="p">:</span><span class="bp">self</span><span class="o">.</span><span class="n">ycenter</span><span class="o">+</span><span class="mi">10</span><span class="p">]</span>
+                <span class="k">print</span> <span class="n">i</span><span class="p">[</span><span class="bp">self</span><span class="o">.</span><span class="n">ycenter</span><span class="o">-</span><span class="mi">10</span><span class="p">:</span><span class="bp">self</span><span class="o">.</span><span class="n">ycenter</span><span class="o">+</span><span class="mi">10</span><span class="p">]</span>
 
-            <span class="nb">print</span> <span class="s2">&quot;Saving &quot;</span><span class="o">+</span><span class="nb">str</span><span class="p">(</span><span class="nb">int</span><span class="p">(</span><span class="n">angle</span> <span class="o">*</span> <span class="mi">4</span><span class="p">)</span> <span class="o">+</span> <span class="mi">4</span><span class="p">)</span><span class="o">+</span><span class="s2">&quot; mask&quot;</span>
+            <span class="k">print</span> <span class="s2">&quot;Saving &quot;</span><span class="o">+</span><span class="nb">str</span><span class="p">(</span><span class="nb">int</span><span class="p">(</span><span class="n">angle</span> <span class="o">*</span> <span class="mi">4</span><span class="p">)</span> <span class="o">+</span> <span class="mi">4</span><span class="p">)</span><span class="o">+</span><span class="s2">&quot; mask&quot;</span>
             <span class="n">np</span><span class="o">.</span><span class="n">save</span><span class="p">(</span><span class="s2">&quot;masks/&quot;</span><span class="o">+</span><span class="nb">str</span><span class="p">(</span><span class="nb">int</span><span class="p">(</span><span class="n">angle</span> <span class="o">*</span> <span class="mi">4</span><span class="p">)</span> <span class="o">+</span> <span class="mi">4</span><span class="p">)</span><span class="o">+</span><span class="s2">&quot;_wedge_mask&quot;</span><span class="p">,</span> <span class="n">np</span><span class="o">.</span><span class="n">asarray</span><span class="p">(</span><span class="n">result</span><span class="p">))</span>
 
 
@@ -179,11 +176,14 @@
 <div id="searchbox" style="display: none" role="search">
   <h3>Quick search</h3>
     <form class="search" action="../search.html" method="get">
-      <div><input type="text" name="q" /></div>
-      <div><input type="submit" value="Go" /></div>
+      <input type="text" name="q" />
+      <input type="submit" value="Go" />
       <input type="hidden" name="check_keywords" value="yes" />
       <input type="hidden" name="area" value="default" />
     </form>
+    <p class="searchtip" style="font-size: 90%">
+    Enter search terms or a module, class or function name.
+    </p>
 </div>
 <script type="text/javascript">$('#searchbox').show(0);</script>
         </div>
@@ -194,8 +194,8 @@
       &copy;2016, Matt Armstrong, Joseph Huehnerhoff.
       
       |
-      Powered by <a href="http://sphinx-doc.org/">Sphinx 1.4.6</a>
-      &amp; <a href="https://github.com/bitprophet/alabaster">Alabaster 0.7.9</a>
+      Powered by <a href="http://sphinx-doc.org/">Sphinx 1.3.6</a>
+      &amp; <a href="https://github.com/bitprophet/alabaster">Alabaster 0.7.7</a>
       
     </div>
 
