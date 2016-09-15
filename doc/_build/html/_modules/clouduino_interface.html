@@ -1,0 +1,217 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN"
+  "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+
+
+<html xmlns="http://www.w3.org/1999/xhtml">
+  <head>
+    <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+    
+    <title>clouduino_interface &#8212; CloudCamera 1.0 documentation</title>
+    
+    <link rel="stylesheet" href="../_static/alabaster.css" type="text/css" />
+    <link rel="stylesheet" href="../_static/pygments.css" type="text/css" />
+    
+    <script type="text/javascript">
+      var DOCUMENTATION_OPTIONS = {
+        URL_ROOT:    '../',
+        VERSION:     '1.0',
+        COLLAPSE_INDEX: false,
+        FILE_SUFFIX: '.html',
+        HAS_SOURCE:  true
+      };
+    </script>
+    <script type="text/javascript" src="../_static/jquery.js"></script>
+    <script type="text/javascript" src="../_static/underscore.js"></script>
+    <script type="text/javascript" src="../_static/doctools.js"></script>
+    <link rel="top" title="CloudCamera 1.0 documentation" href="../index.html" />
+    <link rel="up" title="Module code" href="index.html" />
+   
+  <link rel="stylesheet" href="../_static/custom.css" type="text/css" />
+  
+  
+  <meta name="viewport" content="width=device-width, initial-scale=0.9, maximum-scale=0.9" />
+
+  </head>
+  <body role="document">
+  
+
+    <div class="document">
+      <div class="documentwrapper">
+        <div class="bodywrapper">
+          <div class="body" role="main">
+            
+  <h1>Source code for clouduino_interface</h1><div class="highlight"><pre>
+<span></span><span class="ch">#! /usr/bin/python</span>
+
+<span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">clouduino_interface.py</span>
+<span class="sd">This program is designed to read in data from an arduino.</span>
+<span class="sd">Specifically this is program interfaces to the arduino on the</span>
+<span class="sd">cloud camera.  Functionality includes reading the temperature,</span>
+<span class="sd"> humidity, and light levels.</span>
+<span class="sd">TODO:</span>
+<span class="sd">finish interface</span>
+<span class="sd">Usage:</span>
+<span class="sd">Options:</span>
+<span class="sd">&quot;&quot;&quot;</span>
+
+<span class="n">__author__</span> <span class="o">=</span> <span class="p">[</span><span class="s2">&quot;Joseph Huehnerhoff&quot;</span><span class="p">,</span> <span class="s2">&quot;Matt Armstrong&quot;</span><span class="p">,</span> <span class="s2">&quot;Andrew Wilkins&quot;</span><span class="p">]</span>
+<span class="n">__license__</span> <span class="o">=</span> <span class="s2">&quot;GPL&quot;</span>
+<span class="n">__version__</span> <span class="o">=</span> <span class="s2">&quot;0.1&quot;</span>
+<span class="n">__maintainer__</span> <span class="o">=</span> <span class="s2">&quot;Matt Armstrong&quot;</span>
+<span class="n">__email__</span> <span class="o">=</span> <span class="s2">&quot;&quot;</span>
+<span class="n">__status__</span> <span class="o">=</span> <span class="s2">&quot;Developement&quot;</span>
+
+<span class="kn">import</span> <span class="nn">serial</span>
+<span class="kn">import</span> <span class="nn">time</span>
+<span class="kn">import</span> <span class="nn">os</span>
+
+<div class="viewcode-block" id="ClouduinoInterface"><a class="viewcode-back" href="../source/clouduino_interface.html#clouduino_interface.ClouduinoInterface">[docs]</a><span class="k">class</span> <span class="nc">ClouduinoInterface</span><span class="p">():</span>
+    <span class="k">def</span> <span class="nf">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+	<span class="bp">self</span><span class="o">.</span><span class="n">serPort</span> <span class="o">=</span> <span class="s1">&#39;/dev/ttyACM0&#39;</span>
+
+<div class="viewcode-block" id="ClouduinoInterface.log"><a class="viewcode-back" href="../source/clouduino_interface.html#clouduino_interface.ClouduinoInterface.log">[docs]</a>    <span class="k">def</span> <span class="nf">log</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+    	<span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    	Check the serial port for data</span>
+<span class="sd">    	and write any data with a timestamp</span>
+<span class="sd">    	to the savefile</span>
+<span class="sd">    	&quot;&quot;&quot;</span>
+    	<span class="n">data</span> <span class="o">=</span> <span class="n">ser</span><span class="o">.</span><span class="n">readline</span><span class="p">()</span>
+    	<span class="n">f</span> <span class="o">=</span> <span class="nb">open</span><span class="p">(</span><span class="n">savefile</span><span class="p">,</span> <span class="s1">&#39;a&#39;</span><span class="p">)</span>
+    	<span class="n">f</span><span class="o">.</span><span class="n">write</span><span class="p">(</span><span class="nb">str</span><span class="p">(</span><span class="n">time</span><span class="o">.</span><span class="n">strftime</span><span class="p">(</span><span class="s2">&quot;%H%M%S&quot;</span><span class="p">))</span><span class="o">+</span><span class="s2">&quot;,&quot;</span><span class="o">+</span><span class="nb">str</span><span class="p">(</span><span class="n">data</span><span class="p">))</span>
+    	<span class="n">f</span><span class="o">.</span><span class="n">close</span><span class="p">()</span></div>
+
+<div class="viewcode-block" id="ClouduinoInterface.openPort"><a class="viewcode-back" href="../source/clouduino_interface.html#clouduino_interface.ClouduinoInterface.openPort">[docs]</a>    <span class="k">def</span> <span class="nf">openPort</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+	<span class="sd">&quot;&quot;&quot; open the serial port for communication with the arduino&quot;&quot;&quot;</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">ser</span><span class="o">=</span><span class="n">serial</span><span class="o">.</span><span class="n">Serial</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">serPort</span><span class="p">,</span> <span class="mi">9600</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">readSer</span><span class="p">()</span>
+	<span class="k">return</span></div>
+
+<div class="viewcode-block" id="ClouduinoInterface.closePort"><a class="viewcode-back" href="../source/clouduino_interface.html#clouduino_interface.ClouduinoInterface.closePort">[docs]</a>    <span class="k">def</span> <span class="nf">closePort</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+	<span class="sd">&quot;&quot;&quot; close the serial port connection to the arduino&quot;&quot;&quot;</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">ser</span><span class="o">.</span><span class="n">close</span><span class="p">()</span>
+        <span class="k">return</span></div>
+
+<div class="viewcode-block" id="ClouduinoInterface.checkRain1"><a class="viewcode-back" href="../source/clouduino_interface.html#clouduino_interface.ClouduinoInterface.checkRain1">[docs]</a>    <span class="k">def</span> <span class="nf">checkRain1</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+	<span class="sd">&quot;&quot;&quot; Check the status of the rain sensor&quot;&quot;&quot;</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">ser</span><span class="o">.</span><span class="n">write</span><span class="p">(</span><span class="s1">&#39;r&#39;</span><span class="p">)</span>
+        <span class="n">time</span><span class="o">.</span><span class="n">sleep</span><span class="p">(</span><span class="mi">1</span><span class="p">)</span>
+        <span class="n">status</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">readSer</span><span class="p">()</span>
+	<span class="k">if</span> <span class="n">status</span> <span class="o">==</span> <span class="s2">&quot;rain1 = True&quot;</span><span class="p">:</span>
+            <span class="c1">#print &quot;rain1 = true&quot;</span>
+	    <span class="k">return</span> <span class="kc">True</span>
+        <span class="k">elif</span> <span class="n">status</span> <span class="o">==</span> <span class="s2">&quot;rain1 = False&quot;</span><span class="p">:</span>
+            <span class="c1">#print &quot;rain1 = False&quot;</span>
+	    <span class="k">return</span> <span class="kc">False</span>
+        <span class="k">else</span><span class="p">:</span>
+	    <span class="c1">#print status</span>
+            <span class="k">return</span> <span class="kc">None</span></div>
+
+<div class="viewcode-block" id="ClouduinoInterface.checkRain2"><a class="viewcode-back" href="../source/clouduino_interface.html#clouduino_interface.ClouduinoInterface.checkRain2">[docs]</a>    <span class="k">def</span> <span class="nf">checkRain2</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot; Check the status of the rain sensor&quot;&quot;&quot;</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">ser</span><span class="o">.</span><span class="n">write</span><span class="p">(</span><span class="s1">&#39;t&#39;</span><span class="p">)</span>
+        <span class="n">time</span><span class="o">.</span><span class="n">sleep</span><span class="p">(</span><span class="mi">1</span><span class="p">)</span>
+        <span class="n">status</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">readSer</span><span class="p">()</span>
+
+        <span class="k">if</span> <span class="n">status</span> <span class="o">==</span> <span class="s2">&quot;rain2 = True&quot;</span><span class="p">:</span>
+            <span class="k">return</span> <span class="kc">True</span>
+        <span class="k">elif</span> <span class="n">status</span> <span class="o">==</span> <span class="s2">&quot;rain2 = False&quot;</span><span class="p">:</span>
+            <span class="k">return</span> <span class="kc">False</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="k">return</span> <span class="kc">None</span></div>
+
+
+<div class="viewcode-block" id="ClouduinoInterface.checkRain"><a class="viewcode-back" href="../source/clouduino_interface.html#clouduino_interface.ClouduinoInterface.checkRain">[docs]</a>    <span class="k">def</span> <span class="nf">checkRain</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot; Check the status of the rain sensor&quot;&quot;&quot;</span>
+	<span class="n">rain1</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">checkRain1</span><span class="p">()</span>
+	<span class="n">rain2</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">checkRain2</span><span class="p">()</span>
+	<span class="nb">print</span> <span class="n">time</span><span class="o">.</span><span class="n">strftime</span><span class="p">(</span><span class="s2">&quot;%Y</span><span class="si">%d</span><span class="s2">%mT%H%M%SMDT&quot;</span><span class="p">),</span><span class="n">rain1</span><span class="p">,</span> <span class="n">rain2</span>
+        <span class="k">if</span> <span class="n">rain1</span> <span class="o">==</span> <span class="kc">False</span> <span class="ow">and</span> <span class="n">rain2</span> <span class="o">==</span> <span class="kc">False</span><span class="p">:</span>
+            <span class="k">return</span> <span class="kc">False</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="k">return</span> <span class="kc">True</span></div>
+
+
+
+<div class="viewcode-block" id="ClouduinoInterface.readSer"><a class="viewcode-back" href="../source/clouduino_interface.html#clouduino_interface.ClouduinoInterface.readSer">[docs]</a>    <span class="k">def</span> <span class="nf">readSer</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+	<span class="sd">&quot;&quot;&quot; Read in the arduino output, parse, and return something useful</span>
+<span class="sd">	Arguments:</span>
+<span class="sd">		None</span>
+<span class="sd">	Returns:</span>
+<span class="sd">		s (string): parsed serial output</span>
+<span class="sd">	&quot;&quot;&quot;</span>
+	<span class="n">s</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">ser</span><span class="o">.</span><span class="n">readline</span><span class="p">()</span><span class="o">.</span><span class="n">rstrip</span><span class="p">(</span><span class="s2">&quot;</span><span class="se">\n</span><span class="s2">&quot;</span><span class="p">)</span><span class="o">.</span><span class="n">rstrip</span><span class="p">(</span><span class="s2">&quot;</span><span class="se">\r</span><span class="s2">&quot;</span><span class="p">)</span>
+	<span class="c1">#print s</span>
+        <span class="k">return</span> <span class="n">s</span></div>
+
+<div class="viewcode-block" id="ClouduinoInterface.setFilterPos"><a class="viewcode-back" href="../source/clouduino_interface.html#clouduino_interface.ClouduinoInterface.setFilterPos">[docs]</a>    <span class="k">def</span> <span class="nf">setFilterPos</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">pos</span><span class="p">):</span>
+	<span class="sd">&quot;&quot;&quot; pos accepts True or False.  If true then it moves into position</span>
+<span class="sd">	Arguments:</span>
+<span class="sd">		pos (bool): True if filter should be in path, False if not</span>
+<span class="sd">	Retruns:</span>
+<span class="sd">		None</span>
+<span class="sd">	&quot;&quot;&quot;</span>
+	<span class="k">if</span> <span class="n">pos</span><span class="p">:</span>
+		<span class="bp">self</span><span class="o">.</span><span class="n">ser</span><span class="o">.</span><span class="n">write</span><span class="p">(</span><span class="s1">&#39;i&#39;</span><span class="p">)</span>
+	<span class="k">else</span><span class="p">:</span>
+		<span class="bp">self</span><span class="o">.</span><span class="n">ser</span><span class="o">.</span><span class="n">write</span><span class="p">(</span><span class="s1">&#39;o&#39;</span><span class="p">)</span>
+	<span class="k">return</span></div>
+
+
+<div class="viewcode-block" id="ClouduinoInterface.rainOut"><a class="viewcode-back" href="../source/clouduino_interface.html#clouduino_interface.ClouduinoInterface.rainOut">[docs]</a>    <span class="k">def</span> <span class="nf">rainOut</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">status</span> <span class="o">=</span> <span class="kc">None</span><span class="p">):</span>
+	<span class="n">f_out</span> <span class="o">=</span> <span class="nb">open</span><span class="p">(</span><span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="n">os</span><span class="o">.</span><span class="n">getcwd</span><span class="p">(),</span><span class="s1">&#39;rain.dat&#39;</span><span class="p">),</span><span class="s1">&#39;w&#39;</span><span class="p">)</span>
+	<span class="n">f_out</span><span class="o">.</span><span class="n">write</span><span class="p">(</span><span class="nb">str</span><span class="p">(</span><span class="n">status</span><span class="p">))</span>
+	<span class="n">f_out</span><span class="o">.</span><span class="n">close</span><span class="p">()</span></div></div>
+
+<span class="k">if</span> <span class="n">__name__</span> <span class="o">==</span> <span class="s2">&quot;__main__&quot;</span><span class="p">:</span>
+	<span class="n">c</span> <span class="o">=</span> <span class="n">ClouduinoInterface</span><span class="p">()</span>
+	<span class="n">c</span><span class="o">.</span><span class="n">openPort</span><span class="p">()</span>
+	<span class="n">time</span><span class="o">.</span><span class="n">sleep</span><span class="p">(</span><span class="mi">1</span><span class="p">)</span>
+	<span class="nb">print</span> <span class="s1">&#39;port open&#39;</span>
+	<span class="k">while</span> <span class="kc">True</span><span class="p">:</span>
+		<span class="n">c</span><span class="o">.</span><span class="n">rainOut</span><span class="p">(</span><span class="n">c</span><span class="o">.</span><span class="n">checkRain</span><span class="p">())</span>	
+		<span class="n">time</span><span class="o">.</span><span class="n">sleep</span><span class="p">(</span><span class="mi">5</span><span class="p">)</span>
+	<span class="n">c</span><span class="o">.</span><span class="n">closePort</span><span class="p">()</span>
+</pre></div>
+
+          </div>
+        </div>
+      </div>
+      <div class="sphinxsidebar" role="navigation" aria-label="main navigation">
+        <div class="sphinxsidebarwrapper"><div class="relations">
+<h3>Related Topics</h3>
+<ul>
+  <li><a href="../index.html">Documentation overview</a><ul>
+  <li><a href="index.html">Module code</a><ul>
+  </ul></li>
+  </ul></li>
+</ul>
+</div>
+<div id="searchbox" style="display: none" role="search">
+  <h3>Quick search</h3>
+    <form class="search" action="../search.html" method="get">
+      <div><input type="text" name="q" /></div>
+      <div><input type="submit" value="Go" /></div>
+      <input type="hidden" name="check_keywords" value="yes" />
+      <input type="hidden" name="area" value="default" />
+    </form>
+</div>
+<script type="text/javascript">$('#searchbox').show(0);</script>
+        </div>
+      </div>
+      <div class="clearer"></div>
+    </div>
+    <div class="footer">
+      &copy;2016, Matt Armstrong, Joseph Huehnerhoff.
+      
+      |
+      Powered by <a href="http://sphinx-doc.org/">Sphinx 1.4.6</a>
+      &amp; <a href="https://github.com/bitprophet/alabaster">Alabaster 0.7.9</a>
+      
+    </div>
+
+    
+
+    
+  </body>
+</html>

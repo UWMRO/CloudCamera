@@ -1,0 +1,3 @@
+sphinx-apidoc -f -o _build/html/source/ ../
+sphinx-apidoc -f -o source/ ../
+make html

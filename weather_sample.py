@@ -145,9 +145,6 @@ class ARCSATWeather:
                 enc=1
         #print cloud, wind, enc
             
-            out = time.strftime("%Y-%m-%d %H:%M:%S ") + 'F M 0 %s 0 %s %s 0 0 0 0 01 0.001 %s %s 1 %s' % (val[0],val[2],val[4], cloud, wind, enc)
-        except:
-            out = time.strftime("%Y-%m-%d %H:%M:%S ") + 'F M 0 0 0 0 0 0 0 0 0 01 0.001 0 0 0 0'
         print out
         f_out=open('weather.log','w')
         f_out.write(out)

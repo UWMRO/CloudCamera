@@ -1,0 +1,179 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN"
+  "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+
+
+<html xmlns="http://www.w3.org/1999/xhtml">
+  <head>
+    <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+    
+    <title>clouduino_interface module &#8212; CloudCamera 1.0 documentation</title>
+    
+    <link rel="stylesheet" href="../_static/alabaster.css" type="text/css" />
+    <link rel="stylesheet" href="../_static/pygments.css" type="text/css" />
+    
+    <script type="text/javascript">
+      var DOCUMENTATION_OPTIONS = {
+        URL_ROOT:    '../',
+        VERSION:     '1.0',
+        COLLAPSE_INDEX: false,
+        FILE_SUFFIX: '.html',
+        HAS_SOURCE:  true
+      };
+    </script>
+    <script type="text/javascript" src="../_static/jquery.js"></script>
+    <script type="text/javascript" src="../_static/underscore.js"></script>
+    <script type="text/javascript" src="../_static/doctools.js"></script>
+    <link rel="top" title="CloudCamera 1.0 documentation" href="../index.html" />
+   
+  <link rel="stylesheet" href="../_static/custom.css" type="text/css" />
+  
+  
+  <meta name="viewport" content="width=device-width, initial-scale=0.9, maximum-scale=0.9" />
+
+  </head>
+  <body role="document">
+  
+
+    <div class="document">
+      <div class="documentwrapper">
+        <div class="bodywrapper">
+          <div class="body" role="main">
+            
+  <div class="section" id="module-clouduino_interface">
+<span id="clouduino-interface-module"></span><h1>clouduino_interface module<a class="headerlink" href="#module-clouduino_interface" title="Permalink to this headline">¶</a></h1>
+<p>clouduino_interface.py
+This program is designed to read in data from an arduino.
+Specifically this is program interfaces to the arduino on the
+cloud camera.  Functionality includes reading the temperature,</p>
+<blockquote>
+<div>humidity, and light levels.</div></blockquote>
+<p>TODO:
+finish interface
+Usage:
+Options:</p>
+<dl class="class">
+<dt id="clouduino_interface.ClouduinoInterface">
+<em class="property">class </em><code class="descclassname">clouduino_interface.</code><code class="descname">ClouduinoInterface</code><a class="reference internal" href="../_modules/clouduino_interface.html#ClouduinoInterface"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#clouduino_interface.ClouduinoInterface" title="Permalink to this definition">¶</a></dt>
+<dd><dl class="method">
+<dt id="clouduino_interface.ClouduinoInterface.checkRain">
+<code class="descname">checkRain</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="../_modules/clouduino_interface.html#ClouduinoInterface.checkRain"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#clouduino_interface.ClouduinoInterface.checkRain" title="Permalink to this definition">¶</a></dt>
+<dd><p>Check the status of the rain sensor</p>
+</dd></dl>
+
+<dl class="method">
+<dt id="clouduino_interface.ClouduinoInterface.checkRain1">
+<code class="descname">checkRain1</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="../_modules/clouduino_interface.html#ClouduinoInterface.checkRain1"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#clouduino_interface.ClouduinoInterface.checkRain1" title="Permalink to this definition">¶</a></dt>
+<dd><p>Check the status of the rain sensor</p>
+</dd></dl>
+
+<dl class="method">
+<dt id="clouduino_interface.ClouduinoInterface.checkRain2">
+<code class="descname">checkRain2</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="../_modules/clouduino_interface.html#ClouduinoInterface.checkRain2"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#clouduino_interface.ClouduinoInterface.checkRain2" title="Permalink to this definition">¶</a></dt>
+<dd><p>Check the status of the rain sensor</p>
+</dd></dl>
+
+<dl class="method">
+<dt id="clouduino_interface.ClouduinoInterface.closePort">
+<code class="descname">closePort</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="../_modules/clouduino_interface.html#ClouduinoInterface.closePort"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#clouduino_interface.ClouduinoInterface.closePort" title="Permalink to this definition">¶</a></dt>
+<dd><p>close the serial port connection to the arduino</p>
+</dd></dl>
+
+<dl class="method">
+<dt id="clouduino_interface.ClouduinoInterface.log">
+<code class="descname">log</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="../_modules/clouduino_interface.html#ClouduinoInterface.log"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#clouduino_interface.ClouduinoInterface.log" title="Permalink to this definition">¶</a></dt>
+<dd><p>Check the serial port for data
+and write any data with a timestamp
+to the savefile</p>
+</dd></dl>
+
+<dl class="method">
+<dt id="clouduino_interface.ClouduinoInterface.openPort">
+<code class="descname">openPort</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="../_modules/clouduino_interface.html#ClouduinoInterface.openPort"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#clouduino_interface.ClouduinoInterface.openPort" title="Permalink to this definition">¶</a></dt>
+<dd><p>open the serial port for communication with the arduino</p>
+</dd></dl>
+
+<dl class="method">
+<dt id="clouduino_interface.ClouduinoInterface.rainOut">
+<code class="descname">rainOut</code><span class="sig-paren">(</span><em>status=None</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/clouduino_interface.html#ClouduinoInterface.rainOut"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#clouduino_interface.ClouduinoInterface.rainOut" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="method">
+<dt id="clouduino_interface.ClouduinoInterface.readSer">
+<code class="descname">readSer</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="../_modules/clouduino_interface.html#ClouduinoInterface.readSer"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#clouduino_interface.ClouduinoInterface.readSer" title="Permalink to this definition">¶</a></dt>
+<dd><p>Read in the arduino output, parse, and return something useful
+Arguments:</p>
+<blockquote>
+<div>None</div></blockquote>
+<dl class="docutils">
+<dt>Returns:</dt>
+<dd>s (string): parsed serial output</dd>
+</dl>
+</dd></dl>
+
+<dl class="method">
+<dt id="clouduino_interface.ClouduinoInterface.setFilterPos">
+<code class="descname">setFilterPos</code><span class="sig-paren">(</span><em>pos</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/clouduino_interface.html#ClouduinoInterface.setFilterPos"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#clouduino_interface.ClouduinoInterface.setFilterPos" title="Permalink to this definition">¶</a></dt>
+<dd><p>pos accepts True or False.  If true then it moves into position
+Arguments:</p>
+<blockquote>
+<div>pos (bool): True if filter should be in path, False if not</div></blockquote>
+<dl class="docutils">
+<dt>Retruns:</dt>
+<dd>None</dd>
+</dl>
+</dd></dl>
+
+</dd></dl>
+
+</div>
+
+
+          </div>
+        </div>
+      </div>
+      <div class="sphinxsidebar" role="navigation" aria-label="main navigation">
+        <div class="sphinxsidebarwrapper"><div class="relations">
+<h3>Related Topics</h3>
+<ul>
+  <li><a href="../index.html">Documentation overview</a><ul>
+  </ul></li>
+</ul>
+</div>
+  <div role="note" aria-label="source link">
+    <h3>This Page</h3>
+    <ul class="this-page-menu">
+      <li><a href="../_sources/source/clouduino_interface.txt"
+            rel="nofollow">Show Source</a></li>
+    </ul>
+   </div>
+<div id="searchbox" style="display: none" role="search">
+  <h3>Quick search</h3>
+    <form class="search" action="../search.html" method="get">
+      <div><input type="text" name="q" /></div>
+      <div><input type="submit" value="Go" /></div>
+      <input type="hidden" name="check_keywords" value="yes" />
+      <input type="hidden" name="area" value="default" />
+    </form>
+</div>
+<script type="text/javascript">$('#searchbox').show(0);</script>
+        </div>
+      </div>
+      <div class="clearer"></div>
+    </div>
+    <div class="footer">
+      &copy;2016, Matt Armstrong, Joseph Huehnerhoff.
+      
+      |
+      Powered by <a href="http://sphinx-doc.org/">Sphinx 1.4.6</a>
+      &amp; <a href="https://github.com/bitprophet/alabaster">Alabaster 0.7.9</a>
+      
+      |
+      <a href="../_sources/source/clouduino_interface.txt"
+          rel="nofollow">Page source</a>
+    </div>
+
+    
+
+    
+  </body>
+</html>

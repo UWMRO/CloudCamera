@@ -1,0 +1,206 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN"
+  "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+
+
+<html xmlns="http://www.w3.org/1999/xhtml">
+  <head>
+    <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+    
+    <title>Cloud_Mask &#8212; CloudCamera 1.0 documentation</title>
+    
+    <link rel="stylesheet" href="../_static/alabaster.css" type="text/css" />
+    <link rel="stylesheet" href="../_static/pygments.css" type="text/css" />
+    
+    <script type="text/javascript">
+      var DOCUMENTATION_OPTIONS = {
+        URL_ROOT:    '../',
+        VERSION:     '1.0',
+        COLLAPSE_INDEX: false,
+        FILE_SUFFIX: '.html',
+        HAS_SOURCE:  true
+      };
+    </script>
+    <script type="text/javascript" src="../_static/jquery.js"></script>
+    <script type="text/javascript" src="../_static/underscore.js"></script>
+    <script type="text/javascript" src="../_static/doctools.js"></script>
+    <link rel="top" title="CloudCamera 1.0 documentation" href="../index.html" />
+    <link rel="up" title="Module code" href="index.html" />
+   
+  <link rel="stylesheet" href="../_static/custom.css" type="text/css" />
+  
+  
+  <meta name="viewport" content="width=device-width, initial-scale=0.9, maximum-scale=0.9" />
+
+  </head>
+  <body role="document">
+  
+
+    <div class="document">
+      <div class="documentwrapper">
+        <div class="bodywrapper">
+          <div class="body" role="main">
+            
+  <h1>Source code for Cloud_Mask</h1><div class="highlight"><pre>
+<span></span><span class="ch">#! /usr/bin/python</span>
+
+<span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">Cloud_Mask.py</span>
+<span class="sd">Used to produce mask files for the CloudCam.</span>
+
+<span class="sd">Can be used to make a large aperture mask,</span>
+<span class="sd">small aperture mask, and directional wedge</span>
+<span class="sd">masks.</span>
+<span class="sd">&quot;&quot;&quot;</span>
+
+<span class="kn">import</span> <span class="nn">numpy</span> <span class="k">as</span> <span class="nn">np</span>
+<span class="kn">from</span> <span class="nn">CloudParams</span> <span class="k">import</span> <span class="o">*</span>
+
+<div class="viewcode-block" id="CloudMask"><a class="viewcode-back" href="../source/Cloud_Mask.html#Cloud_Mask.CloudMask">[docs]</a><span class="k">class</span> <span class="nc">CloudMask</span><span class="p">(</span><span class="nb">object</span><span class="p">):</span>
+    <span class="k">def</span> <span class="nf">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">radius</span> <span class="o">=</span> <span class="n">radius</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">xcenter</span> <span class="o">=</span> <span class="n">x_center</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">ycenter</span> <span class="o">=</span> <span class="n">y_center</span>
+
+
+<div class="viewcode-block" id="CloudMask.make_aperture_mask"><a class="viewcode-back" href="../source/Cloud_Mask.html#Cloud_Mask.CloudMask.make_aperture_mask">[docs]</a>    <span class="k">def</span> <span class="nf">make_aperture_mask</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">radius</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Used to make a static aperture mask, which can be</span>
+<span class="sd">        multiplied by the analysis image to remove any pixels</span>
+<span class="sd">        outside the radius from the center.</span>
+
+<span class="sd">        Input: Radius to mask from center of image</span>
+
+<span class="sd">        Output: Aperture masked numpy array the same size as the image.</span>
+<span class="sd">                Saved as a numpy mask file</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="n">result</span> <span class="o">=</span> <span class="p">[]</span>
+
+        <span class="nb">print</span> <span class="s2">&quot;Producing aperture mask with radius = &quot;</span><span class="o">+</span><span class="nb">str</span><span class="p">(</span><span class="n">radius</span><span class="p">)</span>
+        <span class="k">for</span> <span class="n">x</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="mi">1024</span><span class="p">):</span>
+            <span class="n">shift_x</span> <span class="o">=</span> <span class="n">x</span><span class="o">-</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">xcenter</span><span class="p">)</span>
+            <span class="n">temp_row</span> <span class="o">=</span> <span class="p">[]</span>
+            <span class="k">for</span> <span class="n">y</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="mi">1280</span><span class="p">):</span>
+                <span class="n">shift_y</span> <span class="o">=</span> <span class="n">y</span><span class="o">-</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">ycenter</span><span class="p">)</span>
+                <span class="k">if</span> <span class="n">np</span><span class="o">.</span><span class="n">sqrt</span><span class="p">((</span><span class="n">shift_x</span><span class="p">)</span><span class="o">**</span><span class="mi">2</span> <span class="o">+</span> <span class="p">(</span><span class="n">shift_y</span><span class="p">)</span><span class="o">**</span><span class="mi">2</span><span class="p">)</span> <span class="o">&gt;</span> <span class="n">radius</span><span class="p">:</span>
+                    <span class="n">temp_row</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="mi">1</span><span class="p">)</span>
+                <span class="k">else</span><span class="p">:</span>
+                    <span class="n">temp_row</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="mi">0</span><span class="p">)</span>
+            <span class="n">result</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">temp_row</span><span class="p">)</span>
+        <span class="n">np</span><span class="o">.</span><span class="n">save</span><span class="p">(</span><span class="s2">&quot;masks/aperture_mask_&quot;</span><span class="o">+</span><span class="nb">str</span><span class="p">(</span><span class="n">radius</span><span class="p">),</span> <span class="n">np</span><span class="o">.</span><span class="n">asarray</span><span class="p">(</span><span class="n">result</span><span class="p">))</span>
+        <span class="k">return</span> <span class="s2">&quot;Aperture mask saved&quot;</span></div>
+
+
+<div class="viewcode-block" id="CloudMask.make_wedge_mask"><a class="viewcode-back" href="../source/Cloud_Mask.html#Cloud_Mask.CloudMask.make_wedge_mask">[docs]</a>    <span class="k">def</span> <span class="nf">make_wedge_mask</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">radius</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Used to produce directional wedge shaped masks</span>
+
+<span class="sd">        Input:</span>
+<span class="sd">            radius (float)      How large should the wedges extend from center</span>
+
+<span class="sd">        Output:</span>
+<span class="sd">            Saved wedge shaped mask files in masks/</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+
+        <span class="n">angle_list</span> <span class="o">=</span> <span class="p">[</span><span class="o">-</span><span class="mi">3</span><span class="o">/</span><span class="mf">4.0</span><span class="p">,</span> <span class="o">-</span><span class="mi">1</span><span class="o">/</span><span class="mf">2.0</span><span class="p">,</span> <span class="o">-</span><span class="mi">1</span><span class="o">/</span><span class="mf">4.0</span><span class="p">,</span> <span class="mf">0.0</span><span class="p">,</span> <span class="mi">1</span><span class="o">/</span><span class="mf">4.0</span><span class="p">,</span> <span class="mi">1</span><span class="o">/</span><span class="mf">2.0</span><span class="p">,</span> <span class="mi">3</span><span class="o">/</span><span class="mf">4.0</span><span class="p">,</span> <span class="mf">1.0</span><span class="p">]</span>
+        <span class="c1">#angle_list = [1.0]</span>
+
+        <span class="k">for</span> <span class="n">angle</span> <span class="ow">in</span> <span class="n">angle_list</span><span class="p">:</span>
+            <span class="n">theta_low</span> <span class="o">=</span> <span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">pi</span> <span class="o">*</span> <span class="n">angle</span><span class="p">)</span> <span class="o">-</span> <span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">pi</span> <span class="o">/</span> <span class="mi">8</span><span class="p">)</span>
+            <span class="n">theta_high</span> <span class="o">=</span> <span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">pi</span> <span class="o">*</span> <span class="n">angle</span><span class="p">)</span> <span class="o">+</span> <span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">pi</span> <span class="o">/</span> <span class="mi">8</span><span class="p">)</span>
+            <span class="k">if</span> <span class="n">theta_high</span> <span class="o">&gt;</span> <span class="n">np</span><span class="o">.</span><span class="n">pi</span><span class="p">:</span>
+                <span class="n">theta_high</span> <span class="o">=</span> <span class="n">theta_high</span> <span class="o">-</span> <span class="p">(</span><span class="mi">2</span> <span class="o">*</span> <span class="n">np</span><span class="o">.</span><span class="n">pi</span><span class="p">)</span>
+
+            <span class="nb">print</span> <span class="s2">&quot;Theta low = &quot;</span><span class="o">+</span><span class="nb">str</span><span class="p">(</span><span class="n">theta_low</span> <span class="o">/</span> <span class="n">np</span><span class="o">.</span><span class="n">pi</span><span class="p">)</span>
+            <span class="nb">print</span> <span class="s2">&quot;Theta high = &quot;</span><span class="o">+</span><span class="nb">str</span><span class="p">(</span><span class="n">theta_high</span> <span class="o">/</span> <span class="n">np</span><span class="o">.</span><span class="n">pi</span><span class="p">)</span>
+
+            <span class="n">result</span> <span class="o">=</span> <span class="p">[]</span>
+            <span class="c1"># Move coordinate system to center of image</span>
+            <span class="k">for</span> <span class="n">x</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="mi">1024</span><span class="p">):</span>
+                <span class="n">shift_x</span> <span class="o">=</span> <span class="n">x</span><span class="o">-</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">xcenter</span><span class="p">)</span>
+                <span class="n">temp_row</span> <span class="o">=</span> <span class="p">[]</span>
+                <span class="k">for</span> <span class="n">y</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="mi">1280</span><span class="p">):</span>
+                    <span class="n">shift_y</span> <span class="o">=</span> <span class="n">y</span><span class="o">-</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">ycenter</span><span class="p">)</span>
+
+                    <span class="n">theta</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">arctan2</span><span class="p">(</span><span class="n">shift_y</span><span class="p">,</span><span class="n">shift_x</span><span class="p">)</span>
+                    <span class="n">rad</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">sqrt</span><span class="p">((</span><span class="n">shift_x</span><span class="p">)</span><span class="o">**</span><span class="mi">2</span> <span class="o">+</span> <span class="p">(</span><span class="n">shift_y</span><span class="p">)</span><span class="o">**</span><span class="mi">2</span><span class="p">)</span>
+
+                    <span class="k">if</span> <span class="n">angle</span> <span class="o">==</span> <span class="mf">1.0</span><span class="p">:</span>
+                        <span class="c1">#Only look at points inside the radius</span>
+                        <span class="k">if</span> <span class="n">rad</span> <span class="o">&lt;</span> <span class="n">radius</span><span class="p">:</span>
+                            <span class="k">if</span> <span class="n">theta_low</span> <span class="o">&lt;</span> <span class="n">theta</span><span class="p">:</span>
+                                <span class="n">temp_row</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="mi">0</span><span class="p">)</span>
+                            <span class="k">elif</span> <span class="n">theta_high</span> <span class="o">&gt;</span> <span class="n">theta</span><span class="p">:</span>
+                                <span class="n">temp_row</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="mi">0</span><span class="p">)</span>
+                            <span class="k">else</span><span class="p">:</span>
+                                <span class="n">temp_row</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="mi">1</span><span class="p">)</span>
+                        <span class="k">else</span> <span class="p">:</span>
+                            <span class="n">temp_row</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="mi">1</span><span class="p">)</span>
+
+                    <span class="k">else</span><span class="p">:</span>
+                        <span class="c1">#Only look at points inside the radius</span>
+                        <span class="k">if</span> <span class="n">rad</span> <span class="o">&lt;</span> <span class="n">radius</span><span class="p">:</span>
+                            <span class="k">if</span> <span class="n">theta_low</span> <span class="o">&lt;</span> <span class="n">theta</span> <span class="ow">and</span> <span class="n">theta</span> <span class="o">&lt;</span> <span class="n">theta_high</span><span class="p">:</span>
+                                <span class="n">temp_row</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="mi">0</span><span class="p">)</span>
+                            <span class="k">else</span><span class="p">:</span>
+                                <span class="n">temp_row</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="mi">1</span><span class="p">)</span>
+                        <span class="k">else</span> <span class="p">:</span>
+                            <span class="n">temp_row</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="mi">1</span><span class="p">)</span>
+                <span class="n">result</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">temp_row</span><span class="p">)</span>
+
+            <span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="n">result</span><span class="p">[</span><span class="bp">self</span><span class="o">.</span><span class="n">xcenter</span><span class="o">-</span><span class="mi">10</span><span class="p">:</span><span class="bp">self</span><span class="o">.</span><span class="n">xcenter</span><span class="o">+</span><span class="mi">10</span><span class="p">]:</span>
+                <span class="nb">print</span> <span class="n">i</span><span class="p">[</span><span class="bp">self</span><span class="o">.</span><span class="n">ycenter</span><span class="o">-</span><span class="mi">10</span><span class="p">:</span><span class="bp">self</span><span class="o">.</span><span class="n">ycenter</span><span class="o">+</span><span class="mi">10</span><span class="p">]</span>
+
+            <span class="nb">print</span> <span class="s2">&quot;Saving &quot;</span><span class="o">+</span><span class="nb">str</span><span class="p">(</span><span class="nb">int</span><span class="p">(</span><span class="n">angle</span> <span class="o">*</span> <span class="mi">4</span><span class="p">)</span> <span class="o">+</span> <span class="mi">4</span><span class="p">)</span><span class="o">+</span><span class="s2">&quot; mask&quot;</span>
+            <span class="n">np</span><span class="o">.</span><span class="n">save</span><span class="p">(</span><span class="s2">&quot;masks/&quot;</span><span class="o">+</span><span class="nb">str</span><span class="p">(</span><span class="nb">int</span><span class="p">(</span><span class="n">angle</span> <span class="o">*</span> <span class="mi">4</span><span class="p">)</span> <span class="o">+</span> <span class="mi">4</span><span class="p">)</span><span class="o">+</span><span class="s2">&quot;_wedge_mask&quot;</span><span class="p">,</span> <span class="n">np</span><span class="o">.</span><span class="n">asarray</span><span class="p">(</span><span class="n">result</span><span class="p">))</span>
+
+
+        <span class="k">return</span> <span class="s2">&quot;Wedge masks saved&quot;</span></div></div>
+
+<span class="k">if</span> <span class="n">__name__</span> <span class="o">==</span> <span class="s2">&quot;__main__&quot;</span><span class="p">:</span>
+    <span class="n">cm</span> <span class="o">=</span> <span class="n">CloudMask</span><span class="p">()</span>
+    <span class="n">cm</span><span class="o">.</span><span class="n">make_aperture_mask</span><span class="p">(</span><span class="mi">500</span><span class="p">)</span>
+    <span class="n">cm</span><span class="o">.</span><span class="n">make_aperture_mask</span><span class="p">(</span><span class="mi">400</span><span class="p">)</span>
+    <span class="c1">#cm.make_wedge_mask(300)</span>
+</pre></div>
+
+          </div>
+        </div>
+      </div>
+      <div class="sphinxsidebar" role="navigation" aria-label="main navigation">
+        <div class="sphinxsidebarwrapper"><div class="relations">
+<h3>Related Topics</h3>
+<ul>
+  <li><a href="../index.html">Documentation overview</a><ul>
+  <li><a href="index.html">Module code</a><ul>
+  </ul></li>
+  </ul></li>
+</ul>
+</div>
+<div id="searchbox" style="display: none" role="search">
+  <h3>Quick search</h3>
+    <form class="search" action="../search.html" method="get">
+      <div><input type="text" name="q" /></div>
+      <div><input type="submit" value="Go" /></div>
+      <input type="hidden" name="check_keywords" value="yes" />
+      <input type="hidden" name="area" value="default" />
+    </form>
+</div>
+<script type="text/javascript">$('#searchbox').show(0);</script>
+        </div>
+      </div>
+      <div class="clearer"></div>
+    </div>
+    <div class="footer">
+      &copy;2016, Matt Armstrong, Joseph Huehnerhoff.
+      
+      |
+      Powered by <a href="http://sphinx-doc.org/">Sphinx 1.4.6</a>
+      &amp; <a href="https://github.com/bitprophet/alabaster">Alabaster 0.7.9</a>
+      
+    </div>
+
+    
+
+    
+  </body>
+</html>
