@@ -8,8 +8,8 @@ max_median = 100		#Upper limit for median value
 step_size = 0.60		#Exposure scaling step size, %
 expose = 1			#Set starting exposure
 max_exp = 10
-gain = 5			#Set starting gain
-gainmax = 1
+gain = 1			#Set starting gain
+gainmax = 5
 
 #Cloud_Graph.py
 scale_img = True		#Toggle image scaling
