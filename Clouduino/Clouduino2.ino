@@ -31,11 +31,11 @@ int heatOn(){
        if (heatStatus == 1){
           Serial.println("heat=1");
           }
-         else{
+       else{
           digitalWrite(heatPin, HIGH);
           heatStatus = 1;
           Serial.println("heat=1");
-         }  
+          }  
       return 1;
 }
 
@@ -43,11 +43,11 @@ int heatOff(){
        if (heatStatus == 0){
           Serial.println("heat=0");
           }
-         else{
+       else{
           digitalWrite(heatPin, LOW);
           heatStatus = 0;
           Serial.println("heat=0");
-         }  
+          }  
       return 0;
 }
 
@@ -75,6 +75,28 @@ int checkRainSensor2(){
         }
 }
 
+int rainStatus(){
+	status1 = checkRainSensor1();
+    	status2 = checkRainSensor2();
+    	if (status1 == 1.0 || status2 == 1.0){
+      		rainCount = rainCount + 1.0;
+    	}
+    	rainCountTotal = rainCountTotal + 1.0;
+    	//Serial.println(rainCount / rainCountTotal);
+    	if (rainCountTotal == sleepcount){
+      		Serial.print("heat=");
+        	Serial.print(heatStatus);
+      		if ((rainCount / rainCountTotal) > 0.75){
+        		Serial.println(",rain=1");
+        	}
+      		else {
+        	Serial.println(",rain=0");
+        	//rainStatus = 0;
+      }
+      //Serial.println("Clearing previous rain data");
+      rainCount = 0;
+      rainCountTotal = 0;
+    }
 
 void test(void){
   Serial.println("test routine");
@@ -95,26 +117,6 @@ void loop(void) {
           break;
       }
     }
-    status1 = checkRainSensor1();
-    status2 = checkRainSensor2();
-    if (status1 == 1.0 || status2 == 1.0){
-      rainCount = rainCount + 1.0;
-    }
-    rainCountTotal = rainCountTotal + 1.0;
-    //Serial.println(rainCount / rainCountTotal);
-    if (rainCountTotal == sleepcount){
-      Serial.print("heat=");
-      Serial.print(heatStatus);
-      if ((rainCount / rainCountTotal) > 0.75){
-        Serial.println(",rain=1");
-      }
-      else {
-        Serial.println(",rain=0");
-        //rainStatus = 0;
-      }
-      //Serial.println("Clearing previous rain data");
-      rainCount = 0;
-      rainCountTotal = 0;
-    }
+    
     delay(sleepcount);
   }

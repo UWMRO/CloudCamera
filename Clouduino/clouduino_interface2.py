@@ -65,12 +65,12 @@ class ClouduinoInterface():
         return
 
     def heatOn(self):
-	self.ser.write('h')
+	self.ser.write('h\r')
 	self.heatStatus = 1
 	return
 
     def heatOff(self):
-	self.ser.write('l')
+	self.ser.write('l\r')
 	self.heatStatus = 0
 	return
 
@@ -85,13 +85,16 @@ class ClouduinoInterface():
 
     def run(self):
         #self.openPort()
+	data = ''
         data = self.readSer()
+	print data
 	if data.startswith('heat=') == True:
 	    self.heatCount += 1
             print self.sortOutput(data)
 	    if self.heatToggle == self.heatCount:
 		if self.heatStatus == 0:
 		    self.heatOn()
+		    print "Heat on"
 		    #time.sleep(5)
 		else:
 		    self.heatOff()
