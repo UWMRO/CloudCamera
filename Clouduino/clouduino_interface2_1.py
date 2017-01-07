@@ -1,7 +1,11 @@
 #! /usr/bin/python
 
 """
+<<<<<<< HEAD
+clouduino_interface.py
+=======
 clouduino_interface2_1.py
+>>>>>>> c5ed227b3ad99bb7342e4de9cc1c888fb4362c99
 
 This program is designed to read in data from an arduino.
 Specifically this is program interfaces to the arduino on the
@@ -38,7 +42,7 @@ class ClouduinoInterface():
 	self.savefile = os.getcwd()+'/logs/log.txt'
 	
 	self.heatCount = 0
-	self.heatToggle = 5
+	self.heatToggle = 20
 	self.heatStatus = 0
 	self.delay = 0.1
 
