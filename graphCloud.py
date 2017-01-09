@@ -79,6 +79,9 @@ class CloudGraph(object):
 		self.user = 'jwhueh'
 		self.serverDir = 'public_html/CloudCamera/'
 
+                self.rain10m = self.ci.rain10m
+                self.heatStatus = self.ci.heatStatus
+		self.coretemp = self.ci.coretemp
 		self.start = None
 
 
@@ -314,16 +317,27 @@ class CloudGraph(object):
 		ax[0,0].text(1240, 1060, 'Standard Dev = %.2f' % (stat_arr[2]), size = 16, color="white", horizontalalignment='right')
 		ax[0,0].imshow(img, cmap="gray")
 
-
 		rainStatus = self.rainSensors()
 		print 'rainStatus: ', rainStatus
-		if rainStatus == 'True':
+                if rainStatus == 'True':
                         ax[0,0].text(1000, 50, "Rain = Yes", size=18, color="red")
                 elif rainStatus == 'False':
                         ax[0,0].text(1000, 50, "Rain = No", size=18, color="green")
                 else:
                         ax[0,0].text(1000, 50, "Rain = Unknown", size=18, color="yellow")
- 
+                self.heatStatus = self.ci.heatStatus
+                
+		print 'heatStatus: ', self.heatStatus
+                if self.heatStatus == 1:
+                        ax[0,0].text(1000, 100, "Heat = On", size=18, color="red")
+                elif self.heatStatus == 0:
+                        ax[0,0].text(1000, 100, "Heat = Off", size=18, color="blue")
+                else:
+                        ax[0,0].text(1000, 100, "Heat = Unknown (%s)"%self.heatStatus, size=18, color="yellow")
+
+		self.coretemp = int(open('/sys/class/thermal/thermal_zone0/temp').read()) / 1e3
+		print 'coreTemp [C]: ', self.coretemp
+		ax[0,0].text(1000, 150, "Core Temp = %.1f"%self.coretemp, size=18, color="white")
 
 		#Plot the histogram
 		ax[1,0] = plt.subplot(gs[11:13,:10])
@@ -354,19 +368,20 @@ class CloudGraph(object):
 		#print ('end plot_hist ', (time.time() - self.start))
 		return
 
+        def rainSensors(self):
+                rain = 'Unknown'
+                try:
+                        #f_in = open(os.path.join(os.getcwd(),'rain.dat'),'r')
+                        #for line in f_in:
+                        #       rain = line.rstrip('\n')
+                        #f_in.close()
+                        self.rain10m = str(self.ci.rain10m).rstrip('\r').rstrip('\n')
+                        rain = self.rain10m
+                except:
+                        return 'Unknown'
+                print rain
+                return rain
 
-	def rainSensors(self):
-		rain = 'Unknown'
-		try:
-			f_in = open(os.path.join(os.getcwd(),'rain.dat'),'r')
-			for line in f_in:
-				rain = line.rstrip('\n')
-			f_in.close()
-		except:
-			return 'Unknown'
-		print rain
-		return rain
-		
 
 	def rainSensorsOld(self):
                 self.ci.openPort()
