@@ -44,6 +44,7 @@ class ClouduinoInterface():
 	self.savefile = os.getcwd()+'/logs/log.txt'
 	self.tr = transfer()
 
+	self.heatToggle = 0		#Allow heaters? 1=y, 0=n
 	self.heatStatus = 0
 	self.heatLast = datetime.datetime.strptime("01012001-00:00:00", "%m%d%Y-%H:%M:%S")
 	self.heatThreshold = 40.0	#Minimum pi core temp to turn on heaters
@@ -106,28 +107,31 @@ class ClouduinoInterface():
 
     def checkHeat(self, statusDict):
 	coreTemp = statusDict['coretemp']
-	if coreTemp <= self.heatThreshold:
-	    self.heatLast = datetime.datetime.now()	#will keep heaters running until 10min after heat rises above threshold
-	heatCheck = datetime.datetime.now() - self.heatLast
-	heatCheckmins =  heatCheck.total_seconds() / 60
-	#print timeCheckmins
-	if heatCheckmins <= self.heatDuration:
-	    self.heatOn()
-	    statusDict['heat'] = 1
-	    #print "heaters on"
+	if self.heatToggle == 1:
+		if coreTemp <= self.heatThreshold:
+	      	    self.heatLast = datetime.datetime.now()	#will keep heaters running until 10min after heat rises above threshold
+		heatCheck = datetime.datetime.now() - self.heatLast
+		heatCheckmins =  heatCheck.total_seconds() / 60
+		#print timeCheckmins
+		if heatCheckmins <= self.heatDuration:
+		    self.heatOn()
+		    statusDict['heat'] = 1
+		    #print "heaters on"
+		else:
+		    self.heatOff()
+		    statusDict['heat'] = 0
+		    #print "heaters off"
 	else:
-	    self.heatOff()
-	    statusDict['heat'] = 0
-	    #print "heaters off"
+		statusDict['heat'] = 0
 	return statusDict
 	
     def heatOn(self):
-	#self.ser.write(b'h')
+	self.ser.write(b'h')
 	self.heatStatus = 1
 	return
 
     def heatOff(self):
-	#self.ser.write(b'l')
+	self.ser.write(b'l')
 	self.heatStatus = 0
 	return
 
