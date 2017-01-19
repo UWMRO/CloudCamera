@@ -122,7 +122,7 @@ class CloudGraph(object):
 		img = self.fits_to_list(name+'.fits')
 		print ("Analyzing ", str(name))
 		name_arr = name.split('/')
-		#print ("img = "+str(img))
+
 		# Use small mask to calculate image statistics
 		masked, median, mean, std = self.dynamic_mask(img, self.small_mask)
 		print ("Median = "+str(median)+", Mean = "+str(mean)+", Standard Dev = "+str(std))
@@ -130,7 +130,7 @@ class CloudGraph(object):
 		# Calculate histogram for small maksed image
 		values, bins = self.pixel_value_list(masked)
 		fixed_vals = np.append(values, 0)
-		#print(img)
+
 		# Use large mask to produce image
 		masked, junk1, junk2, junk3 = self.dynamic_mask(img, self.large_mask)
 		#print ('end dynamic mask ', (time.time() - self.start))
@@ -193,24 +193,22 @@ class CloudGraph(object):
 
 		# Make a masked array using the static mask and imput image
 		pre_masked = ma.array(image, mask=maskname)
-		#print("pre_masked=",str(pre_masked))
+
 		# Mask saturated or empty
 		#upper clipping
 		#masked1 = ma.masked_greater(pre_masked, 252)
 		masked1 = pre_masked
 		try:
-			median = ma.median(masked1)
-			#print("median=",str(median))
+			median = int(ma.median(masked1))
 			mean = ma.mean(masked1)
 			std = ma.std(masked1)
 		except:
 			traceback.print_exc()
-			median = 99
+			median = 99.9
 			return
 
 		mean = float('%.2f' % (mean))
 		std = float('%.2f' % (std))
-		median = int(median)
 
 		return masked1, median, mean, std
 
@@ -319,7 +317,7 @@ class CloudGraph(object):
 		ax[0,0].text(1240, 1020, "Mean = %.2f" % (stat_arr[1]), size = 16, color="white", horizontalalignment='right')
 		ax[0,0].text(1240, 1060, 'Standard Dev = %.2f' % (stat_arr[2]), size = 16, color="white", horizontalalignment='right')
 		ax[0,0].imshow(img, cmap="gray")
-		"""
+		
 		try:
 		    statusDict = {}
 		    with open("testlog.txt") as f:
@@ -355,7 +353,6 @@ class CloudGraph(object):
                 else:
                         ax[0,0].text(1000, 100, "Heat = Unknown (%s)"%self.heatStatus, size=18, color="yellow")
 
-		"""
 		#self.coretemp = statusDict['coretemp']
 		#self.coretemp = int(open('/sys/class/thermal/thermal_zone0/temp').read()) / 1e3
 		#print 'coreTemp [C]: ', self.coretemp
@@ -472,4 +469,4 @@ if __name__=="__main__":
 	cg = CloudGraph()
 	cg.start_up_checks()
 
-	cg.run_analysis('images/20170109/20170109T144630_0.020', '0.2', '1' )
+	cg.run_analysis('images/20160726/20160726T095434_0.020', '0.2', '1' )

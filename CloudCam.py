@@ -67,8 +67,9 @@ class CloudCam(object):
 	# Check and adjust exposure timing for low light
 	print "bounds (minMed, maxMed, maxGain, maxExp: ", self.min, self.max, self.gainmax, self.maxExp
         if median < self.min:
-	    if self.expose >=self.maxExp and self.gain >= 1:
-                self.gain += 1
+	    print ("first")
+	    if self.gain >= 1 and self.gain <= self.gainmax:
+                self.gain =self.gain+1
 		if self.gain > self.gainmax:
 			self.gain = self.gainmax
                 print ("Gain Set To: "+str(self.gain))
@@ -78,8 +79,9 @@ class CloudCam(object):
 
 	# Check and adjust exposure and gain for high light
         elif median > self.max:
+	    print ("second")
 	    if self.expose >=0.02 and self.gain > 1:
-            	self.gain -= 1
+            	self.gain = self.gain - 1
 		print ("Gain Set To: "+ str(self.gain))
 	    if self.expose >=0.02 and self.gain == 1:
 		self.expose = self.expose*(1.0-self.step)

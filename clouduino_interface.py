@@ -35,6 +35,7 @@ import time
 import os
 import shutil
 from transfer import transfer
+from CloudParams import *
 
 class ClouduinoInterface():
     def __init__(self):
@@ -44,14 +45,14 @@ class ClouduinoInterface():
 	self.savefile = os.getcwd()+'/logs/log.txt'
 	self.tr = transfer()
 
-	self.heatToggle = 0		#Allow heaters? 1=y, 0=n
+	self.heatToggle = heat_toggle		#Allow heaters? 1=y, 0=n
 	self.heatStatus = 0
 	self.heatLast = datetime.datetime.strptime("01012001-00:00:00", "%m%d%Y-%H:%M:%S")
-	self.heatThreshold = 40.0	#Minimum pi core temp to turn on heaters
-	self.heatDuration = 10		#Duration (in mins) to run heaters
+	self.heatThreshold = heat_threshold	#Minimum pi core temp to turn on heaters
+	self.heatDuration = heat_time	#Duration (in mins) to run heaters
 
 	self.rainStatus = 0
-	self.rainThreshold = 40 	#percent rain detects in last 30 seconds
+	self.rainThreshold = rain_min 	#percent rain detects in last 30 seconds
 	self.rainLast = datetime.datetime.strptime("01012001-00:00:00", "%m%d%Y-%H:%M:%S")	
 	self.rain10m = False
 	self.coretemp = int(open('/sys/class/thermal/thermal_zone0/temp').read()) / 1e3
@@ -120,7 +121,7 @@ class ClouduinoInterface():
 		else:
 		    self.heatOff()
 		    statusDict['heat'] = 0
-		    #print "heaters off"
+		    #print "heaters off
 	else:
 		statusDict['heat'] = 0
 	return statusDict
@@ -154,6 +155,8 @@ class ClouduinoInterface():
 	#print timeCheckmins
 	if timeCheckmins <= 10:
 	   self.rain10m = True
+	   if self.heatToggle == 1:
+		self.heatStatus = self.heatOn()
 	else:
 	   self.rain10m = False
 	#"rain10m = "+str(self.rain10m)

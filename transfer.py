@@ -115,7 +115,7 @@ if __name__ == "__main__":
 	t = transfer()
 	#t.openConnection('galileo.apo.nmsu.edu','jwhueh')
 	#t.closeConnection()
-	t.uploadFile('galileo.apo.nmsu.edu', 'jwhueh', 'test.png', 'public_html/CloudCamera/')
+	t.uploadFile('galileo.apo.nmsu.edu', 'jwhueh', 'live.py', 'public_html/cgi-bin/')
 	#t.downloadFile('galileo.apo.nmsu.edu', 'jwhueh', 'public_html/CloudCamera/test.png', 'test.png')
 	#print (t.findFiles('irsc.apo.nmsu.edu', 'irsc', 'data/56916'))
 	
