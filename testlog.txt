@@ -1,5 +1,5 @@
-timestamp=20170119-16:03:37
+timestamp=20170123-11:12:50
 heat=0
-coretemp=41.856
+coretemp=42.932
 rain10m=False
 rain=0

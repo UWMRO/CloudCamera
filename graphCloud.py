@@ -78,7 +78,7 @@ class CloudGraph(object):
 		self.host = 'galileo.apo.nmsu.edu'
 		self.user = 'jwhueh'
 		self.serverDir = 'public_html/CloudCamera/'
-
+		self.dispEngData = False
                 self.rain10m = self.ci.rain10m
                 self.heatStatus = self.ci.heatStatus
 		self.coretemp = self.ci.coretemp
@@ -193,16 +193,17 @@ class CloudGraph(object):
 
 		# Make a masked array using the static mask and imput image
 		pre_masked = ma.array(image, mask=maskname)
-		#print("pre_masked=",str(pre_masked))
 		# Mask saturated or empty
 		#upper clipping
 		#masked1 = ma.masked_greater(pre_masked, 252)
-		masked1 = pre_masked
+		
+		masked1 = pre_masked.compressed()
+		
 		try:
-			median = ma.median(masked1)
+			median = np.median(masked1)
 			#print("median=",str(median))
-			mean = ma.mean(masked1)
-			std = ma.std(masked1)
+			mean = np.mean(masked1)
+			std = np.std(masked1)
 		except:
 			traceback.print_exc()
 			median = 99
@@ -212,7 +213,7 @@ class CloudGraph(object):
 		std = float('%.2f' % (std))
 		median = int(median)
 
-		return masked1, median, mean, std
+		return pre_masked, median, mean, std
 
 	def pixel_value_list(self, image):
 		"""
@@ -319,47 +320,43 @@ class CloudGraph(object):
 		ax[0,0].text(1240, 1020, "Mean = %.2f" % (stat_arr[1]), size = 16, color="white", horizontalalignment='right')
 		ax[0,0].text(1240, 1060, 'Standard Dev = %.2f' % (stat_arr[2]), size = 16, color="white", horizontalalignment='right')
 		ax[0,0].imshow(img, cmap="gray")
-		"""
-		try:
-		    statusDict = {}
-		    with open("testlog.txt") as f:
-			for line in f:
-			    (key, val) = line.split('=')
-			    statusDict[str(key)] = str(val)
-		    
-		    rainStatus = statusDict['rain10m']
-		    self.heatStatus = statusDict['heat']
-		    self.coretemp = statusDict['coretemp']
-		except:
-		    rainStatus = 'Unknown'
-		    self.heatStatus = 'Unknown'
-		    self.coretemp = 0.0
-		
-		#rainStatus = statusDict['rain10m']
-		#rainStatus = self.rainSensors()
-		print 'rainStatus: ', rainStatus
-                if rainStatus == 'True':
-                        ax[0,0].text(1000, 50, "Rain [10m] = Yes", size=18, color="red")
-                elif rainStatus == 'False':
-                        ax[0,0].text(1000, 50, "Rain [10m] = No", size=18, color="green")
-                else:
-                        ax[0,0].text(1000, 50, "Rain [10m] = Unknown", size=18, color="yellow")
-                #self.heatStatus = self.ci.heatStatus
-                
-		#heatStatus = statusDict['heat']
-		print 'heatStatus: ', self.heatStatus
-                if self.heatStatus == 1:
-                        ax[0,0].text(1000, 100, "Heat = On", size=18, color="red")
-                elif self.heatStatus == 0:
-                        ax[0,0].text(1000, 100, "Heat = Off", size=18, color="blue")
-                else:
-                        ax[0,0].text(1000, 100, "Heat = Unknown (%s)"%self.heatStatus, size=18, color="yellow")
+		if self.dispEngData == True:
+			try:
+			    statusDict = {}
+		    	    with open("testlog.txt") as f:
+			        for line in f:
+				    (key, val) = line.split('=')
+				    statusDict[str(key)] = str(val).rstrip('\r\n')
+			    print(statusDict)
+			    rainStatus = statusDict['rain10m']
+			    self.heatStatus = int(statusDict['heat'])
+			    self.coretemp = float(statusDict['coretemp'])
+			except:
+			    rainStatus = 'Unknown'
+			    self.heatStatus = 'Unknown'
+			    self.coretemp = 0.0
+			ax[0,0].text(1000, 0, 'Engineering Data:', size=18, color="white")
+			#rainStatus = statusDict['rain10m']
+			#rainStatus = self.rainSensors()
+			print 'rainStatus: ', rainStatus
+	                if rainStatus == 'True':
+	                        ax[0,0].text(1000, 50, "Rain [10m] = Yes", size=18, color="red")
+	                elif rainStatus == 'False':
+	                        ax[0,0].text(1000, 50, "Rain [10m] = No", size=18, color="green")
+	                else:
+	                        ax[0,0].text(1000, 50, "Rain [10m] = Unknown", size=18, color="yellow")
+	                #self.heatStatus = self.ci.heatStatus
+	                
+			#heatStatus = statusDict['heat']
+			print 'heatStatus: ', self.heatStatus
+        	        if self.heatStatus == 1:
+	                        ax[0,0].text(1000, 100, "Heat = On", size=18, color="red")
+	                elif self.heatStatus == 0:
+        	                ax[0,0].text(1000, 100, "Heat = Off", size=18, color="blue")
+	                else:
+                	        ax[0,0].text(1000, 100, "Heat = Unknown (%s)"%self.heatStatus, size=18, color="yellow")
 
-		"""
-		#self.coretemp = statusDict['coretemp']
-		#self.coretemp = int(open('/sys/class/thermal/thermal_zone0/temp').read()) / 1e3
-		#print 'coreTemp [C]: ', self.coretemp
-		#ax[0,0].text(1000, 150, "Core Temp = %.1f"%self.coretemp, size=18, color="white")
+			ax[0,0].text(10000, 150, "Core Temp = %.1f"%self.coretemp, size=18, color="white")
 
 		#Plot the histogram
 		ax[1,0] = plt.subplot(gs[11:13,:10])
