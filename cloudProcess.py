@@ -55,9 +55,9 @@ if __name__ == "__main__":
 			x=0
 		if y==5:
 			print 'running rsync'
-			p1 = subprocess.Popen(['rsync -azrh --progress --remove-source-files /home/cloudcam/CloudCamera/images/ analysis:/raid/CloudCamera/fits/'], stdout=subprocess.PIPE, shell=True)
+			#p1 = subprocess.Popen(['rsync -azrh --progress --remove-source-files /home/cloudcam/CloudCamera/images/ analysis:/raid/CloudCamera/fits/'], stdout=subprocess.PIPE, shell=True)
 			#print p1.stdout.read()
-			p2 = subprocess.Popen(['rsync -azrh --progress --remove-source-files /home/cloudcam/CloudCamera/analyzed/ analysis:/raid/CloudCamera/'], stdout=subprocess.PIPE, shell=True)
+			#p2 = subprocess.Popen(['rsync -azrh --progress --remove-source-files /home/cloudcam/CloudCamera/analyzed/ analysis:/raid/CloudCamera/'], stdout=subprocess.PIPE, shell=True)
 			#print p2.stdout.read()
 			y=0
 		if not arrProc[0]:

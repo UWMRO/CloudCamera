@@ -3,7 +3,7 @@ Parameter file for CloudCam options.
 '''
 
 #clouduino_interface.py
-heat_toggle = 1			#Activate heater system, 1 = On
+heat_toggle = 0			#Activate heater system, 1 = On
 heat_threshold = 28.0		#CPU temperature to turn on heaters
 heat_time = 10.0		#time to run heaters after last detect
 rain_min = 10			#minimum number of rain counts to trigger rain
@@ -13,9 +13,9 @@ min_median = 40			#Lower limit for median value
 max_median = 100		#Upper limit for median value
 step_size = 0.50		#Exposure scaling step size, %
 expose = 1			#Set starting exposure
-max_exp = 15
+max_exp = 10
 gain = 1			#Set starting gain
-gainmax = 5
+gainmax = 8
 
 #graphCloud.py
 scale_img = True		#Toggle image scaling
