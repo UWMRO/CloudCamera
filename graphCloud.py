@@ -74,7 +74,7 @@ class CloudGraph(object):
 
 		self.scaleimg = scale_img
 		self.rotate = rotate
-
+		self.fitsCompress = False
 		self.host = 'galileo.apo.nmsu.edu'
 		self.user = 'jwhueh'
 		self.serverDir = 'public_html/CloudCamera/'
@@ -447,9 +447,10 @@ class CloudGraph(object):
 		self.header['STD'] = std
 		img_out = os.path.join(os.getcwd(),name+".fits")
 		# Close and compress the FITS file, saving the header
-		compressed = Fits.CompImageHDU(self.hdudata, self.header, name=name.split('/')[5])
-		compressed.writeto(img_out, clobber=True)
-		compressed = None
+		if self.fitsCompress == True:
+			compressed = Fits.CompImageHDU(self.hdudata, self.header, name=name.split('/')[5])
+			compressed.writeto(img_out, clobber=True)
+			compressed = None
 		#zip output
 		self.zipFile(img_out)
 		print ('end add_headers ', (time.time() - self.start))

@@ -4,7 +4,7 @@ Parameter file for CloudCam options.
 
 #clouduino_interface.py
 heat_toggle = 0			#Activate heater system, 1 = On
-heat_threshold = 28.0		#CPU temperature to turn on heaters
+heat_threshold = 34.0		#CPU temperature to turn on heaters
 heat_time = 10.0		#time to run heaters after last detect
 rain_min = 10			#minimum number of rain counts to trigger rain
 
