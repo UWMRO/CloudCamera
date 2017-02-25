@@ -1,5 +1,5 @@
-timestamp=20170209-16:07:17
+timestamp=20170224-23:03:52
 heat=0
-coretemp=52.078
+coretemp=41.856
 rain10m=False
 rain=0
