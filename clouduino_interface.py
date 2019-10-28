@@ -39,6 +39,7 @@ from CloudParams import *
 
 class ClouduinoInterface():
     def __init__(self):
+	self.enable = clouduino_enable		#Enable clouduino
 	self.ser = None
 	#self.serPort = '/dev/tty.usbmodem1421'
     	self.serPort = '/dev/ttyACM0'
@@ -175,13 +176,16 @@ class ClouduinoInterface():
 
 if __name__ == "__main__":
 	c = ClouduinoInterface()
-	run = True
-    	c.openPort()
-	time.sleep(2)
-	c.ser.write(b'l')
-	print "Port open"
+	if c.enable == 1:
+	    run = True
+	else:
+	    run = False
     	while run == True:
-	    #print "in loop"
+	    c.openPort()
+	    time.sleep(2)
+	    c.ser.write(b'l')
+	    print "Port open"
+    	    #print "in loop"
 	    statusDict = c.checkStatus()
 	    #print len(statusDict)
 	    if len(statusDict) == 5:

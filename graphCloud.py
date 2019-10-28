@@ -59,13 +59,13 @@ from PIL import Image
 from Cloud_Mask import CloudMask
 from transfer import transfer
 from CloudParams import *
-from clouduino_interface import ClouduinoInterface
+#from clouduino_interface import ClouduinoInterface
 import gzip
 
 class CloudGraph(object):
 	def __init__(self):
 		self.cm = CloudMask()
-		self.ci = ClouduinoInterface()
+		#self.ci = ClouduinoInterface()
 		self.trans = transfer()
 		
 		#==>  I think this is the memory leak, needs to be a local variable
@@ -75,14 +75,15 @@ class CloudGraph(object):
 		self.scaleimg = scale_img
 		self.rotate = rotate
 		self.fitsCompress = False
-		self.host = 'galileo.apo.nmsu.edu'
-		self.user = 'jwhueh'
-		self.serverDir = 'public_html/CloudCamera/'
-		self.dispEngData = False
-                self.rain10m = self.ci.rain10m
-                self.heatStatus = self.ci.heatStatus
-		self.coretemp = self.ci.coretemp
+		self.host = 'ovid.u.washington.edu'
+		self.user = 'mrouser'
+		self.serverDir = 'public_html/CloudCam/'
+		#self.dispEngData = False
+                #self.rain10m = self.ci.rain10m
+                #self.heatStatus = self.ci.heatStatus
+		#self.coretemp = self.ci.coretemp
 		self.start = None
+		self.upload = False
 
 
 	def start_up_checks(self):
@@ -311,7 +312,7 @@ class CloudGraph(object):
 
 		ax[0,0].text(640, 15, "N", size=20, color="white")
 		ax[0,0].text(640, 1075, "S", size=20, color="white")
-		ax[0,0].text(110, 550, "E", size=20, color="white")
+		ax[0,0].text(-30, 550, "E", size=20, color="white")
 		ax[0,0].text(1180, 550, "W", size=20, color="white")
 		ax[0,0].text(-30, 980, text_name, size = 16, color="white", horizontalalignment='left')
 		ax[0,0].text(-30, 1020, 'Exposure = '+str(exp)+' [s]', size = 16, color="white", horizontalalignment='left', )
@@ -320,6 +321,8 @@ class CloudGraph(object):
 		ax[0,0].text(1240, 1020, "Mean = %.2f" % (stat_arr[1]), size = 16, color="white", horizontalalignment='right')
 		ax[0,0].text(1240, 1060, 'Standard Dev = %.2f' % (stat_arr[2]), size = 16, color="white", horizontalalignment='right')
 		ax[0,0].imshow(img, cmap="gray")
+		
+		"""
 		if self.dispEngData == True:
 			try:
 			    statusDict = {}
@@ -357,7 +360,8 @@ class CloudGraph(object):
                 	        ax[0,0].text(1000, 100, "Heat = Unknown (%s)"%self.heatStatus, size=18, color="yellow")
 
 			ax[0,0].text(10000, 150, "Core Temp = %.1f"%self.coretemp, size=18, color="white")
-
+		"""
+		
 		#Plot the histogram
 		ax[1,0] = plt.subplot(gs[11:13,:10])
 		ax[1,0].bar(bins, (values*100.0), alpha=1.0)
@@ -376,7 +380,8 @@ class CloudGraph(object):
 		shutil.copyfile("latest.png", os.path.join(os.getcwd(),"gif", name+".png"))
 		plt.close()
 		fig.clf()
-		self.trans.uploadFile(self.host, self.user, 'latest.png', self.serverDir)
+		if self.upload == True:
+		    self.trans.uploadFile(self.host, self.user, 'latest.png', self.serverDir)
 
 		#change memory pointer to allow for garbage collection
 		img = None
@@ -386,7 +391,7 @@ class CloudGraph(object):
 		ax = None
 		#print ('end plot_hist ', (time.time() - self.start))
 		return
-
+	"""
         def rainSensors(self):
                 rain = 'Unknown'
                 try:
@@ -408,6 +413,7 @@ class CloudGraph(object):
 		self.ci.closePort()
 		print ('rain sensors (1|2): ',rain, (time.time() - self.start))		
 		return rain
+	"""
 
 	def mapImg(self, imArr = None, name = None, map = None):
 		fig1 = plt.figure(figsize=(10,9.5))
@@ -417,7 +423,8 @@ class CloudGraph(object):
 		shutil.copyfile(name, os.path.join("/var/www/html/",name))
 		#if map == 'inferno':
 		#	shutil.copyfile(name, os.path.join(os.getcwd(),"gif_map",time.strftime("%Y%m%dT%H%M%S_map.png")))
-		self.trans.uploadFile(self.host, self.user, name, self.serverDir)
+		if self.upload == True:
+		    self.trans.uploadFile(self.host, self.user, name, self.serverDir)
 		plt.close()
 		fig1.clf()
 		fig1 = None

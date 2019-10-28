@@ -1,20 +1,32 @@
 <html>
+<script language="javascript">
+
+function updateImage() {
+   obj3 = document.latest;
+   obj3.src = obj3.src + "?" + Math.random();	
+   obj2 = document.latestmap;
+   obj2.src = obj2.src + "?" + Math.random();
+   setInterval("updateImage()",6000);
+}
+
+</script>
 <head>
-<meta http-equiv="cahce-control" content="no-cache">
-<meta http-equiv="refresh" content="30">
-<title>APO Optical Cloud Camera</title>
+<title>MRO Optical Cloud Camera</title>
 </head>
 
 <body onload="updateImage()"  bgcolor="black">
     <h2>
-        <center><font color="blue">Apache Point Observatory Optical  Cloud Camera</font></center>
+        <center><font color="blue">Manastash Ridge Observatory<br>Optical Cloud Camera</font></center>
     </h2>
     <font color="white">
     <table border="0">
     <tr>
     <td><a href="latest.png"><img src="latest.png" width="400"  name="latest"></a></td>
+    <!--
     <td><a href="latest.mp4" width="400"  name="latestgif"><video width="400" height="400" controls>
   <source src="latest.mp4" type="video/mp4"></a></td>
+    -->
+    <td><a href="latest.gif"><img src="latest.gif" width="400" name="latestgif"></a></td>
     <td><a href="latest_map.png"><img src="latest_map.png" width="400" name="latestmap"></a></td>
     </tr>
     </table>
@@ -23,30 +35,8 @@
 Image will auto-refresh<br><br>
 </center>
 <hr>
-<a href="20160813.mp4">20160813.mp4</a><br>
-<a href="20160812.mp4">20160812.mp4</a><br>
-<a href="20160811.mp4">20160811.mp4</a><br>
-<a href="20160810.mp4">20160810.mp4</a><br>
-<a href="20160809.mp4">20160809.mp4</a><br>
-<a href="20160808.mp4">20160808.mp4</a><br>
-<a href="20160807.mp4">20160807.mp4</a><br>
-<a href="20160806.mp4">20160806.mp4</a><br>
 
-<a href="20160805.mp4">20160805.mp4</a><br>
-<a href="20160804.mp4">20160804.mp4</a><br>
-<a href="20160803.mp4">20160803.mp4</a><br>
-<a href="20160802.mp4">20160802.mp4</a><br>
-<a href="20160801.mp4">20160801.mp4</a><br>
-<a href="20160731.mp4">20160731.mp4</a><br>
-<a href="20160730.mp4">20160730.mp4</a><br>
-<a href="20160729.mp4">20160729.mp4</a><br>
-<a href="20160728.mp4">20160728.mp4</a><br>
-<a href="20160727.mp4">20160727.mp4</a><br>
-<a href="20160726.mp4">20160726.mp4</a><br>
-<a href="20160725.mp4">20160725.mp4</a><br>
-<a href="20160724.mp4">20160724.mp4</a><br>
-<a href="20160723.mp4">20160723.mp4</a><br>
+  </font>
 
-</font>
 </body>
 </html>

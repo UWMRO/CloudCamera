@@ -36,9 +36,10 @@ import traceback
 class CloudGif(object):
 	def __init__(self):
 		self.trans = transfer()
-		self.host = 'galileo.apo.nmsu.edu'
-                self.user = 'jwhueh'
-                self.serverDir = 'public_html/CloudCamera/'
+		self.transfer = False
+		self.host = 'ovid.u.washington.edu'
+                self.user = 'mrouser'
+                self.serverDir = 'public_html/CloudCam/'
 
 
 	def cleanDir(self, dir = None):
@@ -73,20 +74,48 @@ class CloudGif(object):
 		if os.path.isfile(gifName):
 			print ("gif image produced")
 			shutil.copyfile(gifName, os.path.join("/var/www/html/", gifName))
-			self.trans.uploadFile(self.host, self.user, gifName, self.serverDir)
+			if self.transfer == True:
+				self.trans.uploadFile(self.host, self.user, gifName, self.serverDir)
 		else:
 			print ("gif was not created")
 		return
 
+	def hourGIF(self, dir=None):
+		self.cleanDir(dir)
+                if dir == "gif":
+                        gifName = 'latest.gif'
+                        gifPath = os.path.join(os.getcwd(), dir, gifName)
+                if dir == "gif_map":
+                        gifName = 'latest_map.gif'
+                        gifPath = os.path.join(os.getcwd(), dir, gifName)
+                print ("Producing gif image")
+                if os.path.isfile(gifPath):
+                        os.remove(gifPath)
+                fps = 3
+                command = "ffmpeg -framerate " + str(fps) + " -pattern_type glob -i 'gif/*.png' " + str(gifName)
+                out = subprocess.Popen(command, stdout = subprocess.PIPE, shell=True)
+                print (out)
+		stdoutp, stderrp = out.communicate()
+                print ("Results: " + str(stdoutp))
+                if os.path.isfile(gifName):
+                        print ("gif image produced")
+                        shutil.copyfile(gifName, os.path.join("/var/www/html/", gifName))
+                        if self.transfer == True:
+                                self.trans.uploadFile(self.host, self.user, gifName, self.serverDir)
+                else:
+                        print ("gif was not created")
+                return
+
+
 	def dayWiggle(self):
 		dayName = time.strftime("%Y%m%d")
-                gifPath = os.path.join('/raid/CloudCamera/', dayName)
-		command = "ffmpeg -y -f image2 -r 6 -pattern_type glob -i '%s/*.png' %s" % (str(gifPath),str(dayName+'.mp4'))
-		self.trans.remoteCommand('analysis', 'jwhueh', command)
-                return
+                gifPath = os.path.join('analyzed/', dayName)
+		command = "ffmpeg -y -f image2 -r 6 -pattern_type glob -i '%s/*.png' %s.mp4" % (str(gifPath),str(dayName))
+		#self.trans.remoteCommand('analysis', 'jwhueh', command)
+       		return
 
 
 if __name__ ==  "__main__":
 	cg = CloudGif()
-	cg.hourWiggle('gif')
-		
+	cg.hourGIF('gif')
+	#cg.dayWiggle()	

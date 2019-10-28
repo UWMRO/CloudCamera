@@ -30,9 +30,9 @@ get_pid() {
     PID3=$pid3
 
 
-    PID4=""
-    pid4=`/bin/ps -e -ww -o pid,user,command | egrep -v 'awk|grep' | grep 'clouduino_interface.py' | awk '{print $1}'`
-    PID4=$pid4
+#    PID4=""
+#    pid4=`/bin/ps -e -ww -o pid,user,command | egrep -v 'awk|grep' | grep 'clouduino_interface.py' | awk '{print $1}'`
+#    PID4=$pid4
     
     if test "$pid"; then
         echo "cloudProcess is running as process $pid"
@@ -53,11 +53,11 @@ get_pid() {
         echo "wiggleCloud is not running"
     fi
 
-    if test "$pid4"; then
-        echo "clouduino_interface is running as process $pid4"
-    else
-        echo "clouduino_inteface is not running"
-    fi
+#    if test "$pid4"; then
+#        echo "clouduino_interface is running as process $pid4"
+#    else
+#        echo "clouduino_inteface is not running"
+#    fi
 
 
 }
@@ -108,8 +108,8 @@ do_stop() {
     kill -TERM $PID2
     echo "Stopping wiggleCloud."
     kill -TERM $PID3
-    echo "Stopping clouduino_interface."
-    kill -TERM $PID4
+#    echo "Stopping clouduino_interface."
+#    kill -TERM $PID4
 }
 
 
@@ -139,12 +139,12 @@ do_stopall() {
     echo "Stopping wiggleCloud."
     kill -TERM $PID3
 
-    if test ! "$PID4"; then
-        return
-    fi
-
-    echo "Stopping clouduino_interface."
-    kill -TERM $PID4
+#    if test ! "$PID4"; then
+#        return
+#    fi
+#
+#    echo "Stopping clouduino_interface."
+#    kill -TERM $PID4
 
 }
 
