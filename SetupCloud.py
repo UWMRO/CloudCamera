@@ -60,7 +60,30 @@ class CloudSetup(object):
            print("Exiting setup routine")
            quit()
 
+	print("----------------------------------------------")
+	print("At this point, the basic setup is complete and the CloudCam can collect and process images.")
+	print(" ")
+	print("This script will help you set up different image delivery choices.")
+	print("You can use SSH/SCP to push images to a remote server and/or you can use the CloudCam to run a local webpage to display the images.")
+	print(" ")
+	print("The first thing this script will help you set up is a local webserver to display images from the CloudCam.")
+	webserverInstall = raw_input("Would you like to set up a local webserver? (Yes/No or Y/N):")
+        if webserverInstall.lower() in self.yesList:
+           self.webserver()
+        else:
+	   print("Skipping webserver setup.")
 
+	print("----------------------------------------------")
+	print("The CloudCam can also push images to a remote server using SCP and SSH keys.")
+	scpInstall = raw_input("Would you like to set up SSH keys and SCP to a remote server? (Yes/No or Y/N):")
+        if scpInstall.lower() in self.yesList:
+           self.scpSetup()
+        else:
+           print("Skipping SCP setup.")
+
+	print("----------------------------------------------")
+	print("The CloudCam setup routine is now complete.")
+	print("Please enjoy your CloudCam experience")
 	return
 
     def dependencies(self):
@@ -83,6 +106,31 @@ class CloudSetup(object):
 	    print("g++ camera.cpp -lusb -lopenssag -o camera")
 	else:
 	    print("Setting permissions")
+	return
+
+    def webserver(self):
+	print("Setting up local webserver")
+	if self.Demo == True:
+	   print("DEMO MODE, NOT ACTUALLY RUNNING THESE COMMANDS:")
+	   print("sudo apt-get -y install apache2")
+	   print("sudo rm /var/www/html/index.html")
+	   print("sudo cp index.html /var/www/html/index.html")
+	else:
+	   print("Setting up webserver")
+	return
+
+    def scpSetup(self):
+	print("Setting up SSH keys and SCP to remote server")
+	if self.Demo == True:
+	   print("DEMO MODE, NOT ACTUALLY RUNNING THESE COMMANDS:")
+	   print("mkdir -p $HOME/.ssh")
+	   print("sudo chmod 0700 $HOME/.ssh")
+	   print("ssh-keygen -t rsa")
+	   sshServer = raw_input("SSH key created, please enter the server you wish to connect to:")
+	   sshUser = raw_input("Please enter the username for the remote server:")
+	   print("ssh-copy-id -i $HOME/.ssh/id_rsa.pub %s@%s" %(sshUser, sshServer))
+	else:
+	   print("Setting up SSH key and SCP")
 	return
 
 if __name__ == "__main__":
