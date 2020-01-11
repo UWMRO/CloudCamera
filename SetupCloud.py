@@ -19,7 +19,7 @@ class CloudSetup(object):
 	self.Demo = True
 
 	self.yesList = {'yes', 'y'}
-	self.dependencyList = ['libusb-dev', 'libtool', 'eclipse-cdt-autools',
+	self.dependencyList = ['libusb-dev', 'libtool', 'eclipse-cdt-autotools',
 			       'python-matplotlib', 'python-astropy', 'python-scipy',
 			       'python-pyfits']
 
@@ -27,7 +27,15 @@ class CloudSetup(object):
 	print("Welcome to the CloudCam setup routine.")
 	print(" ")
 	print("This program will install the needed dependencies and set up permissions to run the CloudCam.")
-	
+
+	demoMode = raw_input("Would you like to use the demonstration mode? (Yes/No or Y/N):")
+	if demoMode.lower() in self.yesList:
+	   print("Running software in Demo mode")
+	   self.Demo = True
+	else:
+	   print("NOT using Demo mode, this will actually run terminal commands to install software.")
+	   self.Demo = False
+
 	beginSetup = raw_input("Would you like to begin setup? (Yes/No or Y/N):")
 	if beginSetup.lower() in self.yesList:
 	   print("Continuing setup routine")
@@ -87,13 +95,14 @@ class CloudSetup(object):
 	return
 
     def dependencies(self):
-	print("Installing dependencies")
 	if self.Demo == True:
 	   print("DEMO MODE, NOT ACTUALLY RUNNING THESE COMMANDS:")
 	   for i in range(len(self.dependencyList)):
               print("sudo apt-get install -y %s" %self.dependencyList[i])
 	else:
 	   print("Installing dependencies")
+	   for i in range(len(self.dependencyList)):
+	      self.runCmd("sudo apt-get install -y %s" %self.dependencyList[i])
 	print("Dependencies installed successfully.")
         print("----------------------------------------------")
 	return
@@ -105,7 +114,8 @@ class CloudSetup(object):
 	    print("sudo usermod -a -G dialout $USER")
 	    print("g++ camera.cpp -lusb -lopenssag -o camera")
 	else:
-	    print("Setting permissions")
+	    self.runCmd("sudo usermod -a -G dialout $USER")
+	    self.runCmd("g++ camera.cpp -lusb -lopenssag -o camera")
 	return
 
     def webserver(self):
@@ -116,7 +126,9 @@ class CloudSetup(object):
 	   print("sudo rm /var/www/html/index.html")
 	   print("sudo cp index.html /var/www/html/index.html")
 	else:
-	   print("Setting up webserver")
+	   self.runCmd("sudo apt-get -y install apache2")
+	   self.runCmd("sudo rm /var/www/html/index.html")
+	   self.runCmd("sudo cp index.html /var/www/html/index.html")
 	return
 
     def scpSetup(self):
@@ -130,7 +142,21 @@ class CloudSetup(object):
 	   sshUser = raw_input("Please enter the username for the remote server:")
 	   print("ssh-copy-id -i $HOME/.ssh/id_rsa.pub %s@%s" %(sshUser, sshServer))
 	else:
-	   print("Setting up SSH key and SCP")
+	   self.runCmd(""mkdir -p $HOME/.ssh")
+	   self.runCmd("sudo chmod 0700 $HOME/.ssh")
+	   self.runCmd("ssh-keygen -t rsa")
+	   sshServer = raw_input("SSH key created, please enter the server you wish to connect to:")
+           sshUser = raw_input("Please enter the username for the remote server:")
+           self.runCmd("ssh-copy-id -i $HOME/.ssh/id_rsa.pub %s@%s" %(sshUser, sshServer))
+	return
+
+    def runCmd(self, command):
+	print("Running command: %s" %command)
+	process = subprocess.Popen(command, shell=True, stdout=subprocess.PIPE)
+	process.wait()
+	outs, err = process.communicate()
+	print(outs)
+	print(process.returncode)
 	return
 
 if __name__ == "__main__":
