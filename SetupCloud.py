@@ -69,6 +69,14 @@ class CloudSetup(object):
            quit()
 
 	print("----------------------------------------------")
+	print("CloudCam software can be set as a linux service, which will start the software automatically and keep it running through crashes.")
+	serviceInstall = raw_input("Would you like to set CloudCam as a service? (Yes/No or Y/N):")
+        if serviceInstall.lower() in self.yesList:
+           self.services()
+        else:
+           print("NOT setting CloudCam as a service")
+
+	print("----------------------------------------------")
 	print("At this point, the basic setup is complete and the CloudCam can collect and process images.")
 	print(" ")
 	print("This script will help you set up different image delivery choices.")
@@ -118,6 +126,24 @@ class CloudSetup(object):
 	    self.runCmd("g++ camera.cpp -lusb -lopenssag -o camera")
 	return
 
+    def services(self):
+	print("Setting CloudCam as a service.")
+	if self.Demo == True:
+	   print("DEMO MODE, NOT ACTUALLY RUNNING THESE COMMANDS:")
+	   print("sudo ln -s install/services/CloudCam.service /lib/systemd/system/CloudCam.service")
+	   print("sudo ln -s install/services/CloudCam.service /lib/systemd/system/wiggleCloud.service")
+	   print("sudo systemctl daemon-reload")
+	   print("sudo systemctl enable CloudCam.service")
+	   print("sudo systemctl enable wiggleCloud.service")
+	else:
+	   self.runCmd("sudo ln -s install/services/CloudCam.service /lib/systemd/system/CloudCam.service")
+	   self.runCmd("sudo ln -s install/services/CloudCam.service /lib/systemd/system/wiggleCloud.service")
+	   self.runCmd("sudo systemctl daemon-reload")
+	   self.runCmd("sudo systemctl enable CloudCam.service")
+	   self.runCmd("sudo systemctl enable wiggleCloud.service")
+	   print("CloudCam is now a service")
+	return
+
     def webserver(self):
 	print("Setting up local webserver")
 	if self.Demo == True:
@@ -142,7 +168,7 @@ class CloudSetup(object):
 	   sshUser = raw_input("Please enter the username for the remote server:")
 	   print("ssh-copy-id -i $HOME/.ssh/id_rsa.pub %s@%s" %(sshUser, sshServer))
 	else:
-	   self.runCmd(""mkdir -p $HOME/.ssh")
+	   self.runCmd("mkdir -p $HOME/.ssh")
 	   self.runCmd("sudo chmod 0700 $HOME/.ssh")
 	   self.runCmd("ssh-keygen -t rsa")
 	   sshServer = raw_input("SSH key created, please enter the server you wish to connect to:")
