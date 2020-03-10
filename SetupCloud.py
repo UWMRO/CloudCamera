@@ -21,7 +21,8 @@ class CloudSetup(object):
 	self.yesList = {'yes', 'y'}
 	self.dependencyList = ['libusb-dev', 'libtool', 'eclipse-cdt-autotools',
 			       'python-matplotlib', 'python-astropy', 'python-scipy',
-			       'python-pyfits']
+			       'python-pyfits', 'libmagickwand-dev', 'saods9',
+			       'python-paramiko', 'python-keyring', 'python-serial']
 
     def run_setup(self):
 	print("Welcome to the CloudCam setup routine.")
@@ -53,8 +54,7 @@ class CloudSetup(object):
 	if dependencyInstall.lower() in self.yesList:
 	   self.dependencies()
         else:
-           print("Exiting setup routine")
-           quit()
+           print("Skipping dependency install")
 
 	print("Next, we need to set up permissions for CloudCam hardware.")
 	print("The following commands are required:")
@@ -65,8 +65,7 @@ class CloudSetup(object):
         if permissionInstall.lower() in self.yesList:
            self.permissions()
         else:
-           print("Exiting setup routine")
-           quit()
+           print("Skipping permission install")
 
 	print("----------------------------------------------")
 	print("CloudCam software can be set as a linux service, which will start the software automatically and keep it running through crashes.")
@@ -119,10 +118,20 @@ class CloudSetup(object):
 	print("Setting up hardware permissions")
 	if self.Demo == True:
 	    print("DEMO MODE, NOT ACTUALLY RUNNING THESE COMMANDS:")
-	    print("sudo usermod -a -G dialout $USER")
+	    print(".openssag/autogen.sh")
+	    print(".openssag/configure")
+	    print("openssag/make")
+	    print("sudo openssag/make install")
+	    print("sudo cp install/rules/90-libusb-rule.rules /etc/udev/rules.d/90-libusb-rule.rules")
+	    print("sudo usermod -a -G plugdev $USER")
 	    print("g++ camera.cpp -lusb -lopenssag -o camera")
 	else:
-	    self.runCmd("sudo usermod -a -G dialout $USER")
+	    self.runCmd("./openssag/autogen.sh")
+            self.runCmd("./openssag/configure")
+            self.runCmd("openssag/make")
+            self.runCmd("openssag/make install")
+	    self.runCmd("sudo cp install/rules/90-libusb-rule.rules /etc/udev/rules.d/90.libusb-rule.rules")
+	    self.runCmd("sudo usermod -a -G plugdev $USER")
 	    self.runCmd("g++ camera.cpp -lusb -lopenssag -o camera")
 	return
 
@@ -149,12 +158,14 @@ class CloudSetup(object):
 	if self.Demo == True:
 	   print("DEMO MODE, NOT ACTUALLY RUNNING THESE COMMANDS:")
 	   print("sudo apt-get -y install apache2")
+	   print("sudo chown -R $USER /var/www/html")
 	   print("sudo rm /var/www/html/index.html")
-	   print("sudo cp index.html /var/www/html/index.html")
+	   print("sudo cp install/webpage/index.html /var/www/html/index.html")
 	else:
 	   self.runCmd("sudo apt-get -y install apache2")
+	   self.runCmd("sudo chown -R $USER /var/www/html")
 	   self.runCmd("sudo rm /var/www/html/index.html")
-	   self.runCmd("sudo cp index.html /var/www/html/index.html")
+	   self.runCmd("sudo cp install/webpage/index.html /var/www/html/index.html")
 	return
 
     def scpSetup(self):
