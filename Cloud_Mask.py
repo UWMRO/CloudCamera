@@ -10,6 +10,7 @@ masks.
 """
 
 import numpy as np
+import os
 from CloudParams import *
 
 class CloudMask(object):
@@ -31,6 +32,10 @@ class CloudMask(object):
                 Saved as a numpy mask file
         """
         result = []
+
+	if not os.path.isdir(os.path.join(os.getcwd(), 'masks')):
+	    print("making masks/ directory")
+	    os.mkdir(os.path.join(os.getcwd(), 'masks'))
 
         print "Producing aperture mask with radius = "+str(radius)
         for x in range(1024):
