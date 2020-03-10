@@ -108,6 +108,18 @@ class CloudCam(object):
 	and creates them if necessary
 	"""
 	dayDir = time.strftime("%Y%m%d", time.gmtime())
+
+	if not os.path.isdir(os.path.join(os.getcwd(), 'images')):
+		os.mkdir(os.path.join(os.getcwd(), 'images'))
+		print("directory made: ", os.path.join(os.getcwd(), 'images'))
+
+	if not os.path.isdir(os.path.join(os.getcwd(), 'analyzed')):
+		os.mkdir(os.path.join(os.getcwd(), 'analyzed'))
+		print ("directory made: ", os.path.join(os.getcwd(), 'analyzed'))
+
+	if not os.path.isdir(os.path.join(os.getcwd(), 'gif')):
+		os.mkdir(os.path.join(os.getcwd(), 'gif'))
+		print("directory made :", os.path.join(os.getcwd(), 'gif'))
 	
 	#Check for fits image storage folder for today, make if needed
 	if not os.path.isdir(os.path.join(os.getcwd(), 'images', dayDir)):
