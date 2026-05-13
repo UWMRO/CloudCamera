@@ -27,7 +27,7 @@ class CameraExpose(object):
         self.wait = 1.0
         self.status = None
         self.ssag = os.getcwd()+"/camera"
-        self.statusDict = {1:'idle', 2:'expose', 3:'reading'}
+        self.statusDict = {1: 'idle', 2: 'expose', 3: 'reading'}
         self.gain = 1
 
     def expose(self, name, exp, dir, gain):
@@ -50,7 +50,7 @@ class CameraExpose(object):
         if '.fit' not in name:
             name = name+'.fits'
         name = dir+'/'+str(name)
-        #print dir, name, self.ssag, exp
+        # print dir, name, self.ssag, exp
         expose = float(exp)*1000
 
         if gain == None:
@@ -58,13 +58,14 @@ class CameraExpose(object):
 
         try:
 
-            subprocess.Popen([self.ssag, 'image', 'binary', str(expose), str(gain)])
+            subprocess.Popen(
+                [self.ssag, 'image', 'binary', str(expose), str(gain)])
             self.status = 2
-            #Pause for the camera to run
+            # Pause for the camera to run
             time.sleep(self.wait+float(exp))
             self.status = 1
 
-            binary=np.fromfile('binary',dtype='u1').reshape(1024,1280)
+            binary = np.fromfile('binary', dtype='u1').reshape(1024, 1280)
 
             # --------------------------
             # Used for testing array procedure, can remove once program is tested on-sky.
@@ -73,30 +74,33 @@ class CameraExpose(object):
             # print binary
             # ---------------------------
 
-            prihdr = self.createHeader(exp, gain)  #create emtpy header information
-            hdu=pyfits.PrimaryHDU(binary, header = prihdr)  #create a primary header file for the FITS image
-            hdulist=pyfits.HDUList([hdu])
+            # create emtpy header information
+            prihdr = self.createHeader(exp, gain)
+            # create a primary header file for the FITS image
+            hdu = pyfits.PrimaryHDU(binary, header=prihdr)
+            hdulist = pyfits.HDUList([hdu])
 
             prihdr['EXPTIME'] = str(exp)
             prihdr['IMAGTYP'] = 'guide'
             # Write the image and header to a FITS file using variable name.
             name = self.checkFile(name)
             hdulist.writeto(name, clobber=True)
-            #im = Image.fromarray(binary)
-            #im.save("tmp.jpg")
+            # im = Image.fromarray(binary)
+            # im.save("tmp.jpg")
 
-            #self.l.logStr('SaveIm\t%s' % name)
+            # self.l.logStr('SaveIm\t%s' % name)
             return True
 
-        except Exception,e:
-            print ("failed")
-            print (str(e))
-	    traceback.print_exc()
+        except Exception, e:
+            print("failed")
+            print(str(e))
+            traceback.print_exc()
             return False
 
     def checkFile(self, fileName):
         if os.path.exists(fileName):
-            name = fileName.replace('.fits','')+time.strftime('_%Y%m%dT%H%M%S.fits')
+            name = fileName.replace('.fits', '') + \
+                time.strftime('_%Y%m%dT%H%M%S.fits')
             return name
         else:
             return fileName
@@ -114,21 +118,21 @@ class CameraExpose(object):
         return prihdr
 
     def checkStatus(self):
-        print ("return some status message")
-        print (self.status, self.statusDict[self.status])
+        print("return some status message")
+        print(self.status, self.statusDict[self.status])
         return self.status
 
     def checkConnection(self):
         try:
             subprocess.Popen([self.ssag, '0', '0', '0'])
         except Exception, e:
-            print (e)
-
+            print(e)
 
     def help(self):
-        print (__doc__)
+        print(__doc__)
         return
 
-if __name__=="__main__":
+
+if __name__ == "__main__":
     c = CameraExpose()
-    c.runExpose('test',0.1, None, 8)
+    c.runExpose('test', 0.1, None, 8)

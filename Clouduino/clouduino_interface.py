@@ -28,86 +28,89 @@ __status__ = "Developement"
 import serial
 import time
 
+
 class ClouduinoInterface():
     def __init__(self):
-	self.ser = None
-	self.serPort = '/dev/tty.usbmodem1421'
+        self.ser = None
+        self.serPort = '/dev/tty.usbmodem1421'
 
     def log(self):
-    	"""
-    	Check the serial port for data
-    	and write any data with a timestamp
-    	to the savefile
-    	"""
-    	data = ser.readline()
-    	f = open(savefile, 'a')
-    	f.write(str(time.strftime("%H%M%S"))+","+str(data))
-    	f.close()
+        """
+        Check the serial port for data
+        and write any data with a timestamp
+        to the savefile
+        """
+        data = ser.readline()
+        f = open(savefile, 'a')
+        f.write(str(time.strftime("%H%M%S"))+","+str(data))
+        f.close()
 
     def openPort(self):
-	""" open the serial port for communication with the arduino"""
-        self.ser=serial.Serial(self.serPort, 9600)
+        """ open the serial port for communication with the arduino"""
+        self.ser = serial.Serial(self.serPort, 9600)
         return
 
     def closePort(self):
-	""" close the serial port connection to the arduino"""
+        """ close the serial port connection to the arduino"""
         self.ser.close()
         return
 
     def readSer(self):
-	""" Read in the arduino output, parse, and return something useful
-	Arguments:
-		None
-	Returns:
-		s (string): parsed serial output
-	"""
+        """ Read in the arduino output, parse, and return something useful
+        Arguments:
+                None
+        Returns:
+                s (string): parsed serial output
+        """
         s = self.ser.readline()
         return s
 
     def getLux(self):
-	""" calls the arduino getLux() function
-	Arguments:
-		None
-	Returns:
-		flux (float): flux level from light sensor
-	"""
-	self.ser.write('l')
-	flux = float(self.readSer())  # this needs some error checking, I could see it causing problems later
-	print flux
-	return flux
+        """ calls the arduino getLux() function
+        Arguments:
+                None
+        Returns:
+                flux (float): flux level from light sensor
+        """
+        self.ser.write('l')
+        # this needs some error checking, I could see it causing problems later
+        flux = float(self.readSer())
+        print flux
+        return flux
 
     def setFilterPos(self, pos):
-	""" pos accepts True or False.  If true then it moves into position
-	Arguments:
-		pos (bool): True if filter should be in path, False if not
-	Retruns:
-		None
-	"""
-	if pos:
-		self.ser.write('i')
-	else:
-		self.ser.write('o')
-	return
-	
-    def getDomeStatus(self):
-	"""returns the dome metrology in format humidity,temp,pos
-	Arguments:
-		None
-	Returns:
-		
+        """ pos accepts True or False.  If true then it moves into position
+        Arguments:
+                pos (bool): True if filter should be in path, False if not
+        Retruns:
+                None
+        """
+        if pos:
+            self.ser.write('i')
+        else:
+            self.ser.write('o')
+        return
 
-	"""
-	self.ser.write('d')
-	time.sleep(1)
-	line = self.ser.readline()
-	l = line.split()
-	print l
-	return l
+    def getDomeStatus(self):
+        """returns the dome metrology in format humidity,temp,pos
+        Arguments:
+                None
+        Returns:
+
+
+        """
+        self.ser.write('d')
+        time.sleep(1)
+        line = self.ser.readline()
+        l = line.split()
+        print l
+        return l
+
 
 if __name__ == "__main__":
-	c = ClouduinoInterface()
-	c.openPort()
-	time.sleep(2)
-	c.setFilterPos(False)
-	time.sleep(5)
-	c.closePort()
+    c = ClouduinoInterface()
+    c.openPort()
+    time.sleep(2)
+    c.setFilterPos(False)
+    time.sleep(5)
+    c.closePort()

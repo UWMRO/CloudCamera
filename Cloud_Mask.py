@@ -12,12 +12,12 @@ masks.
 import numpy as np
 from CloudParams import *
 
+
 class CloudMask(object):
     def __init__(self):
         self.radius = radius
         self.xcenter = x_center
         self.ycenter = y_center
-
 
     def make_aperture_mask(self, radius):
         """
@@ -46,7 +46,6 @@ class CloudMask(object):
         np.save("masks/aperture_mask_"+str(radius), np.asarray(result))
         return "Aperture mask saved"
 
-
     def make_wedge_mask(self, radius):
         """
         Used to produce directional wedge shaped masks
@@ -59,7 +58,7 @@ class CloudMask(object):
         """
 
         angle_list = [-3/4.0, -1/2.0, -1/4.0, 0.0, 1/4.0, 1/2.0, 3/4.0, 1.0]
-        #angle_list = [1.0]
+        # angle_list = [1.0]
 
         for angle in angle_list:
             theta_low = (np.pi * angle) - (np.pi / 8)
@@ -78,11 +77,11 @@ class CloudMask(object):
                 for y in range(1280):
                     shift_y = y-(self.ycenter)
 
-                    theta = np.arctan2(shift_y,shift_x)
+                    theta = np.arctan2(shift_y, shift_x)
                     rad = np.sqrt((shift_x)**2 + (shift_y)**2)
 
                     if angle == 1.0:
-                        #Only look at points inside the radius
+                        # Only look at points inside the radius
                         if rad < radius:
                             if theta_low < theta:
                                 temp_row.append(0)
@@ -90,17 +89,17 @@ class CloudMask(object):
                                 temp_row.append(0)
                             else:
                                 temp_row.append(1)
-                        else :
+                        else:
                             temp_row.append(1)
 
                     else:
-                        #Only look at points inside the radius
+                        # Only look at points inside the radius
                         if rad < radius:
                             if theta_low < theta and theta < theta_high:
                                 temp_row.append(0)
                             else:
                                 temp_row.append(1)
-                        else :
+                        else:
                             temp_row.append(1)
                 result.append(temp_row)
 
@@ -108,13 +107,14 @@ class CloudMask(object):
                 print i[self.ycenter-10:self.ycenter+10]
 
             print "Saving "+str(int(angle * 4) + 4)+" mask"
-            np.save("masks/"+str(int(angle * 4) + 4)+"_wedge_mask", np.asarray(result))
-
+            np.save("masks/"+str(int(angle * 4) + 4) +
+                    "_wedge_mask", np.asarray(result))
 
         return "Wedge masks saved"
+
 
 if __name__ == "__main__":
     cm = CloudMask()
     cm.make_aperture_mask(500)
     cm.make_aperture_mask(400)
-    #cm.make_wedge_mask(300)
+    # cm.make_wedge_mask(300)
