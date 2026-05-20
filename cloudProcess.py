@@ -41,13 +41,13 @@ def indProc():
 def startProc(camStart=False, gifStart=False, rainStart=False):
 
     if camStart:
-        print 'starting cloud cam'
+        print('starting cloud cam')
         os.system('nohup python /home/cloudcam/CloudCamera/CloudCam.py &')
     if gifStart:
-        print 'starting gif'
+        print('starting gif')
         os.system('nohup python /home/cloudcam/CloudCamera/wiggleCloud.py &')
     if rainStart:
-        print 'starting Rain Sensors'
+        print('starting Rain Sensors')
         os.system(
             'nohup python /home/cloudcam/CloudCamera/clouduino_interface.py &')
     return
@@ -59,23 +59,23 @@ if __name__ == "__main__":
     while True:
         arrProc = indProc()
         if x == 5 and not arrProc[1]:
-            print 'starting wiggle'
+            print('starting wiggle')
             startProc(False, True, False)
             x = 0
         if y == 5:
-            print 'running rsync'
+            print('running rsync')
             p1 = subprocess.Popen(
                 ['rsync -azrh --progress --remove-source-files /home/cloudcam/CloudCamera/images/ analysis:/raid/CloudCamera/fits/'], stdout=subprocess.PIPE, shell=True)
-            # print p1.stdout.read()
+            # print(p1.stdout.read())
             p2 = subprocess.Popen(
                 ['rsync -azrh --progress --remove-source-files /home/cloudcam/CloudCamera/analyzed/ analysis:/raid/CloudCamera/'], stdout=subprocess.PIPE, shell=True)
-            # print p2.stdout.read()
+            # print(p2.stdout.read())
             y = 0
         if not arrProc[0]:
-            print 'start cloudcam'
+            print('start cloudcam')
             startProc(True, False)
         if not arrProc[2]:
-            print 'starting clouduino_interface.py'
+            print('starting clouduino_interface.py')
             startProc(False, False, True)
         x = x + 1
         y = y + 1

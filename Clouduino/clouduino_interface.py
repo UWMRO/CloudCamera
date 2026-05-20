@@ -75,7 +75,7 @@ class ClouduinoInterface():
         self.ser.write('l')
         # this needs some error checking, I could see it causing problems later
         flux = float(self.readSer())
-        print flux
+        print(flux)
         return flux
 
     def setFilterPos(self, pos):
@@ -103,7 +103,7 @@ class ClouduinoInterface():
         time.sleep(1)
         line = self.ser.readline()
         l = line.split()
-        print l
+        print(l)
         return l
 
 

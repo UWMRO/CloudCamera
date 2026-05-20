@@ -328,7 +328,7 @@ class CloudGraph(object):
         ax[0, 0].imshow(img, cmap="gray")
 
         rainStatus = self.rainSensors()
-        print 'rainStatus: ', rainStatus
+        print('rainStatus: ', rainStatus)
         if rainStatus == 'True':
             ax[0, 0].text(1000, 50, "Rain = Yes", size=18, color="red")
         elif rainStatus == 'False':
@@ -337,7 +337,7 @@ class CloudGraph(object):
             ax[0, 0].text(1000, 50, "Rain = Unknown", size=18, color="yellow")
         self.heatStatus = self.ci.heatStatus
 
-        print 'heatStatus: ', self.heatStatus
+        print('heatStatus: ', self.heatStatus)
         if self.heatStatus == 1:
             ax[0, 0].text(1000, 100, "Heat = On", size=18, color="red")
         elif self.heatStatus == 0:
@@ -348,7 +348,7 @@ class CloudGraph(object):
 
         self.coretemp = int(
             open('/sys/class/thermal/thermal_zone0/temp').read()) / 1e3
-        print 'coreTemp [C]: ', self.coretemp
+        print('coreTemp [C]: ', self.coretemp)
         ax[0, 0].text(1000, 150, "Core Temp = %.1f" %
                       self.coretemp, size=18, color="white")
 
@@ -396,7 +396,7 @@ class CloudGraph(object):
             rain = self.rain10m
         except:
             return 'Unknown'
-        print rain
+        print(rain)
         return rain
 
     def rainSensorsOld(self):

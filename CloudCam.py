@@ -15,45 +15,55 @@ Usage:
     the IP of the CloudCam
 """
 
+import os
+import typing
+import traceback
 
 import numpy as np
+
 from graphCloud import *
 from camera import *
-import datetime
 from clouduino_interface import ClouduinoInterface
-import os
-from CloudParams import *
-import traceback
+import CloudParams
 
 
 class CloudCam(object):
-    def __init__(self):
-        """
-        Options:
-            self.min        (minimum median value for exposure control)
-            self.max        (maximum median value for exposure control)
-            self.step       (What percent the exp value changes under exposure control)
-            self.expose     (starting exposure length [s])
-            self.dir        (where are the .fits images saved)
-            self.gain       (camera gain setting)
-            self.filterpos  (where is the filter arm? 0 = out, 1 = in)
-        """
 
-        self.debug = False
-        self.min = min_median
-        self.max = max_median
-        self.step = step_size
+    min_exp:  float = CloudParams. min_median
+    max_exp:  float = CloudParams. max_median
+    step:  float = CloudParams.step_size
+    expose:  float = CloudParams.expose
+    img_dir: str
+    gain:  float
+    gainmax: float
+    maxExp:  float
+    backupFile: typing.Final[str] = "backupParams.txt"
+
+    cg: CloudGraph
+    cam: CameraExpose
+    cli: ClouduinoInterface
+
+    def __init__(self,
+                 min_exp: float,  # minimum median value for exposure control
+                 max__exp: float,  # maximum median value for exposure control
+                 step: float,  # What percent the exp value changes under exposure control
+                 expose: float,  # starting exposure length [s)
+                 img_dir: float,  # where are the .fits images saved
+                 gain: float,  # camera gain setting
+                 filterpos: float  # where is the filter arm? 0 = out, 1 = in
+                 ):
+
+        self.min_exp = min_exp
+        self.max__exp = max__exp
+        self.step = step
         self.expose = expose
-        self.dir = os.path.join(os.getcwd(), 'images')
-        self.dayDir = None
+        self.img_dir = img_dir
         self.gain = gain
-        self.gainmax = gainmax
-        self.maxExp = max_exp
-        self.backupFile = "backupParams.txt"
+        self.filterpos = filterpos
 
-        self.cg = CloudGraph()
-        self.c = CameraExpose()
-        self.ci = ClouduinoInterface()
+        self.camg = CloudGraph()
+        self.cam = CameraExpose()
+        self.cli = ClouduinoInterface()
 
     def check_exposure(self, median):
         """
@@ -65,7 +75,8 @@ class CloudCam(object):
         """
 
         # Check and adjust exposure timing for low light
-        print "bounds (minMed, maxMed, maxGain, maxExp: ", self.min, self.max, self.gainmax, self.maxExp
+        print("bounds (minMed, maxMed, maxGain, maxExp: ",
+              self.min, self.max, self.gainmax, self.maxExp)
         if median < self.min:
             if self.expose >= self.maxExp and self.gain >= 1:
                 self.gain += 1
@@ -126,7 +137,7 @@ class CloudCam(object):
         """
         Take and analyze image, check exposure after analysis
         """
-        dayDir = os.path.join(os.getcwd(), 'images', self.checkDir())
+        dayDir = os.path.join(os.getcwd(), 'images', self.camheckDir())
         name = time.strftime("%Y%m%dT%H%M%S")+"_"+str('%.3f' % (self.expose))
 
         # Remove the old image binary file
@@ -153,7 +164,7 @@ class CloudCam(object):
         try:
             median = cg.run_analysis(os.path.join(
                 dayDir, name), self.expose, self.gain)
-            self.check_exposure(median)
+            self.camheck_exposure(median)
         except:
             traceback.print_exc()
             # self.expose = 1.0
@@ -188,8 +199,8 @@ class CloudCam(object):
         self.fakeOut = False
         im = False
         if self.fakeOut != True:
-            print imExp, self.gain
-            im = self.c.runExpose(str(imgName), str(
+            print(imExp, self.gain)
+            im = self.cam.runExpose(str(imgName), str(
                 imExp), str(imDir), self.gain)
             if im == True:  # check on completion and save of image exposure
                 time.sleep(1)

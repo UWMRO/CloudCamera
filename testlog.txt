@@ -1,5 +1,0 @@
-timestamp=20170108-22:17:38
-heat=0
-coretemp=45.622
-rain10m=False
-rain=0

@@ -16,12 +16,12 @@ class IRSC(object):
         utcDay = dt.datetime.utcnow()
         currentMJD = int(Time(utcDay.strftime("%Y-%m-%d"), format='isot').mjd)
         # currentMJD = '57592'
-        print currentMJD
+        print(currentMJD)
         files = t.findFiles(self.server, self.usr, 'data/'+str(currentMJD))
-        # print sorted(files)
+        # print(sorted(files))
         if files != False:
             # for f in files:
-            # print 'do something'
+            # print('do something')
             pass
         return
 

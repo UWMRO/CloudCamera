@@ -32,7 +32,7 @@ class CloudMask(object):
         """
         result = []
 
-        print "Producing aperture mask with radius = "+str(radius)
+        print("Producing aperture mask with radius = "+str(radius))
         for x in range(1024):
             shift_x = x-(self.xcenter)
             temp_row = []
@@ -66,8 +66,8 @@ class CloudMask(object):
             if theta_high > np.pi:
                 theta_high = theta_high - (2 * np.pi)
 
-            print "Theta low = "+str(theta_low / np.pi)
-            print "Theta high = "+str(theta_high / np.pi)
+            print("Theta low = "+str(theta_low / np.pi))
+            print("Theta high = "+str(theta_high / np.pi))
 
             result = []
             # Move coordinate system to center of image
@@ -104,9 +104,9 @@ class CloudMask(object):
                 result.append(temp_row)
 
             for i in result[self.xcenter-10:self.xcenter+10]:
-                print i[self.ycenter-10:self.ycenter+10]
+                print(i[self.ycenter-10:self.ycenter+10])
 
-            print "Saving "+str(int(angle * 4) + 4)+" mask"
+            print("Saving "+str(int(angle * 4) + 4)+" mask")
             np.save("masks/"+str(int(angle * 4) + 4) +
                     "_wedge_mask", np.asarray(result))
 

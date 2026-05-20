@@ -50,7 +50,7 @@ class CameraExpose(object):
         if '.fit' not in name:
             name = name+'.fits'
         name = dir+'/'+str(name)
-        # print dir, name, self.ssag, exp
+        # print(dir, name, self.ssag, exp)
         expose = float(exp)*1000
 
         if gain == None:
@@ -69,9 +69,9 @@ class CameraExpose(object):
 
             # --------------------------
             # Used for testing array procedure, can remove once program is tested on-sky.
-            # print binary.shape
-            # print binary.dtype.name
-            # print binary
+            # print(binary.shape)
+            # print(binary.dtype.name)
+            # print(binary)
             # ---------------------------
 
             # create emtpy header information

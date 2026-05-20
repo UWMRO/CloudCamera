@@ -1,12 +1,6 @@
 #! /usr/bin/python
 
 """
-<<<<<<< HEAD
-clouduino_interface.py
-=======
-clouduino_interface2_2.py
->>>>>>> c5ed227b3ad99bb7342e4de9cc1c888fb4362c99
-
 This program is designed to read in data from an arduino.
 Specifically this is program interfaces to the arduino on the
 cloud camera.  Functionality includes reading the temperature,
@@ -39,26 +33,26 @@ from transfer import transfer
 
 class ClouduinoInterface():
     def __init__(self):
-        self.ser = None
-        # self.serPort = '/dev/tty.usbmodem1421'
-        self.serPort = '/dev/ttyACM0'
-        self.savefile = os.getcwd()+'/logs/log.txt'
-        self.tr = transfer()
+        # self.ser: serial.Serial | None = None
+        # self.serPort: str = '/dev/tty.usbmodem1421'
+        self.serPort: str = '/dev/ttyACM0'
+        self.savefile: str = os.getcwd()+'/logs/log.txt'
+        self.tr: transfer = transfer()
 
-        self.heatToggle = 0  # Allow heaters? 1=y, 0=n
-        self.heatStatus = 0
-        self.heatLast = datetime.datetime.strptime(
+        self.heatToggle: int = 0  # Allow heaters? 1=y, 0=n
+        self.heatStatus: int = 0
+        self.heatLast: datetime.datetime = datetime.datetime.strptime(
             "01012001-00:00:00", "%m%d%Y-%H:%M:%S")
-        self.heatThreshold = 40.0  # Minimum pi core temp to turn on heaters
-        self.heatDuration = 10  # Duration (in mins) to run heaters
+        self.heatThreshold: float = 40.0  # Minimum pi core temp to turn on heaters
+        self.heatDuration: float = 10  # Duration (in mins) to run heaters
 
-        self.rainStatus = 0
-        self.rainThreshold = 40  # percent rain detects in last 30 seconds
-        self.rainLast = datetime.datetime.strptime(
+        self.rainStatus: float = 0
+        self.rainThreshold: float = 40  # percent rain detects in last 30 seconds
+        self.rainLast: datetime.datetime = datetime.datetime.strptime(
             "01012001-00:00:00", "%m%d%Y-%H:%M:%S")
-        self.rain10m = False
-        self.coretemp = int(
-            open('/sys/class/thermal/thermal_zone0/temp').read()) / 1e3
+        self.rain10m: bool = False
+        self.coretemp: int = int(
+            float(open('/sys/class/thermal/thermal_zone0/temp').read()) / 1e3)
         self.delay = 4.0
 
     def readSer(self):
@@ -67,8 +61,8 @@ class ClouduinoInterface():
         and write any data with a timestamp
         to the savefile
         """
-        # print "in readSer"
-        data = self.ser.readline().rstrip("\n").rstrip("\r")
+        # print("in readSer")
+        data = self.ser.readline().rstrip(b"\n").rstrip(b"\r")
         f = open(self.savefile, 'a')
         timestamp = datetime.datetime.now().strftime("%Y%m%d-%H:%M:%S")
         returnData = str(data)+",timestamp="+timestamp
@@ -82,7 +76,7 @@ class ClouduinoInterface():
         # time.sleep(1)
         # self.ser.write(b'y')
         # time.sleep(1)
-        # print self.ser.readline()
+        # print(self.ser.readline())
         return
 
     def closePort(self):
@@ -90,24 +84,24 @@ class ClouduinoInterface():
         self.ser.close()
         return
 
-    def checkStatus(self):
+    def checkStatus(self) -> dict[str, int | str]:
         self.ser.write(b's')
         time.sleep(0.1)
         data = ''
         data = self.readSer()
-        sortedDat = {'1': 1}
-        # print data
+        sortedDat: dict[str, int | str] = {}
+        # print(data)
         if data.startswith('heat=') == True:
             sortedDat = self.sortOutput(data)
             if len(sortedDat) == 3:
                 self.rainStatus = int(sortedDat['rain'])
-                sortedDat['rain10m'] = str(self.rainCheck())
+                sortedDat["rain10m"] = str(self.rainCheck())
                 self.coretemp = int(
-                    open('/sys/class/thermal/thermal_zone0/temp').read()) / 1e3
+                    float(open('/sys/class/thermal/thermal_zone0/temp').read()) / 1e3)
                 sortedDat['coretemp'] = self.coretemp
                 sortedDat = self.checkHeat(sortedDat)
                 self.heatStatus = int(sortedDat['heat'])
-                print sortedDat
+                print(sortedDat)
         return sortedDat
 
     def checkHeat(self, statusDict):
@@ -118,15 +112,15 @@ class ClouduinoInterface():
                 self.heatLast = datetime.datetime.now()
             heatCheck = datetime.datetime.now() - self.heatLast
             heatCheckmins = heatCheck.total_seconds() / 60
-            # print timeCheckmins
+            # print(timeCheckmins)
             if heatCheckmins <= self.heatDuration:
                 self.heatOn()
                 statusDict['heat'] = 1
-                # print "heaters on"
+                # print("heaters on")
             else:
                 self.heatOff()
                 statusDict['heat'] = 0
-                # print "heaters off"
+                # print("heaters off")
         else:
             statusDict['heat'] = 0
         return statusDict
@@ -141,22 +135,28 @@ class ClouduinoInterface():
         self.heatStatus = 0
         return
 
-    def sortOutput(self, serDat=None):
-        sortedDat = {}
-        # print serDat
+    def sortOutput(self, serDat: str | None = None) -> dict[str, int | str]:
+        # sortedDat = {}
+        # print(serDat)
         # rawDat = serDat.strip('\r\n')
-        # print rawDat
-        sortedDat = dict(x.split('=') for x in serDat.split(','))
-        return sortedDat
+        # print(rawDat)
+        if serDat == None or serDat == "":
+            return {}
+
+        out: dict[str, int | str] = {}
+        for entry in serDat.split(","):
+            entry_split = entry.split("=")
+            out[entry_split[0]] = int(entry_split[1])
+        return out
 
     def rainCheck(self):
-        # print self.rainStatus
+        # print(self.rainStatus)
         if self.rainStatus >= self.rainThreshold:
             self.rainLast = datetime.datetime.now()
-            # print "Rain Detected"
+            # print("Rain Detected")
         timeCheck = datetime.datetime.now() - self.rainLast
         timeCheckmins = timeCheck.total_seconds() / 60
-        # print timeCheckmins
+        # print(timeCheckmins)
         if timeCheckmins <= 10:
             self.rain10m = True
         else:
@@ -182,11 +182,11 @@ if __name__ == "__main__":
     c.openPort()
     time.sleep(2)
     c.ser.write(b'l')
-    print "Port open"
+    print("Port open")
     while run == True:
-        # print "in loop"
+        # print("in loop")
         statusDict = c.checkStatus()
-        # print len(statusDict)
+        # print(len(statusDict))
         if len(statusDict) == 5:
             c.serOut(statusDict, 'testlog')
             time.sleep(c.delay)
