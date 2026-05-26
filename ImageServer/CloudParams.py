@@ -3,6 +3,14 @@ Parameter file for CloudCam options.
 '''
 
 import typing
+import os
+
+CAMERA_INTERFACE_PROGRAM: typing.Final[str] = "ImageTaker/build/ImageTaker_exe"
+
+repo_dir = os.getcwd()
+if repo_dir.split("/")[-1] == "ImageServer":
+    repo_dir = repo_dir.removesuffix("ImageServer")
+TOP_LEVEL_REPO_DIR: typing.Final[str] = repo_dir
 
 # CloudCam.py
 min_median: typing.Final[float] = 40  # Lower limit for median value
@@ -11,7 +19,7 @@ step_size: typing.Final[float] = 0.60  # Exposure scaling step size, %
 expose: typing.Final[float] = 1  # Set starting exposure
 max_exp: typing.Final[float] = 10
 gain: typing.Final[float] = 1  # Set starting gain
-gainmax: typing.Final[float] = 5
+gain_max: typing.Final[float] = 5
 
 # Cloud_Graph.py
 scale_img: typing.Final[bool] = True  # Toggle image scaling

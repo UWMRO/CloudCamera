@@ -29,6 +29,7 @@ import time
 import os
 import shutil
 from Modules.transfer import transfer
+import CloudParams
 
 
 class ClouduinoInterface():
@@ -36,7 +37,7 @@ class ClouduinoInterface():
         # self.ser: serial.Serial | None = None
         # self.serPort: str = '/dev/tty.usbmodem1421'
         self.serPort: str = '/dev/ttyACM0'
-        self.savefile: str = os.getcwd()+'/logs/log.txt'
+        self.savefile: str = CloudParams.TOP_LEVEL_REPO_DIR+'/logs/log.txt'
         self.tr: transfer = transfer()
 
         self.heatToggle: int = 0  # Allow heaters? 1=y, 0=n
@@ -165,7 +166,7 @@ class ClouduinoInterface():
         return self.rain10m
 
     def serOut(self, status, filename):
-        directory = os.getcwd()+'/'+filename+'.txt'
+        directory = CloudParams.TOP_LEVEL_REPO_DIR+'/'+filename+'.txt'
         f_out = open(directory, 'w')
         for key in status:
             f_out.write(str(key)+"="+str(status[key])+'\r\n')

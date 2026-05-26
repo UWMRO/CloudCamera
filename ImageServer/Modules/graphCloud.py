@@ -25,7 +25,7 @@ Output:
 """
 
 
-from CloudParams import *
+import CloudParams
 from Modules.Cloud_Mask import CloudMask
 from Modules.clouduino_interface import ClouduinoInterface
 from Modules.transfer import transfer
@@ -36,6 +36,7 @@ import datetime
 import os
 import shutil
 import traceback
+import typing
 
 import gzip
 from PIL import Image
@@ -58,7 +59,9 @@ __email__ = "jmarmstr@uw.edu"
 __status__ = "Developement"
 
 
-class CloudGraph(object):
+class CloudGraph:
+    _mask_dir: typing.Final[str] = CloudParams.TOP_LEVEL_REPO_DIR + "masks/"
+
     def __init__(self):
         self.cm = CloudMask()
         self.ci = ClouduinoInterface()
@@ -68,8 +71,8 @@ class CloudGraph(object):
         self.hdudata = None
         self.header = None
 
-        self.scaleimg = scale_img
-        self.rotate = rotate
+        self.scaleimg = CloudParams.scale_img
+        self.rotate = CloudParams.rotate
 
         self.host = 'galileo.apo.nmsu.edu'
         self.user = 'jwhueh'
@@ -96,8 +99,8 @@ class CloudGraph(object):
             self.cm.make_aperture_mask(400)
             # self.cm.make_wedge_mask(300)
 
-        self.large_mask = np.load("masks/aperture_mask_500.npy")
-        self.small_mask = np.load("masks/aperture_mask_400.npy")
+        self.large_mask = np.load(self._mask_dir+"aperture_mask_500.npy")
+        self.small_mask = np.load(self._mask_dir+"aperture_mask_400.npy")
         return
 
     def run_analysis(self, name, expose, gain):
@@ -112,7 +115,7 @@ class CloudGraph(object):
                 name          (name file for timestamp)
         """
         self.start = time.time()
-        img_out = os.path.join(os.getcwd(), 'analyzed', name+'_analyzed.png')
+        img_out = os.path.join(CloudParams.TOP_LEVEL_REPO_DIR, 'analyzed', name+'_analyzed.png')
 
         img: np.ndarray = np.asarray(pyfits.getdata(name+".fits"))
         print("Analyzing ", str(name))
@@ -350,9 +353,9 @@ class CloudGraph(object):
                     facecolor="black", edgecolor='none', clobber=True)
         shutil.copyfile("latest.png", "/var/www/html/latest.png")
         shutil.copyfile("latest.png", os.path.join(
-            os.getcwd(), "analyzed", dayDir, name+"_analyzed.png"))
+            CloudParams.TOP_LEVEL_REPO_DIR, "analyzed", dayDir, name+"_analyzed.png"))
         shutil.copyfile("latest.png", os.path.join(
-            os.getcwd(), "gif", name+".png"))
+            CloudParams.TOP_LEVEL_REPO_DIR, "gif", name+".png"))
         plt.close()
         fig.clf()
         self.trans.uploadFile(self.host, self.user,
@@ -370,7 +373,7 @@ class CloudGraph(object):
     def rainSensors(self):
         rain = 'Unknown'
         try:
-            # f_in = open(os.path.join(os.getcwd(),'rain.dat'),'r')
+            # f_in = open(os.path.join(os. CloudParams.TOP_LEVEL_REPO_DIR(),'rain.dat'),'r')
             # for line in f_in:
             #       rain = line.rstrip('\n')
             # f_in.close()
@@ -396,7 +399,7 @@ class CloudGraph(object):
                     edgecolor='none', bbox_inches='tight')
         shutil.copyfile(name, os.path.join("/var/www/html/", name))
         # if map == 'inferno':
-        # shutil.copyfile(name, os.path.join(os.getcwd(),"gif_map",time.strftime("%Y%m%dT%H%M%S_map.png")))
+        # shutil.copyfile(name, os.path.join(os. CloudParams.TOP_LEVEL_REPO_DIR(),"gif_map",time.strftime("%Y%m%dT%H%M%S_map.png")))
         self.trans.uploadFile(self.host, self.user, name, self.serverDir)
         plt.close()
         fig1.clf()
@@ -427,9 +430,9 @@ class CloudGraph(object):
         self.header['STD'] = std
 
         file_name: str = datetime.datetime.now().strftime("%Y_%m_%d-%H_%M_%S")
-        img_out = os.path.join(os.getcwd() + file_name, name+".fits")
+        img_out = os.path.join(os. CloudParams.TOP_LEVEL_REPO_DIR() + file_name, name+".fits")
         # Close and compress the FITS file, saving the header
-        compressed = fits.CompImageHDU(
+        compressed = pyfits.CompImageHDU(
             self.hdudata, self.header, name=name.split('/')[5])
         compressed.writeto(img_out, clobber=True)
         compressed = None

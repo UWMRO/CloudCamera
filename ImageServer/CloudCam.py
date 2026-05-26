@@ -25,7 +25,7 @@ import numpy as np
 import Modules.graphCloud as graphCloud
 from Modules.camera import *
 from Modules.clouduino_interface import ClouduinoInterface
-import CloudParams
+import CloudParams as CloudParams
 
 
 class CloudCam:
@@ -39,7 +39,7 @@ class CloudCam:
     _gain: float
     _max_gain: float
 
-    _filterpos: int
+    _filter_pos: int
 
     _img_dir: str
     _backup_file: typing.Final[str] = "backupParams.txt"
@@ -56,7 +56,7 @@ class CloudCam:
                  max_exp: float,  # maximum median value for exposure control
                  gain: float,  # camera gain setting
                  max_gain: float,  # max camera gain (?)
-                 filterpos: int,  # where is the filter arm? 0 = out, 1 = in
+                 filter_pos: int,  # where is the filter arm? 0 = out, 1 = in
                  img_dir: str  # where are the .fits images saved
                  ):
         self._min_med = min_med
@@ -66,7 +66,7 @@ class CloudCam:
         self._max_exp = max_exp
         self._gain = gain
         self._max_gain = max_gain
-        self._filterpos = filterpos
+        self._filter_pos = filter_pos
         self._img_dir = img_dir
 
     def check_exposure(self, median):
@@ -117,33 +117,33 @@ class CloudCam:
 
         return
 
-    def checkDir(self):
+    def checkDir(self) -> str:
         """
         This function checks for needed image storage directories
         and creates them if necessary
         """
-        dayDir = time.strftime("%Y%m%d", time.gmtime())
+        dayDir = time.strftime("%Y_%m_%d", time.gmtime())
 
-        # Check for fits image storage folder for today, make if needed
-        if not os.path.isdir(os.path.join(os.getcwd(), 'images', dayDir)):
-            os.mkdir(os.path.join(os.getcwd(), 'images'))
-            os.mkdir(os.path.join(os.getcwd(), 'images', dayDir))
-            print('directory made: ', os.path.join(
-                os.getcwd(), 'images', dayDir))
+        def try_dir(name: str) -> bool:
+            try:
+                os.mkdir(os.path.join(CloudParams.TOP_LEVEL_REPO_DIR, name))
+                return True
+            except FileExistsError:
+                return False
 
-        # Check for analyzed image storage folder for today, make if needed
-        if not os.path.isdir(os.path.join(os.getcwd(), 'analyzed', dayDir)):
-            os.mkdir(os.path.join(os.getcwd(), 'analyzed'))
-            os.mkdir(os.path.join(os.getcwd(), 'analyzed', dayDir))
-            print('directory made: ', os.path.join(
-                os.getcwd(), 'analyzed', dayDir))
+        try_dir("images")
+        try_dir(os.path.join("images/", dayDir))
+        try_dir("analyzed")
+        try_dir(os.path.join("analyzed/", dayDir))
+
         return dayDir
 
     def run_camera(self):
         """
         Take and analyze image, check exposure after analysis
         """
-        dayDir = os.path.join(os.getcwd(), 'images', self.checkDir())
+        dayDir = os.path.join(
+            CloudParams.TOP_LEVEL_REPO_DIR, 'images', self.checkDir())
         name = time.strftime("%Y%m%dT%H%M%S")+"_"+str('%.3f' % (self._exp))
 
         # Remove the old image binary file
@@ -212,7 +212,7 @@ class CloudCam:
                 time.sleep(1)
                 return 0
             else:
-                raise Exception("Image exposure not completed")
+             #   raise Exception("Image exposure not completed")
                 return 1
         else:
             return 3  # Simply returns if no exception raised
@@ -229,7 +229,7 @@ if __name__ == "__main__":
                   CloudParams.expose,
                   CloudParams.max_exp,
                   CloudParams.gain,
-                  CloudParams.gainmax,
+                  CloudParams.gain_max,
                   1,
                   "purr")
 

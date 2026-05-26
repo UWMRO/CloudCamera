@@ -1,0 +1,3 @@
+[submodule "ImageTaker/lib/openssag"]
+	path = ImageTaker/lib/openssag
+	url = https://github.com/ejholmes/openssag

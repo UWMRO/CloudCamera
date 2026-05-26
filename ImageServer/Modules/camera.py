@@ -11,7 +11,7 @@ __license__ = "GPL"
 __version__ = "0.1"
 __maintainer__ = "NA"
 __email__ = "NA"
-__status__ = "Developement"
+__status__ = "Development"
 
 
 import subprocess
@@ -24,12 +24,16 @@ import typing
 import numpy as np
 from astropy.io import fits as pyfits
 
+import CloudParams
+
 
 class CameraExpose(object):
     _thread: threading.Thread
 
     wait: typing.Final[float] = 1.0
-    ssag: typing.Final[str] = os.getcwd()+"/camera"
+    ssag: typing.Final[str] = os.path.join(
+        CloudParams.TOP_LEVEL_REPO_DIR, CloudParams.CAMERA_INTERFACE_PROGRAM)
+
     statusDict: typing.Final[dict[int, str]] = {
         1: 'idle', 2: 'expose', 3: 'reading'}
     gain: typing.Final[float] = 1
@@ -53,7 +57,7 @@ class CameraExpose(object):
         """
 
         if dir == None:
-            dir = os.getcwd()
+            dir = CloudParams.TOP_LEVEL_REPO_DIR
 
         if '.fit' not in name:
             name = name+'.fits'
@@ -83,13 +87,13 @@ class CameraExpose(object):
             # ---------------------------
 
             # create emtpy header information
-            prihdr = self.createHeader(exp, gain)
+            pri_header = self.createHeader(exp, gain)
             # create a primary header file for the FITS image
-            hdu = pyfits.PrimaryHDU(binary, header=prihdr)
+            hdu = pyfits.PrimaryHDU(binary, header=pri_header)
             hdulist = pyfits.HDUList([hdu])
 
-            prihdr['EXPTIME'] = str(exp)
-            prihdr['IMAGTYP'] = 'guide'
+            pri_header['EXPTIME'] = str(exp)
+            pri_header['IMAGTYP'] = 'guide'
             # Write the image and header to a FITS file using variable name.
             name = self.checkFile(name)
             hdulist.writeto(name)  # , clobber=True)
@@ -100,9 +104,8 @@ class CameraExpose(object):
             return True
 
         except Exception as e:
-            print("failed")
-            print(str(e))
-            traceback.print_exc()
+            print("failed", e)
+            # traceback.print_exc()
             return False
 
     def checkFile(self, fileName):
@@ -114,16 +117,16 @@ class CameraExpose(object):
             return fileName
 
     def createHeader(self, exp, gain):
-        prihdr = pyfits.Header()
-        prihdr['COMMENT'] = 'MRO Guider Camera'
-        prihdr['COMMENT'] = 'Orion Star Shoot Auto Guider'
-        prihdr['IMAGTYP'] = None
-        prihdr['EXPTIME'] = exp
-        prihdr['CCDBIN1'] = 1
-        prihdr['CCDBIN2'] = 1
-        prihdr['GAIN'] = gain
-        prihdr['RN'] = None
-        return prihdr
+        pri_header = pyfits.Header()
+        pri_header['COMMENT'] = 'MRO Guider Camera'
+        pri_header['COMMENT'] = 'Orion Star Shoot Auto Guider'
+        pri_header['IMAGTYP'] = None
+        pri_header['EXPTIME'] = exp
+        pri_header['CCDBIN1'] = 1
+        pri_header['CCDBIN2'] = 1
+        pri_header['GAIN'] = gain
+        pri_header['RN'] = None
+        return pri_header
 
     def checkStatus(self) -> int | None:
         print("return some status message")

@@ -9,13 +9,16 @@ small aperture mask, and directional wedge
 masks.
 """
 
+import os
 import typing
 
 import numpy as np
-import CloudParams
+import CloudParams as CloudParams
 
 
 class CloudMask(object):
+    _mask_dir: typing.Final[str] = CloudParams.TOP_LEVEL_REPO_DIR + "masks/"
+
     # radius: typing.Final[int] = CloudParams.radius
     xcenter: typing.Final[int] = CloudParams.x_center
     ycenter: typing.Final[int] = CloudParams.y_center
@@ -44,7 +47,13 @@ class CloudMask(object):
                 else:
                     temp_row.append(0)
             result.append(temp_row)
-        np.save("masks/aperture_mask_"+str(radius), np.asarray(result))
+
+        try:
+            os.mkdir(self._mask_dir)
+        except FileExistsError:
+            pass
+        np.save(self._mask_dir+"aperture_mask_" +
+                str(radius), np.asarray(result))
         return "Aperture mask saved"
 
     def make_wedge_mask(self, radius: int) -> str:
