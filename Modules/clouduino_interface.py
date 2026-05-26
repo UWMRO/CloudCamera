@@ -28,7 +28,7 @@ import datetime
 import time
 import os
 import shutil
-from transfer import transfer
+from Modules.transfer import transfer
 
 
 class ClouduinoInterface():

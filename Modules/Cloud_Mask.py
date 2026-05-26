@@ -9,17 +9,18 @@ small aperture mask, and directional wedge
 masks.
 """
 
+import typing
+
 import numpy as np
-from CloudParams import *
+import CloudParams
 
 
 class CloudMask(object):
-    def __init__(self):
-        self.radius = radius
-        self.xcenter = x_center
-        self.ycenter = y_center
+    # radius: typing.Final[int] = CloudParams.radius
+    xcenter: typing.Final[int] = CloudParams.x_center
+    ycenter: typing.Final[int] = CloudParams.y_center
 
-    def make_aperture_mask(self, radius):
+    def make_aperture_mask(self, radius: int) -> str:
         """
         Used to make a static aperture mask, which can be
         multiplied by the analysis image to remove any pixels
@@ -46,7 +47,7 @@ class CloudMask(object):
         np.save("masks/aperture_mask_"+str(radius), np.asarray(result))
         return "Aperture mask saved"
 
-    def make_wedge_mask(self, radius):
+    def make_wedge_mask(self, radius: int) -> str:
         """
         Used to produce directional wedge shaped masks
 

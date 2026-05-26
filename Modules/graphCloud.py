@@ -24,19 +24,30 @@ Output:
         output to analyzed as (Input_Name)_analyzed.png
 """
 
+
+from CloudParams import *
+from Modules.Cloud_Mask import CloudMask
+from Modules.clouduino_interface import ClouduinoInterface
+from Modules.transfer import transfer
+
 import datetime
+import time
+import datetime
+import os
+import shutil
+import traceback
 
 import gzip
-from clouduino_interface import ClouduinoInterface
-from CloudParams import *
-from transfer import transfer
-from Cloud_Mask import CloudMask
 from PIL import Image
-import matplotlib.ticker as mtick
 from matplotlib import gridspec
-from matplotlib.figure import Figure
-import matplotlib.image as mpimg
 import matplotlib.pyplot as plt
+import numpy as np
+from astropy.io import fits as pyfits
+import scipy
+import matplotlib
+matplotlib.use('Agg')
+
+
 __author__ = ["J. Matt Armstrong"]
 __copyright__ = "NA"
 __credits__ = ["Joseph Huehnerhoff"]
@@ -45,23 +56,6 @@ __version__ = "2.0"
 __maintainer__ = "J. Matt Armstrong"
 __email__ = "jmarmstr@uw.edu"
 __status__ = "Developement"
-
-
-import time
-import datetime
-import os
-import sys
-import subprocess
-import shutil
-import traceback
-
-import numpy as np
-import numpy.ma as ma
-from astropy.io import fits as Fits
-import scipy.ndimage
-from scipy.misc import bytescale as Scale
-import matplotlib
-matplotlib.use('Agg')
 
 
 class CloudGraph(object):
@@ -120,7 +114,7 @@ class CloudGraph(object):
         self.start = time.time()
         img_out = os.path.join(os.getcwd(), 'analyzed', name+'_analyzed.png')
 
-        img = self.fits_to_list(name+'.fits')
+        img: np.ndarray = np.asarray(pyfits.getdata(name+".fits"))
         print("Analyzing ", str(name))
         name_arr = name.split('/')
 
@@ -166,21 +160,7 @@ class CloudGraph(object):
         print('end run_analysis ', (time.time() - self.start))
         return median
 
-    def fits_to_list(self, file_name):
-        """
-        Try to open the fits file.
-        If the file doesn't exist, say so and return.
-        Otherwise, select just the image data as a numpy array
-        and close the fits file.
-
-        Input: File name
-        Output: Numpy array of image data
-        """
-        self.hdudata, self.header = Fits.getdata(file_name, header=True)
-        # print ('end fits_to_list ', (time.time() - self.start))
-        return np.asarray(self.hdudata)
-
-    def dynamic_mask(self, image=None, maskname=None):
+    def dynamic_mask(self, image, maskname) -> tuple[float, float, float, float]:
         """
         Creates a numpy mask on the image, filtering out any
         pixel values that are negative or saturated
@@ -188,25 +168,25 @@ class CloudGraph(object):
         Input:sudo apt-get install cython3
                 image         (Aperture masked numpy image)
         Output: Masked numpy array covering any pixels above or below the standard dev range
-                masked1         (masked numpy array)
+                masked1         (masked numpy array)None
                 median   *Float*   (median value of masked array)
                 mean   *Float*   (mean value of masked array)
         """
 
         # Make a masked array using the static mask and imput image
-        pre_masked = ma.array(image, mask=maskname)
+        pre_masked = np.ma.array(image, mask=maskname)
 
         # Mask saturated or empty
         # upper clipping
         # masked1 = ma.masked_greater(pre_masked, 254)
         masked1 = pre_masked
         try:
-            median = int(ma.median(masked1))
-            mean = ma.mean(masked1)
-            std = ma.std(masked1)
+            median = int(np.ma.median(masked1))
+            mean = np.ma.mean(masked1)
+            std = np.ma.std(masked1)
         except:
             traceback.print_exc()
-            return
+            raise RuntimeError("mask clipping error (?)")
 
         mean = float('%.2f' % (mean))
         std = float('%.2f' % (std))
@@ -261,7 +241,8 @@ class CloudGraph(object):
             bytelow = int(median - scale)
 
         # , high = bytehigh, low = bytelow)
-        result = Scale(img.astype(float), cmax=bytehigh, cmin=bytelow)
+        result = np.uint8(
+            np.clip(np.float64(img), a_min=bytelow, a_max=bytehigh))
         result, junk1, junk2, junk3 = self.dynamic_mask(
             result, self.large_mask)
         return result
@@ -448,7 +429,7 @@ class CloudGraph(object):
         file_name: str = datetime.datetime.now().strftime("%Y_%m_%d-%H_%M_%S")
         img_out = os.path.join(os.getcwd() + file_name, name+".fits")
         # Close and compress the FITS file, saving the header
-        compressed = Fits.CompImageHDU(
+        compressed = fits.CompImageHDU(
             self.hdudata, self.header, name=name.split('/')[5])
         compressed.writeto(img_out, clobber=True)
         compressed = None

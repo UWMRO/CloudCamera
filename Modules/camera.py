@@ -13,27 +13,35 @@ __maintainer__ = "NA"
 __email__ = "NA"
 __status__ = "Developement"
 
-import numpy as np
-import pyfits
+
 import subprocess
 import time
 import os
-import thread
+import threading
 import traceback
+import typing
+
+import numpy as np
+from astropy.io import fits as pyfits
 
 
 class CameraExpose(object):
+    _thread: threading.Thread
+
+    wait: typing.Final[float] = 1.0
+    ssag: typing.Final[str] = os.getcwd()+"/camera"
+    statusDict: typing.Final[dict[int, str]] = {
+        1: 'idle', 2: 'expose', 3: 'reading'}
+    gain: typing.Final[float] = 1
+
     def __init__(self):
-        self.wait = 1.0
-        self.status = None
-        self.ssag = os.getcwd()+"/camera"
-        self.statusDict = {1: 'idle', 2: 'expose', 3: 'reading'}
-        self.gain = 1
+        self.status: int | None = None
 
     def expose(self, name, exp, dir, gain):
-        thread.start_new_thread(self.runExpose, (name, exp, dir, gain))
+        self._thread = threading.Thread(
+            target=self.runExpose, args=(name, exp, dir, gain))
 
-    def runExpose(self, name, exp, dir, gain):
+    def runExpose(self, name: str, exp: float, dir: str | None = None, gain: float | None = None):
         """
         Connect to the OpenSSAG and take image
         input a given file name and exposure
@@ -84,7 +92,7 @@ class CameraExpose(object):
             prihdr['IMAGTYP'] = 'guide'
             # Write the image and header to a FITS file using variable name.
             name = self.checkFile(name)
-            hdulist.writeto(name, clobber=True)
+            hdulist.writeto(name)  # , clobber=True)
             # im = Image.fromarray(binary)
             # im.save("tmp.jpg")
 
@@ -117,20 +125,21 @@ class CameraExpose(object):
         prihdr['RN'] = None
         return prihdr
 
-    def checkStatus(self):
+    def checkStatus(self) -> int | None:
         print("return some status message")
-        print(self.status, self.statusDict[self.status])
+        print(self.status)
+        if self.status != None:
+            print(self.statusDict[self.status])
         return self.status
 
     def checkConnection(self):
         try:
             subprocess.Popen([self.ssag, '0', '0', '0'])
-        except Exception, e:
+        except Exception as e:
             print(e)
 
     def help(self):
         print(__doc__)
-        return
 
 
 if __name__ == "__main__":
