@@ -21,3 +21,5 @@ irsc_raw/
 
 __pycache__/
 doc/
+
+.*/
