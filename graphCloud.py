@@ -113,9 +113,9 @@ class CloudGraph(object):
 
         Input: name of image in, name of image out, and chopped file name
         input:
-                img_in			(name of input .fits image)
-                img_out			(name of output png image)
-                name 			(name file for timestamp)
+                img_in            (name of input .fits image)
+                img_out           (name of output png image)
+                name          (name file for timestamp)
         """
         self.start = time.time()
         img_out = os.path.join(os.getcwd(), 'analyzed', name+'_analyzed.png')
@@ -185,12 +185,12 @@ class CloudGraph(object):
         Creates a numpy mask on the image, filtering out any
         pixel values that are negative or saturated
 
-        Input:
-                image			(Aperture masked numpy image)
+        Input:sudo apt-get install cython3
+                image         (Aperture masked numpy image)
         Output: Masked numpy array covering any pixels above or below the standard dev range
-                masked1			(masked numpy array)
-                median	*Float*	(median value of masked array)
-                mean	*Float*	(mean value of masked array)
+                masked1         (masked numpy array)
+                median   *Float*   (median value of masked array)
+                mean   *Float*   (mean value of masked array)
         """
 
         # Make a masked array using the static mask and imput image
@@ -239,12 +239,12 @@ class CloudGraph(object):
         Brings out cloud detail
 
         input:
-                img			(masked numpy image to scale)\
-                median		(median value of image)
-                std			(std value of image)
+                img         (masked numpy image to scale)\
+                median      (median value of image)
+                std         (std value of image)
 
         output:
-                result		(scaled image)
+                result      (scaled image)
         """
         if median < 100:
             scale = 2*std
@@ -271,19 +271,19 @@ class CloudGraph(object):
         Statistical plotting and output function.
 
         Input: Value list, Bin list, Name of output, Masked image, median value, mean value, standard dev, image name
-                img		(image array)
-                values 		(List of histogram counts)
-                bins		(List of histogram bins)
-                img_out		(Name of output image)
+                img      (image array)
+                values       (List of histogram counts)
+                bins      (List of histogram bins)
+                img_out      (Name of output image)
                 stat_arr = [median, mean, std, name, gain]
 
         Output: png image file with the masked image, statistical and image information, and histogram plot
                 Saves three copies of the image
-                        analyzed/img_out.png			(Archive storage location)
-                        gif/img_out.png					(Temp directory used to produce a gif)
-                        /var/www/html/latest.png		(Live view webpage displays this image)
+                        analyzed/img_out.png         (Archive storage location)
+                        gif/img_out.png               (Temp directory used to produce a gif)
+                        /var/www/html/latest.png      (Live view webpage displays this image)
                 Every 10 images, produces a gif of the images in gif/
-                        /var/www/html/latest.png		(Live view webpage displays this gif)
+                        /var/www/html/latest.png      (Live view webpage displays this gif)
         """
         plt.clf()
 
@@ -291,8 +291,9 @@ class CloudGraph(object):
         fig, ax = plt.subplots(2, 2)
         fig.set_size_inches(10, 10)       # width, height
         fig.tight_layout()
-        gs = gridspec.GridSpec(14, 10)		# height, width
+        gs = gridspec.GridSpec(14, 10)      # height, width
 
+        text_name: str = ""
         # Find timestamp, change this to use header info instead
         try:
             timestamp = stat_arr[3][6].split('_')
@@ -429,10 +430,10 @@ class CloudGraph(object):
         and zip the image to save space.
 
         Input:
-                expose 		The length of the image exposure in seconds
-                median		The statistical median of the image
-                std			The statistical standard dev. of the image
-                img_in		The name of the image
+                expose       The length of the image exposure in seconds
+                median      The statistical median of the image
+                std         The statistical standard dev. of the image
+                img_in      The name of the image
 
         Output:
                 Saved and compressed FITS image

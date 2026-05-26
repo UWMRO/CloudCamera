@@ -91,7 +91,7 @@ class CameraExpose(object):
             # self.l.logStr('SaveIm\t%s' % name)
             return True
 
-        except Exception, e:
+        except Exception as e:
             print("failed")
             print(str(e))
             traceback.print_exc()

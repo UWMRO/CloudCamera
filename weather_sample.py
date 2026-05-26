@@ -83,7 +83,7 @@ class ARCSATWeather:
         except:
             sigma = -1
 
-        print[temp, sigma, wind, windgusts, humidity, encl, encl25m]
+        print(temp, sigma, wind, windgusts, humidity, encl, encl25m)
         return [temp, sigma, wind, windgusts, humidity, encl, encl25m]
 
     def cloudCondition(self, c):
@@ -146,11 +146,11 @@ class ARCSATWeather:
             else:
                 enc = 1
         # print(cloud, wind, enc)
-
-        print(out)
-        f_out = open('weather.log', 'w')
-        f_out.write(out)
-        f_out.close()
+        except Exception as out:
+            print(out)
+            f_out = open('weather.log', 'w')
+            f_out.write(out)
+            f_out.close()
 
 
 a = ARCSATWeather()
