@@ -181,9 +181,9 @@ class CloudCam:
 
         return
 
-    def takeImage(self, imType, imgName, imExp, imDir):
+    def takeImage(self, imType: str, imgName: str, imExp: float, imDir: str) -> int:
         """Takes the class, a string keyword for image type, a string for image
-        name, an integer for exposure tiem, and a string for directory name.
+        name, an integer for exposure time, and a string for directory name.
         The function checks if the variable fakeOut is equal to true first
         -- if so, ends function and carries out rest of code using existing
         images.  If not, the function takes an image using the CameraExpose
@@ -206,8 +206,8 @@ class CloudCam:
         im = False
         if self.fakeOut != True:
             print(imExp, self._gain)
-            im = self._cam.runExpose(str(imgName), str(
-                imExp), str(imDir), self._gain)
+            im = self._cam.runExpose(
+                str(imgName), imExp, str(imDir), self._gain)
             if im == True:  # check on completion and save of image exposure
                 time.sleep(1)
                 return 0
@@ -219,6 +219,10 @@ class CloudCam:
 
 
 if __name__ == "__main__":
+
+    cg = graphCloud.CloudGraph()
+    cg.start_up_checks()
+
     cc = CloudCam(CloudParams.min_median,
                   CloudParams.max_median,
                   CloudParams.step_size,
@@ -234,4 +238,5 @@ if __name__ == "__main__":
     while run:
         start_t = time.time()
         cc.run_camera()
-        time.sleep((time.time() + 1.0/FREQ_HZ) - start_t) # this line means that the next loop is called at every 1/freq seconds as opposed to 1/freq + execution time seconds
+        # this line means that the next loop is called at every 1/freq seconds as opposed to 1/freq + execution time seconds
+        time.sleep((time.time() + 1.0/FREQ_HZ) - start_t)
