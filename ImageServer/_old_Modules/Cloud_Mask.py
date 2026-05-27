@@ -20,8 +20,8 @@ class CloudMask(object):
     _mask_dir: typing.Final[str] = CloudParams.TOP_LEVEL_REPO_DIR + "masks/"
 
     # radius: typing.Final[int] = CloudParams.radius
-    xcenter: typing.Final[int] = CloudParams.x_center
-    ycenter: typing.Final[int] = CloudParams.y_center
+    xcenter: typing.Final[int] = CloudParams.Y_CENTER
+    ycenter: typing.Final[int] = CloudParams.X_CENTER
 
     def make_aperture_mask(self, radius: int) -> str:
         """

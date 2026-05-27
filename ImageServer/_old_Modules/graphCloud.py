@@ -26,9 +26,9 @@ Output:
 
 
 import CloudParams
-from Modules.Cloud_Mask import CloudMask
-from Modules.clouduino_interface import ClouduinoInterface
-from Modules.transfer import transfer
+from _old_Modules.Cloud_Mask import CloudMask
+from _old_Modules.clouduino_interface import ClouduinoInterface
+from _old_Modules.transfer import transfer
 
 import datetime
 import time
@@ -71,8 +71,8 @@ class CloudGraph:
         self.hdudata = None
         self.header = None
 
-        self.scaleimg = CloudParams.scale_img
-        self.rotate = CloudParams.rotate
+        self.scaleimg = CloudParams.SCALE_IMG
+        self.rotate = CloudParams.SCALE_IMG
 
         self.host = 'galileo.apo.nmsu.edu'
         self.user = 'jwhueh'
@@ -115,7 +115,8 @@ class CloudGraph:
                 name          (name file for timestamp)
         """
         self.start = time.time()
-        img_out = os.path.join(CloudParams.TOP_LEVEL_REPO_DIR, 'analyzed', name+'_analyzed.png')
+        img_out = os.path.join(
+            CloudParams.TOP_LEVEL_REPO_DIR, 'analyzed', name+'_analyzed.png')
 
         img: np.ndarray = np.asarray(pyfits.getdata(name+".fits"))
         print("Analyzing ", str(name))
@@ -139,12 +140,13 @@ class CloudGraph:
 
         if self.scaleimg == True:
             scaled_img = self.scale_img(masked_img, median, std)
-            img = Image.fromarray(scaled_img)
+            img = scipy.Image.fromarray(scaled_img)
         else:
-            img = Image.fromarray(masked_img)
-        img = img.rotate(self.rotate).resize((1280, 1024), Image.ANTIALIAS)
+            img = scipy.Image.fromarray(masked_img)
+        img = img.rotate(self.rotate).resize(
+            (1280, 1024), scipy.Image.ANTIALIAS)
         img = scipy.ndimage.median_filter(img, 3)
-        # print ('end rot and filter ', (time.time() - self.start))
+        # print ('end rot and filter img = scipy.Image.fromarray(scaled_img)', (time.time() - self.start))
 
         self.mapImg(img, 'latest_map.png', 'inferno')
         # self.mapImg(img, 'latestimg.png', 'gray')
@@ -391,7 +393,7 @@ class CloudGraph:
         print('rain sensors (1|2): ', rain, (time.time() - self.start))
         return rain
 
-    def mapImg(self, imArr=None, name=None, map=None):
+    def mapImg(self, imArr, name, map):
         fig1 = plt.figure(figsize=(10, 9.5))
         plt.imshow(imArr, cmap=map)
         plt.draw()
@@ -430,7 +432,8 @@ class CloudGraph:
         self.header['STD'] = std
 
         file_name: str = datetime.datetime.now().strftime("%Y_%m_%d-%H_%M_%S")
-        img_out = os.path.join(os. CloudParams.TOP_LEVEL_REPO_DIR() + file_name, name+".fits")
+        img_out = os.path.join(
+            os. CloudParams.TOP_LEVEL_REPO_DIR() + file_name, name+".fits")
         # Close and compress the FITS file, saving the header
         compressed = pyfits.CompImageHDU(
             self.hdudata, self.header, name=name.split('/')[5])

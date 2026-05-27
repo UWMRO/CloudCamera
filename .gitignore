@@ -25,3 +25,6 @@ doc/
 .*/
 
 */build/
+
+/raw
+/tmp_img
