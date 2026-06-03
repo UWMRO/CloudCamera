@@ -7,7 +7,7 @@ import astropy.io.fits
 import matplotlib.pyplot as plt
 import matplotlib.gridspec
 from scipy import ndimage
-import imageio
+from PIL import Image
 
 import CloudParams
 from ..Peripherals import StarShotInterface, RainMonitorInterface, TempMonitor, FanInterface
@@ -43,6 +43,8 @@ class CloudGraph:
             os.mkdir(CloudParams.RAW_IMAGE_DIR)
         if not os.path.exists(CloudParams.ANALYZED_IMAGE_DIR):
             os.mkdir(CloudParams.ANALYZED_IMAGE_DIR)
+
+        self._img_mask = mask
 
     """
     def dynamic_mask(self, img_dat: np.ndarray, mask: np.ndarray) -> tuple[np.ma.MaskedArray, float, float, float]:
@@ -167,17 +169,17 @@ class CloudGraph:
         # Plot the histogram
         # = plt.subplot(gs[11:13, :10])
         ax[1, 0] = plt.hist(masked_img_dat.flatten())
-        ax[1, 0].set_xlim(0, 255)
-        ax[1, 0].set_xlabel('Pixel Value', size=16)
-        ax[1, 0].xaxis.label.set_color('white')
+        #ax[1, 0].set_xlim(0, 255)
+        #ax[1, 0].set_xlabel('Pixel Value', size=16)
+        #ax[1, 0].xaxis.label.set_color('white')
         plt.locator_params(axis='y', nbins=6)
-        ax[1, 0].tick_params(axis='x', colors='white', labelsize=12)
+        #ax[1, 0].tick_params(axis='x', colors='white', labelsize=12)
 
         plt.draw()
-        fig.savefig(out_filenamepath, cmap="grey", transparent=True,
-                    facecolor="black", edgecolor='none', clobber=True)
+        fig.savefig(out_filenamepath,)# transparent=True,
+                    #facecolor="black", edgecolor='none', clobber=True)
         plt.close()
-        fig.clf()
+#        fig.clear()
         # change memory pointer to allow for garbage collection
         fig = None
         gs = None
@@ -190,7 +192,7 @@ class CloudGraph:
         img_namepath = CloudGraph._create_img_dirs(curr_time)
 
         raw_name = os.path.join(CloudParams.RAW_IMAGE_DIR,
-                                img_namepath)
+                                img_namepath+".fits")
         res = await self._camera.img_from_ssag(raw_name, exposure, gain)
         if not res:
             return False
@@ -215,8 +217,11 @@ class CloudGraph:
 
         img = ndimage.rotate(img_dat, CloudParams.ROTATION)
         img = ndimage.median_filter(img_dat, 3)
-        imageio.save(os.path.join(CloudParams.ANALYZED_IMAGE_DIR,
-                     img_namepath), img)
+        img_obj = Image.fromarray(img)
+        if img_obj.mode != 'RGB':
+            img_obj = img_obj.convert('RGB')
+        img_obj.save(os.path.join(CloudParams.ANALYZED_IMAGE_DIR,
+                     img_namepath), format="PNG")
 
         self._create_hist(masked_dat,
                           os.path.join(

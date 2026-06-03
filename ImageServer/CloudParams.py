@@ -52,7 +52,7 @@ X_CENTER: typing.Final[int] = int(1024/2)  # Center pixel on x axis 512
 Y_CENTER: typing.Final[int] = int(1340/2)  # Center pixel on y axis 670
 
 # subroutines
-IMAGE_TAKING_RATE_HZ: typing.Final[float] = 1
+IMAGE_TAKING_RATE_HZ: typing.Final[float] = 1/60
 WEBSITE_UPDATE_RATE_HZ: typing.Final[float] = 5
 
 # peripherals

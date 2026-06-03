@@ -4,7 +4,7 @@ class TempMonitor:
     _temp_path: str
 
     def __init__(self, temp_path: str):
-        self.temp_path = temp_path
+        self._temp_path = temp_path
 
     def read_temp_C(self) -> float:
         return float(open(self._temp_path).read()) / 1e3

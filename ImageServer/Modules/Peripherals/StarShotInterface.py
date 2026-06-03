@@ -25,8 +25,10 @@ class StarShotInterface:
         return (self._SSAG_IMG_CMD, file_namepath, str(exposure_time), str(gain))
 
     async def _run_ssag_script(self, args: tuple[str, ...]) -> tuple[int, bytes, bytes]:
+        full_args = ["sudo", CloudParams.CAMERA_INTERFACE_PROGRAM]
+        full_args.extend(args)
         ssag_script = await asyncio.create_subprocess_exec(
-            CloudParams.CAMERA_INTERFACE_PROGRAM, *args,
+            *full_args,
             stdout=asyncio.subprocess.PIPE,
             stderr=asyncio.subprocess.PIPE
         )
@@ -81,12 +83,14 @@ class StarShotInterface:
         if not await self._expose(CloudParams.BINARY_IMG_LABEL, exposure, gain):
             return False
 
-        bin_data = np.fromfile("binary", dtype="u1").reshape(
+        bin_data = np.fromfile(os.path.join(CloudParams.BINARY_IMG_DIR, CloudParams.BINARY_IMG_LABEL), dtype="u1").reshape(
             CloudParams.IMG_HxW)
 
         header = self._create_header(exposure, gain)
         hdu_list = fits.HDUList([fits.PrimaryHDU(bin_data, header=header)])
 
+        if ".fits" not in file_namepath:
+            file_namepath +=".fits"
         hdu_list.writeto(file_namepath)
 
         return True
